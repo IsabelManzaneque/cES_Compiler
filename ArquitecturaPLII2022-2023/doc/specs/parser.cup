@@ -93,46 +93,46 @@ terminal Token STRING;
 
 // Declaracion de no terminales
 
-non terminal  			program;
-non terminal Axiom		axiom;
-non terminal  			funcionPrincipal;
-non terminal			epsilon;
-non terminal			seccionFunciones;
-non terminal			funcion;
-non terminal			seccionParametros;
-non terminal		 	declaracionParametros;
-non terminal			parametro;
-non terminal			seccionConstantes;
-non terminal DeclaracionConstante  declaracionConstante;
-non terminal			seccionTipos;
-non terminal			declaracionTipo;
-non terminal			tamTipo;
-non terminal			seccionVariables;
-non terminal 			declaracionVariable;
-non terminal			listadoIDs;
-non terminal			id;
-non terminal Expresion  expresion;
-non terminal 			accesoVector;
-non terminal			llamadaFuncion;
-non terminal			bloque;
-non terminal			listadoSentencias;
-non terminal			sentencia;
-non terminal			sentenciaIncremento;
-non terminal			sentenciaAsignacion;
-non terminal			ref;
-non terminal			sentenciaAsignacionSuma;
-non terminal			sentenciaSi;
-non terminal			sentenciaAlternativas;
-non terminal			casosAlternativa;
-non terminal			casoAlt; 
-non terminal			porDefecto;
-non terminal			sentenciaMientras;
-non terminal			sentenciaLlamadaFuncion;
-non terminal			parametros;
-non terminal			sentenciaSalida;
-non terminal			opcionesEscribe;
-non terminal			opcionesEscribeEnt;
-non terminal			sentenciaDevuelve;
+non terminal Program                 program;
+non terminal Axiom		             axiom;
+non terminal FuncionPrincipal        funcionPrincipal;
+non terminal Epsilon   			     epsilon;
+non terminal SeccionFunciones        seccionFunciones;
+non terminal Funcion 			     funcion;
+non terminal SeccionParametros	     seccionParametros;
+non terminal DeclaracionParametros   declaracionParametros;
+non terminal Parametro			     parametro;
+non terminal SeccionConstantes	     seccionConstantes;
+non terminal DeclaracionConstante    declaracionConstante;
+non terminal SeccionTipos		     seccionTipos;
+non terminal DeclaracionTipo	     declaracionTipo;
+non terminal TamTipo			     tamTipo;
+non terminal SeccionVariables	     seccionVariables;
+non terminal DeclaracionVariable     declaracionVariable;
+non terminal ListadoIDs			     listadoIDs;
+non terminal Id			             id;
+non terminal Expresion               expresion;
+non terminal AccesoVector		     accesoVector;
+non terminal LlamadaFuncion		     llamadaFuncion;
+non terminal Bloque			         bloque;
+non terminal ListadoSentencias       listadoSentencias;
+non terminal Sentencia			     sentencia;
+non terminal SentenciaIncremento     sentenciaIncremento;
+non terminal SentenciaAsignacion     sentenciaAsignacion;
+non terminal Ref  			         ref;
+non terminal SentenciaAsignacionSuma sentenciaAsignacionSuma;
+non terminal SentenciaSi			 sentenciaSi;
+non terminal SentenciaAlternativas   sentenciaAlternativas;
+non terminal CasosAlternativa		 casosAlternativa;
+non terminal CasoAlt			     casoAlt; 
+non terminal PorDefecto			     porDefecto;
+non terminal SentenciaMientras		 sentenciaMientras;
+non terminal SentenciaLlamadaFuncion sentenciaLlamadaFuncion;
+non terminal Parametros			     parametros;
+non terminal SentenciaSalida         sentenciaSalida;
+non terminal OpcionesEscribe         opcionesEscribe;
+non terminal OpcionesEscribeEnt		 opcionesEscribeEnt;
+non terminal SentenciaDevuelve		 sentenciaDevuelve;
 
 // Declaracion de relaciones de precedencia
 precedence left 	OPEN_KEY, CLOSE_KEY;
@@ -180,7 +180,9 @@ axiom ::= seccionConstantes seccionTipos seccionVariables seccionFunciones
 //  CONSTANTES
 
 seccionConstantes ::= declaracionConstante seccionConstantes | epsilon;
+
 epsilon ::= ;
+
 declaracionConstante ::= CONSTANTE IDENTIFICADOR NUMERO SEMI_COLON;
 
 //  TIPOS
