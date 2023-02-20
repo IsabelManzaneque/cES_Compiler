@@ -15,6 +15,8 @@ public class SymbolConstant
     extends SymbolBase
 {
     
+	private String value; // valor de la constante
+	
     /**
      * Constructor for SymbolConstant.
      * @param scope The declaration scope.
@@ -26,5 +28,15 @@ public class SymbolConstant
                            TypeIF type)
     {
         super (scope, name, type);
-    } 
+    }
+
+	public String getValue() {
+		return value;
+	}
+
+	public void setValue(String value) {
+		this.value = value;
+	} 
+    
+    
 }

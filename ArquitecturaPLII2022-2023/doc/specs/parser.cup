@@ -94,6 +94,7 @@ terminal Token STRING;
 // Declaracion de no terminales
 
 non terminal Program                 program;
+non terminal Axiom                   initAxiom;
 non terminal Axiom		             axiom;
 non terminal FuncionPrincipal        funcionPrincipal;
 non terminal Epsilon   			     epsilon;
@@ -156,7 +157,7 @@ program ::=
   {: 
         syntaxErrorManager.syntaxInfo ("Starting parsing..."); 
    :}
-  axiom:ax
+  initAxiom:ax
   {:   		
   		// No modificar esta estructura, aunque se pueden a√±adir m√°s acciones sem√°nticas
   		
@@ -172,9 +173,41 @@ program ::=
   		
    :};
 
+// ambitos: abrirlos y cerrarlos donde correpsonda: al principio y al final de la funcion principal
+// al principio y al final de cada funcion/ procedimiento/ bloque. Abrir ambito, mirar si en ambitos 
+// superiores ya esta definido lo que se va a declarar (dan una funcion que lo hace). Si esta, error,
+// si no, se guarda en la tabla del ambito
+
+initAxiom ::= {:
+				// Creamos ambito global 
+				String idLexema  = "global";								
+				ScopeIF scope = scopeManager.openScope(idLexema);
+				
+				// Comprobamos que se ha creado correctamente y su nivel es 0
+				System.out.println("El nombre del nuevo ·mbito es " + scope.getName());
+				System.out.println("El nivel del nuevo ·mbito es " + scope.getLevel());
+				
+				// Obtenemos la tabla de tipos y la de simbolos del ambito global
+				SymbolTableIF symbolTable = scope.getSymbolTable();
+				TypeTableIF typeTable = scope.getTypeTable();
+				
+				// Introduccion en la tabla de tipos del tipo simple entero
+				
+				// Introduccion en la tabla de tipos del tipo simple vacio
+			:}
+			
+			axiom
+			
+			{:			
+				//cerramos ambito global	
+				scopeManager.closeScope();				
+		    :};	
+
 
 axiom ::= seccionConstantes seccionTipos seccionVariables seccionFunciones
         | seccionConstantes seccionTipos seccionFunciones;
+        
+       
  
  
 //  CONSTANTES
@@ -183,7 +216,28 @@ seccionConstantes ::= declaracionConstante seccionConstantes | epsilon;
 
 epsilon ::= ;
 
-declaracionConstante ::= CONSTANTE IDENTIFICADOR NUMERO SEMI_COLON;
+declaracionConstante ::= CONSTANTE IDENTIFICADOR:id NUMERO:value SEMI_COLON{:
+							
+							// Obtenemos el ambito donde nos encontramos y obtenemos la tabla de simbolos 
+							ScopeIF scope = scopeManager.getCurrentScope();
+							SymbolTableIF tablaSimbolos = scope.getSymbolTable();
+							String name = id.getLexema();
+							
+							// Comprobamos que la constante no este ya declarada en la tabla de simbolos
+							if(tablaSimbolos.containsSymbol(name)){
+								semanticErrorManager.semanticFatalError("Constante " + name + " ya declarada");								
+							}else{
+								System.out.println("Constante " + name + " aun NO declarada");
+														
+								// Introducimos en la tabla de simbolos la constante con su ambito, nombre, tipo y valor
+								TypeTableIF tablaTipos = scope.getTypeTable();
+								TypeIF tipo = scopeManager.searchType("ENTERO");  // en la pec de referencia las constantes eran todas enteras
+								SymbolConstant symbolConstant = new SymbolConstant(scope, name, tipo);
+								symbolConstant.setValue(value.getLexema()); // para esto se ha modificado la clase SymbolConstant en semantic.symbol
+								tablaSimbolos.addSymbol(symbolConstant);								
+							}
+					   :};
+
 
 //  TIPOS
 
@@ -223,9 +277,20 @@ funcionPrincipal ::= VACIO principal OPEN_KEY CLOSE_KEY OPEN_PARENTHESIS seccion
 
 // EXPRESIONES
 
+// en cada regla se pone dos puntos y un nombre a los simbolos gramaticales
+
 expresion     ::= NUMERO | IDENTIFICADOR
-		        | OPEN_KEY expresion CLOSE_KEY 
-			 	| expresion PLUS expresion
+		        | OPEN_KEY expresion:e1 CLOSE_KEY {:
+		        	Expresion e = new Expresion();  // generamos un objeto nuevo del tipo de la parte izq de la regla (en este caso, el antecedente es expresion y su clase Expresion)
+		        	RESULT = e; :}
+		        
+			 	| expresion:e1 PLUS expresion:e2 {:
+			 		Expresion e = new Expresion(e1, e2);
+			 		// comprobacion de tipos de e1 y e2
+			 		// generacion de codigo de e1 + e2
+			 		// ...
+			 		RESULT = e;	:}
+			 	
 			 	| expresion MULT expresion
 			 	| expresion AUTO_INCREMENTO
 			 	| NEGACION expresion
