@@ -100,6 +100,7 @@ non terminal FuncionPrincipal        funcionPrincipal;
 non terminal Epsilon   			     epsilon;
 non terminal SeccionFunciones        seccionFunciones;
 non terminal Funcion 			     funcion;
+non terminal Funcion 			     funcionBloqueF;
 non terminal SeccionParametros	     seccionParametros;
 non terminal DeclaracionParametros   declaracionParametros;
 non terminal Parametro			     parametro;
@@ -108,6 +109,7 @@ non terminal DeclaracionConstante    declaracionConstante;
 non terminal SeccionTipos		     seccionTipos;
 non terminal DeclaracionTipo	     declaracionTipo;
 non terminal TamTipo			     tamTipo;
+non terminal						 tipoVar;
 non terminal SeccionVariables	     seccionVariables;
 non terminal DeclaracionVariable     declaracionVariable;
 non terminal ListadoIDs			     listadoIDs;
@@ -173,42 +175,35 @@ program ::=
   		
    :};
 
-// ambitos: abrirlos y cerrarlos donde correpsonda: al principio y al final de la funcion principal
-// al principio y al final de cada funcion/ procedimiento/ bloque. Abrir ambito, mirar si en ambitos 
-// superiores ya esta definido lo que se va a declarar (dan una funcion que lo hace). Si esta, error,
-// si no, se guarda en la tabla del ambito
 
 initAxiom ::= {:
 				// Creamos ambito global 
 				String idLexema  = "global";								
 				ScopeIF scope = scopeManager.openScope(idLexema);
 				
-				// Comprobamos que se ha creado correctamente y su nivel es 0
-				System.out.println("El nombre del nuevo ámbito es " + scope.getName());
-				System.out.println("El nivel del nuevo ámbito es " + scope.getLevel());
-				
-				// Obtenemos la tabla de tipos y la de simbolos del ambito global
+				System.out.println("Abriendo ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
+								
+				// Obtenemos la tabla de tipos y la de simbolos 
 				SymbolTableIF symbolTable = scope.getSymbolTable();
 				TypeTableIF typeTable = scope.getTypeTable();
 				
-				// Introduccion en la tabla de tipos del tipo simple entero
-				
-				// Introduccion en la tabla de tipos del tipo simple vacio
-			:}
+			 :}
 			
-			axiom
+			 axiom
 			
-			{:			
-				//cerramos ambito global	
+			 {:			
+				//cerramos ambito global
+				ScopeIF scope = scopeManager.getCurrentScope();
+				System.out.println("Cerrando ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
 				scopeManager.closeScope();				
-		    :};	
+		     :};	
 
+// seccionConstantes es ocional por epsilon, seccionTipos es opcional por epsilon, seccionVariables es opcional por dos combinaciones
 
 axiom ::= seccionConstantes seccionTipos seccionVariables seccionFunciones
         | seccionConstantes seccionTipos seccionFunciones;
         
-       
- 
+
  
 //  CONSTANTES
 
@@ -250,6 +245,7 @@ tamTipo           ::= NUMERO |  IDENTIFICADOR;
 seccionVariables    ::= seccionVariables declaracionVariable 
                       | declaracionVariable;
 		
+	                  
 declaracionVariable ::= ENTERO listadoIDs SEMI_COLON
  	                  | IDENTIFICADOR listadoIDs SEMI_COLON;
 
@@ -258,12 +254,50 @@ listadoIDs ::=  id  COLON listadoIDs | id ;
 id ::= IDENTIFICADOR | IDENTIFICADOR ASSIGN NUMERO;
 
 // FUNCIONES
+// Se han factorizado por la izquierda los no terminales funcionPrincipal, funcion y bloque
+// sus elementos comunes se han agrupado en funcionBloqueF para evitar conflictos
 
 seccionFunciones ::= funcion seccionFunciones | funcionPrincipal;
-funcion ::= ENTERO IDENTIFICADOR OPEN_KEY seccionParametros CLOSE_KEY OPEN_PARENTHESIS seccionTipos listadoSentencias CLOSE_PARENTHESIS
-	      | VACIO IDENTIFICADOR OPEN_KEY seccionParametros CLOSE_KEY OPEN_PARENTHESIS seccionTipos listadoSentencias CLOSE_PARENTHESIS
-		  | ENTERO IDENTIFICADOR OPEN_KEY seccionParametros CLOSE_KEY OPEN_PARENTHESIS seccionTipos seccionVariables listadoSentencias CLOSE_PARENTHESIS
-		  | VACIO IDENTIFICADOR OPEN_KEY seccionParametros CLOSE_KEY OPEN_PARENTHESIS seccionTipos seccionVariables listadoSentencias CLOSE_PARENTHESIS;
+
+funcionPrincipal ::= {:
+						// Crea ambito de la funcion principal
+						String idLexema  = "principal";								
+						ScopeIF scope = scopeManager.openScope(idLexema);
+						
+						System.out.println("Abriendo ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
+						
+						// Obtenemos la tabla de tipos y la de simbolos 
+						SymbolTableIF symbolTable = scope.getSymbolTable();
+						TypeTableIF typeTable = scope.getTypeTable();						
+						
+				  	 :}					
+					 VACIO principal OPEN_KEY CLOSE_KEY OPEN_PARENTHESIS seccionTipos funcionBloqueF;					
+					
+
+funcion ::= //{:
+			//	// Crea ambito de la funcion 
+			//	String idLexema  = "principal " + scope.getLevel();								
+			//	ScopeIF scope = scopeManager.openScope(idLexema);
+						
+			//	System.out.println("Abriendo ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
+						
+				// Obtenemos la tabla de tipos y la de simbolos 
+			//	SymbolTableIF symbolTable = scope.getSymbolTable();
+			//	TypeTableIF typeTable = scope.getTypeTable();						
+						
+			//:}				
+			ENTERO IDENTIFICADOR OPEN_KEY seccionParametros CLOSE_KEY OPEN_PARENTHESIS seccionTipos funcionBloqueF;
+			//| VACIO IDENTIFICADOR OPEN_KEY seccionParametros CLOSE_KEY OPEN_PARENTHESIS seccionTipos funcionBloqueF; 
+
+
+funcionBloqueF ::= listadoSentencias CLOSE_PARENTHESIS 
+                 | seccionVariables listadoSentencias CLOSE_PARENTHESIS
+                 {:			
+					//cerramos ambito 
+					ScopeIF scope = scopeManager.getCurrentScope();
+					System.out.println("Cerrando ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
+					scopeManager.closeScope();				
+				 :};
 
 seccionParametros ::= declaracionParametros | epsilon;
 
@@ -271,8 +305,6 @@ declaracionParametros  ::= parametro | parametro COLON declaracionParametros;
 
 parametro ::= ENTERO IDENTIFICADOR | IDENTIFICADOR IDENTIFICADOR;
 
-funcionPrincipal ::= VACIO principal OPEN_KEY CLOSE_KEY OPEN_PARENTHESIS seccionTipos listadoSentencias CLOSE_PARENTHESIS
-	               | VACIO principal OPEN_KEY CLOSE_KEY OPEN_PARENTHESIS seccionTipos seccionVariables listadoSentencias CLOSE_PARENTHESIS;
 
 
 // EXPRESIONES
@@ -310,8 +342,19 @@ parametros     ::= expresion
  
 //  SENTENCIAS
 
-bloque ::= OPEN_PARENTHESIS seccionVariables listadoSentencias CLOSE_PARENTHESIS
-         | OPEN_PARENTHESIS listadoSentencias CLOSE_PARENTHESIS;
+bloque ::= {:
+				// Crea ambito del bloque
+				String idLexema  = "bloque";								
+				ScopeIF scope = scopeManager.openScope(idLexema);
+						
+				System.out.println("Abriendo ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
+						
+				// Obtenemos la tabla de tipos y la de simbolos 
+				SymbolTableIF symbolTable = scope.getSymbolTable();
+				TypeTableIF typeTable = scope.getTypeTable();						
+						
+			:}
+			OPEN_PARENTHESIS funcionBloqueF;
 
 listadoSentencias ::= listadoSentencias sentencia | sentencia;
 
