@@ -100,7 +100,6 @@ non terminal FuncionPrincipal        funcionPrincipal;
 non terminal Epsilon   			     epsilon;
 non terminal SeccionFunciones        seccionFunciones;
 non terminal Funcion 			     funcion;
-non terminal Funcion 			     funcionBloqueF;
 non terminal SeccionParametros	     seccionParametros;
 non terminal DeclaracionParametros   declaracionParametros;
 non terminal Parametro			     parametro;
@@ -109,7 +108,6 @@ non terminal DeclaracionConstante    declaracionConstante;
 non terminal SeccionTipos		     seccionTipos;
 non terminal DeclaracionTipo	     declaracionTipo;
 non terminal TamTipo			     tamTipo;
-non terminal						 tipoVar;
 non terminal SeccionVariables	     seccionVariables;
 non terminal DeclaracionVariable     declaracionVariable;
 non terminal ListadoIDs			     listadoIDs;
@@ -136,6 +134,9 @@ non terminal SentenciaSalida         sentenciaSalida;
 non terminal OpcionesEscribe         opcionesEscribe;
 non terminal OpcionesEscribeEnt		 opcionesEscribeEnt;
 non terminal SentenciaDevuelve		 sentenciaDevuelve;
+
+non terminal cuerpoFuncion;
+non terminal cuerpoBloque;
 
 // Declaracion de relaciones de precedencia
 precedence left 	OPEN_KEY, CLOSE_KEY;
@@ -175,7 +176,6 @@ program ::=
   		
    :};
 
-
 initAxiom ::= {:
 				// Creamos ambito global 
 				String idLexema  = "global";								
@@ -187,79 +187,52 @@ initAxiom ::= {:
 				SymbolTableIF symbolTable = scope.getSymbolTable();
 				TypeTableIF typeTable = scope.getTypeTable();
 				
-			 :}
+		  	  :}
 			
-			 axiom
+			  axiom
 			
-			 {:			
+			  {:			
 				//cerramos ambito global
 				ScopeIF scope = scopeManager.getCurrentScope();
 				System.out.println("Cerrando ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
 				scopeManager.closeScope();				
-		     :};	
-
-// seccionConstantes es ocional por epsilon, seccionTipos es opcional por epsilon, seccionVariables es opcional por dos combinaciones
+		      :};
 
 axiom ::= seccionConstantes seccionTipos seccionVariables seccionFunciones
         | seccionConstantes seccionTipos seccionFunciones;
-        
-
+ 
  
 //  CONSTANTES
 
 seccionConstantes ::= declaracionConstante seccionConstantes | epsilon;
-
 epsilon ::= ;
-
-declaracionConstante ::= CONSTANTE IDENTIFICADOR:id NUMERO:value SEMI_COLON{:
-							
-							// Obtenemos el ambito donde nos encontramos y obtenemos la tabla de simbolos 
-							ScopeIF scope = scopeManager.getCurrentScope();
-							SymbolTableIF tablaSimbolos = scope.getSymbolTable();
-							String name = id.getLexema();
-							
-							// Comprobamos que la constante no este ya declarada en la tabla de simbolos
-							if(tablaSimbolos.containsSymbol(name)){
-								semanticErrorManager.semanticFatalError("Constante " + name + " ya declarada");								
-							}else{
-								System.out.println("Constante " + name + " aun NO declarada");
-														
-								// Introducimos en la tabla de simbolos la constante con su ambito, nombre, tipo y valor
-								TypeTableIF tablaTipos = scope.getTypeTable();
-								TypeIF tipo = scopeManager.searchType("ENTERO");  // en la pec de referencia las constantes eran todas enteras
-								SymbolConstant symbolConstant = new SymbolConstant(scope, name, tipo);
-								symbolConstant.setValue(value.getLexema()); // para esto se ha modificado la clase SymbolConstant en semantic.symbol
-								tablaSimbolos.addSymbol(symbolConstant);								
-							}
-					   :};
-
+declaracionConstante ::= CONSTANTE IDENTIFICADOR NUMERO SEMI_COLON;
 
 //  TIPOS
 
-seccionTipos      ::= declaracionTipo seccionTipos | epsilon;
-declaracionTipo   ::= TIPO ENTERO IDENTIFICADOR OPEN_BRACKET tamTipo CLOSE_BRACKET SEMI_COLON;
-tamTipo           ::= NUMERO |  IDENTIFICADOR;
+seccionTipos ::= declaracionTipo seccionTipos | epsilon;
+declaracionTipo ::= TIPO ENTERO IDENTIFICADOR OPEN_BRACKET tamTipo CLOSE_BRACKET SEMI_COLON;
+tamTipo ::= NUMERO |  IDENTIFICADOR;
 
 //  VARIABLES
 
-seccionVariables    ::= seccionVariables declaracionVariable 
-                      | declaracionVariable;
+seccionVariables ::= seccionVariables declaracionVariable 
+	| declaracionVariable;
 		
-	                  
 declaracionVariable ::= ENTERO listadoIDs SEMI_COLON
- 	                  | IDENTIFICADOR listadoIDs SEMI_COLON;
+ 	| IDENTIFICADOR listadoIDs SEMI_COLON;
 
 listadoIDs ::=  id  COLON listadoIDs | id ;
-
 id ::= IDENTIFICADOR | IDENTIFICADOR ASSIGN NUMERO;
 
 // FUNCIONES
-// Se han factorizado por la izquierda los no terminales funcionPrincipal, funcion y bloque
-// sus elementos comunes se han agrupado en funcionBloqueF para evitar conflictos
+
+// Incluir las acciones semánticas de abrir el ámbito justo entre OPEN_PARENTHESIS cuerpoFuncion y cerrar el ámbito después de CLOSE_PARENTHESIS.
 
 seccionFunciones ::= funcion seccionFunciones | funcionPrincipal;
 
-funcionPrincipal ::= {:
+funcionPrincipal ::= VACIO principal OPEN_KEY CLOSE_KEY OPEN_PARENTHESIS                      
+                     {:
 						// Crea ambito de la funcion principal
 						String idLexema  = "principal";								
 						ScopeIF scope = scopeManager.openScope(idLexema);
@@ -268,37 +241,66 @@ funcionPrincipal ::= {:
 						
 						// Obtenemos la tabla de tipos y la de simbolos 
 						SymbolTableIF symbolTable = scope.getSymbolTable();
-						TypeTableIF typeTable = scope.getTypeTable();						
-						
-				  	 :}					
-					 VACIO principal OPEN_KEY CLOSE_KEY OPEN_PARENTHESIS seccionTipos funcionBloqueF;					
-					
+						TypeTableIF typeTable = scope.getTypeTable();								
+				  	 :} 
+				  	 
+				  	 cuerpoFuncion CLOSE_PARENTHESIS 
+				  	 
+				  	 {:			
+						//cerramos ambito 
+						ScopeIF scope = scopeManager.getCurrentScope();
+						System.out.println("Cerrando ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
+						scopeManager.closeScope();				
+					 :};
 
-funcion ::= //{:
-			//	// Crea ambito de la funcion 
-			//	String idLexema  = "principal " + scope.getLevel();								
-			//	ScopeIF scope = scopeManager.openScope(idLexema);
-						
-			//	System.out.println("Abriendo ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
+funcion ::= ENTERO IDENTIFICADOR OPEN_KEY seccionParametros CLOSE_KEY OPEN_PARENTHESIS
+            {:
+				// Crea ambito de la funcion 
+				String idLexema  = "funcion";								
+				ScopeIF scope = scopeManager.openScope(idLexema);
+					
+				System.out.println("Abriendo ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
 						
 				// Obtenemos la tabla de tipos y la de simbolos 
-			//	SymbolTableIF symbolTable = scope.getSymbolTable();
-			//	TypeTableIF typeTable = scope.getTypeTable();						
+				SymbolTableIF symbolTable = scope.getSymbolTable();
+				TypeTableIF typeTable = scope.getTypeTable();								
+			:} 
+			 
+			cuerpoFuncion CLOSE_PARENTHESIS
+			
+			{:			
+				//cerramos ambito 
+				ScopeIF scope = scopeManager.getCurrentScope();
+				System.out.println("Cerrando ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
+				scopeManager.closeScope();				
+			:}
+			 
+	      | VACIO IDENTIFICADOR OPEN_KEY seccionParametros CLOSE_KEY OPEN_PARENTHESIS 
+	        {:
+				// Crea ambito de la funcion 
+				String idLexema  = "funcion";								
+				ScopeIF scope = scopeManager.openScope(idLexema);
+					
+				System.out.println("Abriendo ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
 						
-			//:}				
-			ENTERO IDENTIFICADOR OPEN_KEY seccionParametros CLOSE_KEY OPEN_PARENTHESIS seccionTipos funcionBloqueF;
-			//| VACIO IDENTIFICADOR OPEN_KEY seccionParametros CLOSE_KEY OPEN_PARENTHESIS seccionTipos funcionBloqueF; 
+				// Obtenemos la tabla de tipos y la de simbolos 
+				SymbolTableIF symbolTable = scope.getSymbolTable();
+				TypeTableIF typeTable = scope.getTypeTable();								
+			:} 
+			 
+			cuerpoFuncion CLOSE_PARENTHESIS
+			
+			{:			
+				//cerramos ambito 
+				ScopeIF scope = scopeManager.getCurrentScope();
+				System.out.println("Cerrando ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
+				scopeManager.closeScope();				
+			:};
+			
 
-
-funcionBloqueF ::= listadoSentencias CLOSE_PARENTHESIS 
-                 | seccionVariables listadoSentencias CLOSE_PARENTHESIS
-                 {:			
-					//cerramos ambito 
-					ScopeIF scope = scopeManager.getCurrentScope();
-					System.out.println("Cerrando ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
-					scopeManager.closeScope();				
-				 :};
-
+cuerpoFuncion ::= seccionTipos listadoSentencias
+                | seccionTipos seccionVariables listadoSentencias;
+                
 seccionParametros ::= declaracionParametros | epsilon;
 
 declaracionParametros  ::= parametro | parametro COLON declaracionParametros;
@@ -309,79 +311,56 @@ parametro ::= ENTERO IDENTIFICADOR | IDENTIFICADOR IDENTIFICADOR;
 
 // EXPRESIONES
 
-// en cada regla se pone dos puntos y un nombre a los simbolos gramaticales
+expresion ::= NUMERO | IDENTIFICADOR
+	|  OPEN_KEY expresion CLOSE_KEY 
+ 	|  expresion PLUS expresion
+ 	|  expresion MULT expresion
+ 	|  expresion AUTO_INCREMENTO
+ 	|  NEGACION expresion
+ 	|  expresion LOWER_THAN expresion
+ 	|  expresion EQUAL expresion
+ 	|  expresion AND_LOGICA expresion
+ 	|  accesoVector
+ 	|  llamadaFuncion;
 
-expresion     ::= NUMERO | IDENTIFICADOR
-		        | OPEN_KEY expresion:e1 CLOSE_KEY {:
-		        	Expresion e = new Expresion();  // generamos un objeto nuevo del tipo de la parte izq de la regla (en este caso, el antecedente es expresion y su clase Expresion)
-		        	RESULT = e; :}
-		        
-			 	| expresion:e1 PLUS expresion:e2 {:
-			 		Expresion e = new Expresion(e1, e2);
-			 		// comprobacion de tipos de e1 y e2
-			 		// generacion de codigo de e1 + e2
-			 		// ...
-			 		RESULT = e;	:}
-			 	
-			 	| expresion MULT expresion
-			 	| expresion AUTO_INCREMENTO
-			 	| NEGACION expresion
-			 	| expresion LOWER_THAN expresion
-			 	| expresion EQUAL expresion
-			 	| expresion AND_LOGICA expresion
-			 	| accesoVector
-			 	| llamadaFuncion;
-
-accesoVector   ::= IDENTIFICADOR OPEN_BRACKET expresion CLOSE_BRACKET;
+accesoVector ::= IDENTIFICADOR OPEN_BRACKET expresion CLOSE_BRACKET;
 
 llamadaFuncion ::= IDENTIFICADOR OPEN_KEY parametros CLOSE_KEY
-	             | IDENTIFICADOR OPEN_KEY CLOSE_KEY;
-	             
-parametros     ::= expresion 
-                 | expresion COLON parametros;
- 
+	| IDENTIFICADOR OPEN_KEY CLOSE_KEY;
+parametros ::= expresion | expresion COLON parametros;
+
 //  SENTENCIAS
 
-bloque ::= {:
-				// Crea ambito del bloque
-				String idLexema  = "bloque";								
-				ScopeIF scope = scopeManager.openScope(idLexema);
-						
-				System.out.println("Abriendo ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
-						
-				// Obtenemos la tabla de tipos y la de simbolos 
-				SymbolTableIF symbolTable = scope.getSymbolTable();
-				TypeTableIF typeTable = scope.getTypeTable();						
-						
-			:}
-			OPEN_PARENTHESIS funcionBloqueF;
+bloque ::= OPEN_PARENTHESIS cuerpoBloque CLOSE_PARENTHESIS;    	 
+
+cuerpoBloque ::= listadoSentencias
+			   | seccionVariables listadoSentencias;
 
 listadoSentencias ::= listadoSentencias sentencia | sentencia;
 
 sentencia ::= sentenciaDevuelve
-			| sentenciaIncremento
-			| sentenciaAsignacion
-			| sentenciaAsignacionSuma
-			| sentenciaSi
-			| sentenciaAlternativas
-			| sentenciaMientras
-			| sentenciaLlamadaFuncion
-			| sentenciaSalida
-			| bloque;
+	| sentenciaIncremento
+	| sentenciaAsignacion
+	| sentenciaAsignacionSuma
+	| sentenciaSi
+	| sentenciaAlternativas
+	| sentenciaMientras
+	| sentenciaLlamadaFuncion
+	| sentenciaSalida
+	| bloque;
 
-sentenciaDevuelve   ::= DEVUELVE SEMI_COLON	
-	                  | DEVUELVE expresion SEMI_COLON;
+sentenciaDevuelve ::= DEVUELVE SEMI_COLON	
+	| DEVUELVE expresion SEMI_COLON;
 
 sentenciaIncremento ::= IDENTIFICADOR AUTO_INCREMENTO SEMI_COLON;
 
 sentenciaAsignacion ::= ref ASSIGN expresion SEMI_COLON;
-
 ref ::= IDENTIFICADOR | accesoVector;
 
 sentenciaAsignacionSuma ::= ref ASSIGN_SUMA expresion SEMI_COLON;
 
 sentenciaSi ::= SI OPEN_KEY expresion CLOSE_KEY sentencia SINO sentencia
-	          | SI OPEN_KEY expresion CLOSE_KEY sentencia;
+	 | SI OPEN_KEY expresion CLOSE_KEY sentencia;
 	
 sentenciaAlternativas ::= ALTENATIVAS OPEN_KEY expresion CLOSE_KEY OPEN_PARENTHESIS casosAlternativa porDefecto CLOSE_PARENTHESIS;
 casosAlternativa ::= casosAlternativa casoAlt | casoAlt;
@@ -393,7 +372,7 @@ sentenciaMientras ::= MIENTRAS OPEN_KEY expresion CLOSE_KEY sentencia;
 
 sentenciaLlamadaFuncion ::= llamadaFuncion SEMI_COLON;
 
-sentenciaSalida ::= ESCRIBE OPEN_KEY opcionesEscribe CLOSE_KEY SEMI_COLON
-	              | ESCRIBE_ENT OPEN_KEY opcionesEscribeEnt CLOSE_KEY SEMI_COLON;
+sentenciaSalida ::=ESCRIBE OPEN_KEY opcionesEscribe CLOSE_KEY SEMI_COLON
+	| ESCRIBE_ENT OPEN_KEY opcionesEscribeEnt CLOSE_KEY SEMI_COLON;
 opcionesEscribe ::= epsilon | STRING;
 opcionesEscribeEnt ::= epsilon | expresion;
