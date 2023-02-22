@@ -185,8 +185,7 @@ initAxiom ::= {:
 								
 				// Obtenemos la tabla de tipos y la de simbolos 
 				SymbolTableIF symbolTable = scope.getSymbolTable();
-				TypeTableIF typeTable = scope.getTypeTable();
-				
+				TypeTableIF typeTable = scope.getTypeTable();				
 		  	  :}
 			
 			  axiom
@@ -206,7 +205,28 @@ axiom ::= seccionConstantes seccionTipos seccionVariables seccionFunciones
 
 seccionConstantes ::= declaracionConstante seccionConstantes | epsilon;
 epsilon ::= ;
-declaracionConstante ::= CONSTANTE IDENTIFICADOR NUMERO SEMI_COLON;
+
+declaracionConstante ::= CONSTANTE IDENTIFICADOR:id NUMERO:value SEMI_COLON{:
+							
+							// Obtenemos el ambito donde nos encontramos y obtenemos la tabla de simbolos 
+							ScopeIF scope = scopeManager.getCurrentScope();
+							SymbolTableIF tablaSimbolos = scope.getSymbolTable();
+							String name = id.getLexema();
+							
+							// Comprobamos que la constante no este ya declarada en la tabla de simbolos
+							if(tablaSimbolos.containsSymbol(name)){
+								semanticErrorManager.semanticFatalError("Constante " + name + " ya declarada");								
+							}else{
+								System.out.println("Constante " + name + " aun NO declarada");
+														
+								// Introducimos en la tabla de simbolos la constante con su ambito, nombre, tipo y valor
+								TypeTableIF tablaTipos = scope.getTypeTable();
+								TypeIF tipo = scopeManager.searchType("ENTERO");  // en la pec de referencia las constantes eran todas enteras
+								SymbolConstant symbolConstant = new SymbolConstant(scope, name, tipo);
+								symbolConstant.setValue(value.getLexema()); // para esto se ha modificado la clase SymbolConstant en semantic.symbol
+								tablaSimbolos.addSymbol(symbolConstant);								
+							}
+					   :};
 
 //  TIPOS
 
@@ -312,16 +332,25 @@ parametro ::= ENTERO IDENTIFICADOR | IDENTIFICADOR IDENTIFICADOR;
 // EXPRESIONES
 
 expresion ::= NUMERO | IDENTIFICADOR
-	|  OPEN_KEY expresion CLOSE_KEY 
- 	|  expresion PLUS expresion
- 	|  expresion MULT expresion
- 	|  expresion AUTO_INCREMENTO
- 	|  NEGACION expresion
- 	|  expresion LOWER_THAN expresion
- 	|  expresion EQUAL expresion
- 	|  expresion AND_LOGICA expresion
- 	|  accesoVector
- 	|  llamadaFuncion;
+		    | OPEN_KEY expresion:e1 CLOSE_KEY {:		    	
+		        Expresion e = new Expresion();  // generamos un objeto nuevo del tipo de la parte izq de la regla (en este caso, el antecedente es expresion y su clase Expresion)
+		        RESULT = e; :}
+		        
+			| expresion:e1 PLUS expresion:e2 {:
+			 	Expresion e = new Expresion(e1, e2);
+			 	// comprobacion de tipos de e1 y e2
+			 	// generacion de codigo de e1 + e2
+			 	// ...
+			 	RESULT = e;	:}
+			 	
+			| expresion MULT expresion
+		 	| expresion AUTO_INCREMENTO
+		 	| NEGACION expresion
+		 	| expresion LOWER_THAN expresion
+		 	| expresion EQUAL expresion
+		 	| expresion AND_LOGICA expresion
+		 	| accesoVector
+			| llamadaFuncion;
 
 accesoVector ::= IDENTIFICADOR OPEN_BRACKET expresion CLOSE_BRACKET;
 
@@ -331,7 +360,25 @@ parametros ::= expresion | expresion COLON parametros;
 
 //  SENTENCIAS
 
-bloque ::= OPEN_PARENTHESIS cuerpoBloque CLOSE_PARENTHESIS;    	 
+bloque ::= OPEN_PARENTHESIS 
+		   {:
+				// Crea ambito de la funcion 
+				String idLexema  = "bloque";								
+				ScopeIF scope = scopeManager.openScope(idLexema);
+					
+				System.out.println("Abriendo ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
+						
+				// Obtenemos la tabla de tipos y la de simbolos 
+				SymbolTableIF symbolTable = scope.getSymbolTable();
+				TypeTableIF typeTable = scope.getTypeTable();								
+			:}
+			cuerpoBloque CLOSE_PARENTHESIS
+			{:			
+				//cerramos ambito 
+				ScopeIF scope = scopeManager.getCurrentScope();
+				System.out.println("Cerrando ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
+				scopeManager.closeScope();				
+			:};    	 
 
 cuerpoBloque ::= listadoSentencias
 			   | seccionVariables listadoSentencias;
