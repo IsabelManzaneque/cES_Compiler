@@ -17,6 +17,10 @@ public class TypeSimple
     extends TypeBase
 {
     
+//	private String name;
+//	private ScopeIF scope;
+//	private int size;
+//	
     /**
      * Constructor for TypeSimple.
      * @param scope The declaration scope.
@@ -26,7 +30,26 @@ public class TypeSimple
         super (scope);
     }
     
-    /**
+    public TypeSimple (ScopeIF scope, String name)
+    {
+        super (scope, name);
+    }
+    
+//    public TypeSimple(ScopeIF scope, String name) {
+//		super(scope);
+//		this.name = name;
+//		this.scope = scope;
+//	}
+//    
+//    public TypeSimple(ScopeIF scope, String name, int size) {
+//		super(scope);
+//		this.name = name;
+//		this.scope = scope;
+//		this.size = size;
+//	}
+
+
+	/**
      * Returns the size of the type.
      * @return the size of the type.
      */

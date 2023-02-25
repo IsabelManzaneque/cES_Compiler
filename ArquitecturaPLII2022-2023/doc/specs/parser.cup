@@ -177,15 +177,22 @@ program ::=
    :};
 
 initAxiom ::= {:
-				// Creamos ambito global 
-				String idLexema  = "global";								
-				ScopeIF scope = scopeManager.openScope(idLexema);
+				// Creamos ambito global 							
+				ScopeIF scope = scopeManager.openScope("global");
 				
 				System.out.println("Abriendo ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
 								
 				// Obtenemos la tabla de tipos y la de simbolos 
+				// en cada scope debemos tener una de cada
 				SymbolTableIF symbolTable = scope.getSymbolTable();
-				TypeTableIF typeTable = scope.getTypeTable();				
+				TypeTableIF typeTable = scope.getTypeTable();	
+				
+				// Introduccion de tipos primitivos en la tabla de tipos
+				TypeSimple tipoEntero = new TypeSimple(scope, "ENTERO");
+				typeTable.addType("ENTERO", tipoEntero);
+				TypeSimple tipoVacio = new TypeSimple(scope, "VACIO");
+				typeTable.addType("VACIO", tipoVacio);
+							
 		  	  :}
 			
 			  axiom
@@ -221,7 +228,7 @@ declaracionConstante ::= CONSTANTE IDENTIFICADOR:id NUMERO:value SEMI_COLON{:
 														
 								// Introducimos en la tabla de simbolos la constante con su ambito, nombre, tipo y valor
 								TypeTableIF tablaTipos = scope.getTypeTable();
-								TypeIF tipo = scopeManager.searchType("ENTERO");  // en la pec de referencia las constantes eran todas enteras
+								TypeIF tipo = scopeManager.searchType("ENTERO");  
 								SymbolConstant symbolConstant = new SymbolConstant(scope, name, tipo);
 								symbolConstant.setValue(value.getLexema()); // para esto se ha modificado la clase SymbolConstant en semantic.symbol
 								tablaSimbolos.addSymbol(symbolConstant);								
@@ -249,13 +256,14 @@ id ::= IDENTIFICADOR | IDENTIFICADOR ASSIGN NUMERO;
 
 // Incluir las acciones semánticas de abrir el ámbito justo entre OPEN_PARENTHESIS cuerpoFuncion y cerrar el ámbito después de CLOSE_PARENTHESIS.
 
+// Se han modificado las producciones de la funcion principal y las funciones para que
+// ambas uilicen el no terminal "cuerpoFuncion" y asi evitar conflictos
 seccionFunciones ::= funcion seccionFunciones | funcionPrincipal;
 
 funcionPrincipal ::= VACIO principal OPEN_KEY CLOSE_KEY OPEN_PARENTHESIS                      
                      {:
-						// Crea ambito de la funcion principal
-						String idLexema  = "principal";								
-						ScopeIF scope = scopeManager.openScope(idLexema);
+						// Crea ambito de la funcion principal							
+						ScopeIF scope = scopeManager.openScope("Funcion principal");
 						
 						System.out.println("Abriendo ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
 						
@@ -273,11 +281,10 @@ funcionPrincipal ::= VACIO principal OPEN_KEY CLOSE_KEY OPEN_PARENTHESIS
 						scopeManager.closeScope();				
 					 :};
 
-funcion ::= ENTERO IDENTIFICADOR OPEN_KEY seccionParametros CLOSE_KEY OPEN_PARENTHESIS
+funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros CLOSE_KEY OPEN_PARENTHESIS
             {:
-				// Crea ambito de la funcion 
-				String idLexema  = "funcion";								
-				ScopeIF scope = scopeManager.openScope(idLexema);
+				// Crea ambito de la funcion 						
+				ScopeIF scope = scopeManager.openScope("Funcion " + id.getLexema());
 					
 				System.out.println("Abriendo ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
 						
@@ -295,11 +302,10 @@ funcion ::= ENTERO IDENTIFICADOR OPEN_KEY seccionParametros CLOSE_KEY OPEN_PAREN
 				scopeManager.closeScope();				
 			:}
 			 
-	      | VACIO IDENTIFICADOR OPEN_KEY seccionParametros CLOSE_KEY OPEN_PARENTHESIS 
+	      | VACIO IDENTIFICADOR:id OPEN_KEY seccionParametros CLOSE_KEY OPEN_PARENTHESIS 
 	        {:
-				// Crea ambito de la funcion 
-				String idLexema  = "funcion";								
-				ScopeIF scope = scopeManager.openScope(idLexema);
+				// Crea ambito de la funcion 							
+				ScopeIF scope = scopeManager.openScope("Funcion " + id.getLexema());
 					
 				System.out.println("Abriendo ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
 						
@@ -362,9 +368,8 @@ parametros ::= expresion | expresion COLON parametros;
 
 bloque ::= OPEN_PARENTHESIS 
 		   {:
-				// Crea ambito de la funcion 
-				String idLexema  = "bloque";								
-				ScopeIF scope = scopeManager.openScope(idLexema);
+				// Crea ambito del bloque							
+				ScopeIF scope = scopeManager.openScope("bloque");
 					
 				System.out.println("Abriendo ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
 						
