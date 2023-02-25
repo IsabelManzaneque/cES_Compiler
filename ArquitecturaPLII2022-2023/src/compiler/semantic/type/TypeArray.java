@@ -13,6 +13,8 @@ import es.uned.lsi.compiler.semantic.type.TypeBase;
 public class TypeArray
     extends TypeBase
 {   
+	
+	private int size;
     
 	/**
      * Constructor for TypeArray.
@@ -34,6 +36,19 @@ public class TypeArray
     }
     
     /**
+     * Constructor for TypeArray.
+     * @param scope The declaration scope.
+     * @param name The name of the type.
+     * @param size Tamano del vector.
+     */
+    public TypeArray (ScopeIF scope, String name, int size)
+    {
+        super (scope, name);
+        this.size = size;
+    }
+    
+    
+    /**
      * Returns the size of the type.
      * @return the size of the type.
      */
@@ -41,6 +56,6 @@ public class TypeArray
     public int getSize ()
     {
         // TODO: Student work
-        return 1;
+        return size;
     }
 }

@@ -107,7 +107,7 @@ non terminal SeccionConstantes	     seccionConstantes;
 non terminal DeclaracionConstante    declaracionConstante;
 non terminal SeccionTipos		     seccionTipos;
 non terminal DeclaracionTipo	     declaracionTipo;
-non terminal TamTipo			     tamTipo;
+non terminal 			     tamTipo;
 non terminal SeccionVariables	     seccionVariables;
 non terminal DeclaracionVariable     declaracionVariable;
 non terminal ListadoIDs			     listadoIDs;
@@ -188,9 +188,9 @@ initAxiom ::= {:
 				TypeTableIF typeTable = scope.getTypeTable();	
 				
 				// Introduccion de tipos primitivos en la tabla de tipos
-				TypeSimple tipoEntero = new TypeSimple(scope, "ENTERO");
+				TypeSimpleEntero tipoEntero = new TypeSimpleEntero(scope, "ENTERO");
 				typeTable.addType("ENTERO", tipoEntero);
-				TypeSimple tipoVacio = new TypeSimple(scope, "VACIO");
+				TypeSimpleVacio tipoVacio = new TypeSimpleVacio(scope, "VACIO");
 				typeTable.addType("VACIO", tipoVacio);
 							
 		  	  :}
@@ -235,11 +235,50 @@ declaracionConstante ::= CONSTANTE IDENTIFICADOR:id NUMERO:value SEMI_COLON{:
 							}
 					   :};
 
-//  TIPOS
+//  TIPOS  (vectores)
+// No es posible definir dos tipos con el mismo nombre aunque pertenezcan a distintos ámbitos, 
+// si desde un ámbito se puede alcanzar el otro ámbito
 
 seccionTipos ::= declaracionTipo seccionTipos | epsilon;
-declaracionTipo ::= TIPO ENTERO IDENTIFICADOR OPEN_BRACKET tamTipo CLOSE_BRACKET SEMI_COLON;
-tamTipo ::= NUMERO |  IDENTIFICADOR;
+
+declaracionTipo ::= TIPO ENTERO IDENTIFICADOR:id OPEN_BRACKET tamTipo:tt CLOSE_BRACKET SEMI_COLON {:			      		 		
+							
+						// Obtenemos el ambito donde nos encontramos y obtenemos la tabla de simbolos 
+						ScopeIF scope = scopeManager.getCurrentScope();
+						SymbolTableIF tablaSimbolos = scope.getSymbolTable();
+						String name = id.getLexema();
+							
+						// Comprobamos que la constante no este ya declarada en la tabla de simbolos
+						if(scopeManager.containsType(name)){
+							semanticErrorManager.semanticFatalError("Tipo " + name + " ya declarado");								
+						}else{
+							System.out.println("Creando tipo " + name);
+											
+							// Introducimos en la tabla de tipos el nuevo tipo							
+							TypeTableIF tablaTipos = scope.getTypeTable();							
+							TypeArray tipoVector = new TypeArray(scope, name);
+							tablaTipos.addType(name, tipoVector);
+												
+						}
+					:}; 
+
+tamTipo ::= NUMERO:num {: 
+				RESULT = new Integer(Integer.valueOf(num.getLexema()).intValue()); 
+		  :}
+          | IDENTIFICADOR:id {:
+          
+                //Buscamos la constante en el ambito y si existe tomamos su valor
+                
+				SymbolTableIF tablaSimbolos = scopeManager.getCurrentScope().getSymbolTable();
+				String name = id.getLexema();
+				
+				if(!scopeManager.containsSymbol(name)){
+					semanticErrorManager.semanticFatalError("No existe la constante");
+				}
+				
+				SymbolConstant c = (SymbolConstant)scopeManager.searchSymbol(name);
+				RESULT = new Integer(Integer.valueOf(c.getValue()).intValue());					
+          :};
 
 //  VARIABLES
 
