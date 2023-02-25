@@ -256,7 +256,7 @@ declaracionTipo ::= TIPO ENTERO IDENTIFICADOR:id OPEN_BRACKET tamTipo:tt CLOSE_B
 											
 							// Introducimos en la tabla de tipos el nuevo tipo							
 							TypeTableIF tablaTipos = scope.getTypeTable();							
-							TypeArray tipoVector = new TypeArray(scope, name);
+							TypeArray tipoVector = new TypeArray(scope, name, (int)tt);
 							tablaTipos.addType(name, tipoVector);
 												
 						}
