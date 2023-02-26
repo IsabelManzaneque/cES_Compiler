@@ -100,7 +100,7 @@ non terminal FuncionPrincipal        funcionPrincipal;
 non terminal Epsilon   			     epsilon;
 non terminal SeccionFunciones        seccionFunciones;
 non terminal Funcion 			     funcion;
-non terminal SeccionParametros	     seccionParametros;
+non terminal                	     seccionParametros;
 non terminal DeclaracionParametros   declaracionParametros;
 non terminal Parametro			     parametro;
 non terminal SeccionConstantes	     seccionConstantes;
@@ -392,16 +392,36 @@ funcionPrincipal ::= VACIO principal OPEN_KEY CLOSE_KEY OPEN_PARENTHESIS
 						scopeManager.closeScope();				
 					 :};
 
-funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros CLOSE_KEY OPEN_PARENTHESIS
+funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN_PARENTHESIS
             {:
 				// Crea ambito de la funcion 						
-				ScopeIF scope = scopeManager.openScope("Funcion " + id.getLexema());
-					
+				ScopeIF scope = scopeManager.openScope("Funcion " + id.getLexema());					
 				System.out.println("Abriendo ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
 						
 				// Obtenemos la tabla de tipos y la de simbolos 
-				SymbolTableIF symbolTable = scope.getSymbolTable();
-				TypeTableIF typeTable = scope.getTypeTable();								
+				SymbolTableIF tablaSimbolos = scope.getSymbolTable();
+				TypeTableIF tablaTipos = scope.getTypeTable();					
+				
+				String name = id.getLexema();	
+				DeclaracionParametros listaParam = (DeclaracionParametros)sP;
+				
+				//Declaracion de parametros en el ambito de la funcion											
+				for(Parametro param : listaParam.getListaParam()){							
+					String paramName = param.getName();
+					String paramType = param.getType();					
+																				
+					if(!scopeManager.containsType(paramType)){
+						semanticErrorManager.semanticFatalError("Tipo del parametro no declarado");
+					}
+							
+					System.out.println("Generando parametro: " + paramName);
+											
+					TypeIF tipo = scopeManager.searchType(paramType);  
+					SymbolParameter symbolParameter = new SymbolParameter(scope, paramName, tipo);							
+					tablaSimbolos.addSymbol(symbolParameter);
+				}
+				
+													
 			:} 
 			 
 			cuerpoFuncion CLOSE_PARENTHESIS
@@ -413,16 +433,36 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros CLOSE_KEY OPEN_PA
 				scopeManager.closeScope();				
 			:}
 			 
-	      | VACIO IDENTIFICADOR:id OPEN_KEY seccionParametros CLOSE_KEY OPEN_PARENTHESIS 
+	      | VACIO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN_PARENTHESIS 
 	        {:
 				// Crea ambito de la funcion 							
-				ScopeIF scope = scopeManager.openScope("Funcion " + id.getLexema());
-					
+				ScopeIF scope = scopeManager.openScope("Funcion " + id.getLexema());					
 				System.out.println("Abriendo ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
 						
 				// Obtenemos la tabla de tipos y la de simbolos 
-				SymbolTableIF symbolTable = scope.getSymbolTable();
-				TypeTableIF typeTable = scope.getTypeTable();								
+				SymbolTableIF tablaSimbolos = scope.getSymbolTable();
+				TypeTableIF tablaTipos = scope.getTypeTable();
+				
+				String name = id.getLexema();	
+				DeclaracionParametros listaParam = (DeclaracionParametros)sP;
+				
+				//Declaracion de parametros en el ambito de la funcion											
+				for(Parametro param : listaParam.getListaParam()){							
+					String paramName = param.getName();
+					String paramType = param.getType();					
+																				
+					if(!scopeManager.containsType(paramType)){
+						semanticErrorManager.semanticFatalError("Tipo del parametro no declarado");
+					}
+							
+					System.out.println("Generando parametro: " + paramName);
+											
+					TypeIF tipo = scopeManager.searchType(paramType);  
+					SymbolParameter symbolParameter = new SymbolParameter(scope, paramName, tipo);							
+					tablaSimbolos.addSymbol(symbolParameter);
+				}				
+				
+												
 			:} 
 			 
 			cuerpoFuncion CLOSE_PARENTHESIS
@@ -438,7 +478,10 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros CLOSE_KEY OPEN_PA
 cuerpoFuncion ::= seccionTipos listadoSentencias
                 | seccionTipos seccionVariables listadoSentencias;
                 
-seccionParametros ::= declaracionParametros | epsilon;
+seccionParametros ::= declaracionParametros:listaParam{:						
+						RESULT = listaParam;						
+			        :} 
+			        | epsilon;
 
 declaracionParametros  ::= parametro:param COLON declaracionParametros:listaParam{:						   		
 						   		listaParam.add(param);

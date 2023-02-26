@@ -11,11 +11,11 @@ public class DeclaracionParametros extends NonTerminal {
 		listaParam = new ArrayList<>();
 	}
 
-	public ArrayList<Parametro> getListaIds() {
+	public ArrayList<Parametro> getListaParam() {
 		return listaParam;
 	}
 
-	public void setListaIds(ArrayList<Parametro> listaParam) {
+	public void setListaParam(ArrayList<Parametro> listaParam) {
 		this.listaParam = listaParam;
 	}
 	
