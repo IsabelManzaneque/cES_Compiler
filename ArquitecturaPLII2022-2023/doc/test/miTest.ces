@@ -1,21 +1,20 @@
 /* CONSTANTES */
 #constante VERDADERO 1;
 #constante FALSO 0;
-#constante TAM 7;
 #constante MAX 10;
 
 /* TIPOS COMPUESTOS */ 
-tipo entero vector[TAM];
+tipo entero vector[3];
 tipo entero vector1[MAX];
-tipo entero vector2[3];
-
-vector1 v1;
-vector2 v2;
 
 /* VARIABLES */
+entero a, b;
 entero suma;
-entero mayorDiez;
-entero a = 1;
+entero uno = 1;
+entero ocho = 8, tres = 3;
+
+vector v0;
+vector1 v1, v2;
 
 
 entero funSuma (entero x, entero y) {

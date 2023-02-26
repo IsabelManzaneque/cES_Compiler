@@ -14,6 +14,7 @@ import es.uned.lsi.compiler.semantic.type.TypeIF;
 public class SymbolVariable
     extends SymbolBase
 {  
+	private int value; // valor de la constante
    
     /**
      * Constructor for SymbolVariable.
@@ -27,4 +28,12 @@ public class SymbolVariable
     {
         super (scope, name, type);
     } 
+    
+    public int getValue() {
+		return value;
+	}
+
+	public void setValue(int value) {
+		this.value = value;
+	}
 }

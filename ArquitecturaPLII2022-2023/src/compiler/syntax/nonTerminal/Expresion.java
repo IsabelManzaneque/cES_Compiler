@@ -1,8 +1,6 @@
 package compiler.syntax.nonTerminal;
 
-// Para cada atributo un get y un set. 
-// al menos un constructor (el vacio)
-// sobrescribir los metodos de object (toString, equals y hashcode)
+
 public class Expresion extends NonTerminal {
 	
 	private String tipo;

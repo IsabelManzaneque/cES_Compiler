@@ -15,7 +15,7 @@ public class SymbolConstant
     extends SymbolBase
 {
     
-	private String value; // valor de la constante
+	private String value;
 	
     /**
      * Constructor for SymbolConstant.

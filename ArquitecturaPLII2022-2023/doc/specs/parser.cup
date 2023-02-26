@@ -107,7 +107,7 @@ non terminal SeccionConstantes	     seccionConstantes;
 non terminal DeclaracionConstante    declaracionConstante;
 non terminal SeccionTipos		     seccionTipos;
 non terminal DeclaracionTipo	     declaracionTipo;
-non terminal 			     tamTipo;
+non terminal 			             tamTipo;
 non terminal SeccionVariables	     seccionVariables;
 non terminal DeclaracionVariable     declaracionVariable;
 non terminal ListadoIDs			     listadoIDs;
@@ -224,7 +224,7 @@ declaracionConstante ::= CONSTANTE IDENTIFICADOR:id NUMERO:value SEMI_COLON{:
 							if(tablaSimbolos.containsSymbol(name)){
 								semanticErrorManager.semanticFatalError("Constante " + name + " ya declarada");								
 							}else{
-								System.out.println("Constante " + name + " aun NO declarada");
+								System.out.println("Generando constante: " + name);
 														
 								// Introducimos en la tabla de simbolos la constante con su ambito, nombre, tipo y valor
 								TypeTableIF tablaTipos = scope.getTypeTable();
@@ -236,25 +236,23 @@ declaracionConstante ::= CONSTANTE IDENTIFICADOR:id NUMERO:value SEMI_COLON{:
 					   :};
 
 //  TIPOS  (vectores)
-// No es posible definir dos tipos con el mismo nombre aunque pertenezcan a distintos ámbitos, 
-// si desde un ámbito se puede alcanzar el otro ámbito
 
 seccionTipos ::= declaracionTipo seccionTipos | epsilon;
 
 declaracionTipo ::= TIPO ENTERO IDENTIFICADOR:id OPEN_BRACKET tamTipo:tt CLOSE_BRACKET SEMI_COLON {:			      		 		
 							
-						// Obtenemos el ambito donde nos encontramos y obtenemos la tabla de simbolos 
+						// Obtenemos el ambito donde nos encontramos y la tabla de simbolos 
 						ScopeIF scope = scopeManager.getCurrentScope();
 						SymbolTableIF tablaSimbolos = scope.getSymbolTable();
 						String name = id.getLexema();
 							
-						// Comprobamos que la constante no este ya declarada en la tabla de simbolos
+						// Comprobamos que el tipo no este ya declarado en la tabla de tipos de ningun ambito
 						if(scopeManager.containsType(name)){
-							semanticErrorManager.semanticFatalError("Tipo " + name + " ya declarado");								
-						}else{
-							System.out.println("Creando tipo " + name);
-											
-							// Introducimos en la tabla de tipos el nuevo tipo							
+							semanticErrorManager.semanticFatalError("Tipo " + name + " ya declarado");			
+												
+						}else{																												
+							// Introducimos en la tabla de tipos el nuevo tipo								
+							System.out.println("Generando tipo: " + name);						
 							TypeTableIF tablaTipos = scope.getTypeTable();							
 							TypeArray tipoVector = new TypeArray(scope, name, (int)tt);
 							tablaTipos.addType(name, tipoVector);
@@ -263,7 +261,7 @@ declaracionTipo ::= TIPO ENTERO IDENTIFICADOR:id OPEN_BRACKET tamTipo:tt CLOSE_B
 					:}; 
 
 tamTipo ::= NUMERO:num {: 
-				RESULT = new Integer(Integer.valueOf(num.getLexema()).intValue()); 
+				RESULT = Integer.parseInt(num.getLexema()); 
 		  :}
           | IDENTIFICADOR:id {:
           
@@ -277,19 +275,98 @@ tamTipo ::= NUMERO:num {:
 				}
 				
 				SymbolConstant c = (SymbolConstant)scopeManager.searchSymbol(name);
-				RESULT = new Integer(Integer.valueOf(c.getValue()).intValue());					
+				RESULT = Integer.parseInt(c.getValue());					
           :};
 
 //  VARIABLES
 
 seccionVariables ::= seccionVariables declaracionVariable 
-	| declaracionVariable;
+	               | declaracionVariable;
 		
-declaracionVariable ::= ENTERO listadoIDs SEMI_COLON
- 	| IDENTIFICADOR listadoIDs SEMI_COLON;
+declaracionVariable ::= ENTERO listadoIDs:listaId SEMI_COLON{:
+							
+							// Obtenemos actual y la tabla de simbolos 
+							ScopeIF scope = scopeManager.getCurrentScope();
+							SymbolTableIF tablaSimbolos = scope.getSymbolTable();
+							TypeTableIF tablaTipos = scope.getTypeTable();
+							
+							for(Id id : listaId.getListaIds()){
+								
+								String idName = id.getName();
+								int idValue = id.getValue();
+								
+								if(tablaSimbolos.containsSymbol(idName)){
+									semanticErrorManager.semanticFatalError("Variable " + idName + " ya declarada");								
+								}else{
+																							
+									// Introducimos en la tabla de simbolos la variable 
+									
+									System.out.println("Generando variable: " + idName);									
+								
+									TypeIF tipo = scopeManager.searchType("ENTERO");  
+									SymbolVariable symbolVariable = new SymbolVariable(scope, idName, tipo);
+									symbolVariable.setValue(idValue); 
+									tablaSimbolos.addSymbol(symbolVariable);
+								}
+							}					
+					   :}
+					   
+ 	                  | IDENTIFICADOR:iden listadoIDs:listaId SEMI_COLON{:
+							
+							// Obtenemos actual y la tabla de simbolos 
+							ScopeIF scope = scopeManager.getCurrentScope();
+							SymbolTableIF tablaSimbolos = scope.getSymbolTable();
+							TypeTableIF tablaTipos = scope.getTypeTable();
+							String type = iden.getLexema();
+							
+							for(Id id : listaId.getListaIds()){
+								
+								String idName = id.getName();
+																								
+								if(tablaSimbolos.containsSymbol(idName)){
+									semanticErrorManager.semanticFatalError("Variable " + idName + " ya declarada");								
+								}else{
+																							
+									// Introducimos en la tabla de simbolos la variable 
+									
+									System.out.println("Generando variable: " + idName);
+									
+									if(!scopeManager.containsType(type)){
+										semanticErrorManager.semanticFatalError("Tipo no declarado");
+									}
+									
+									TypeIF tipo = scopeManager.searchType(type);  
+									SymbolVariable symbolVariable = new SymbolVariable(scope, idName, tipo);							
+									tablaSimbolos.addSymbol(symbolVariable);
+								}
+							}					
+					   :};
 
-listadoIDs ::=  id  COLON listadoIDs | id ;
-id ::= IDENTIFICADOR | IDENTIFICADOR ASSIGN NUMERO;
+listadoIDs ::= id:id  COLON listadoIDs:listaId {:
+			   		
+			   		listaId.add(id);
+			   		RESULT = listaId;	
+			 :}
+			 			 
+			 | id:id{:
+			 
+			   		ListadoIDs listaId = new ListadoIDs();
+			   		listaId.add(id);
+			   		RESULT = listaId;			 
+			 :} ;
+
+id ::= IDENTIFICADOR:id{:	      		   
+         
+			String name = id.getLexema();			
+			RESULT = new Id(name, 0);						
+     :}
+     
+	 | IDENTIFICADOR:id ASSIGN NUMERO:num{:	   				
+   
+			String name = id.getLexema();
+			int value = Integer.parseInt(num.getLexema());			
+			RESULT = new Id(name, value);					
+     :};
 
 // FUNCIONES
 
