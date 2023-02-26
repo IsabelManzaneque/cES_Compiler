@@ -218,16 +218,15 @@ declaracionConstante ::= CONSTANTE IDENTIFICADOR:id NUMERO:value SEMI_COLON{:
 							// Obtenemos el ambito donde nos encontramos y obtenemos la tabla de simbolos 
 							ScopeIF scope = scopeManager.getCurrentScope();
 							SymbolTableIF tablaSimbolos = scope.getSymbolTable();
+							TypeTableIF tablaTipos = scope.getTypeTable();
 							String name = id.getLexema();
 							
 							// Comprobamos que la constante no este ya declarada en la tabla de simbolos
 							if(tablaSimbolos.containsSymbol(name)){
 								semanticErrorManager.semanticFatalError("Constante " + name + " ya declarada");								
-							}else{
-								System.out.println("Generando constante: " + name);
-														
-								// Introducimos en la tabla de simbolos la constante con su ambito, nombre, tipo y valor
-								TypeTableIF tablaTipos = scope.getTypeTable();
+							}else{														
+								// Introducimos en la tabla de simbolos la constante con su ambito, nombre, tipo y valor	
+								System.out.println("Generando constante: " + name);	
 								TypeIF tipo = scopeManager.searchType("ENTERO");  
 								SymbolConstant symbolConstant = new SymbolConstant(scope, name, tipo);
 								symbolConstant.setValue(value.getLexema()); 
@@ -235,7 +234,7 @@ declaracionConstante ::= CONSTANTE IDENTIFICADOR:id NUMERO:value SEMI_COLON{:
 							}
 					   :};
 
-//  TIPOS  (vectores)
+//  TIPOS 
 
 seccionTipos ::= declaracionTipo seccionTipos | epsilon;
 
@@ -364,24 +363,32 @@ id ::= IDENTIFICADOR:id{:
 
 // FUNCIONES
 
-// Incluir las acciones semánticas de abrir el ámbito justo entre OPEN_PARENTHESIS cuerpoFuncion y cerrar el ámbito después de CLOSE_PARENTHESIS.
-
 // Se han modificado las producciones de la funcion principal y las funciones para que
 // ambas uilicen el no terminal "cuerpoFuncion" y asi evitar conflictos
 
 seccionFunciones ::= funcion seccionFunciones | funcionPrincipal;
 
 funcionPrincipal ::= VACIO principal OPEN_KEY CLOSE_KEY OPEN_PARENTHESIS                      
-                     {:
-						// Crea ambito de la funcion principal							
+                     {:	
+                     	//Declarar funcion principal en tabla de tipos y simbolos global                     	
+                        ScopeIF globalScope = scopeManager.getCurrentScope();
+                     	SymbolTableIF globalTablaSimbolos = globalScope.getSymbolTable();
+						TypeTableIF globalTablaTipos = globalScope.getTypeTable();	
+                     	
+                     	TypeIF tipo = scopeManager.searchType("VACIO");  
+						SymbolFunction symbolFunction = new SymbolFunction(globalScope, "principal", tipo);
+						globalTablaSimbolos.addSymbol(symbolFunction);	
+						TypeFunction typeFunction = new TypeFunction(globalScope, "principal");
+						globalTablaTipos.addType("principal", typeFunction);
+						
+						// Crear ambito de la funcion principal y obtener sus tablas						
 						ScopeIF scope = scopeManager.openScope("Funcion principal");						
 						System.out.println("Abriendo ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
 						
-						// Obtenemos la tabla de tipos y la de simbolos 
-						SymbolTableIF symbolTable = scope.getSymbolTable();
-						TypeTableIF typeTable = scope.getTypeTable();		
+						SymbolTableIF tablaSimbolos = scope.getSymbolTable();  // las necesito?
+						TypeTableIF tablaTipos = scope.getTypeTable();		
 						
-												
+																						
 				  	 :} 
 				  	 
 				  	 cuerpoFuncion CLOSE_PARENTHESIS 
@@ -395,12 +402,22 @@ funcionPrincipal ::= VACIO principal OPEN_KEY CLOSE_KEY OPEN_PARENTHESIS
 
 funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN_PARENTHESIS
             {:
-				// Crea ambito de la funcion 						
+            	//Declarar funcion en tabla de tipos y tabla de simbolos global                     	
+                ScopeIF globalScope = scopeManager.getCurrentScope();
+                SymbolTableIF globalTablaSimbolos = globalScope.getSymbolTable();
+				TypeTableIF globalTablaTipos = globalScope.getTypeTable();	
+                     	
+                TypeIF type = scopeManager.searchType("ENTERO");  
+				SymbolFunction symbolFunction = new SymbolFunction(globalScope, id.getLexema(), type);
+				globalTablaSimbolos.addSymbol(symbolFunction);	
+				TypeFunction typeFunction = new TypeFunction(globalScope, id.getLexema());
+				globalTablaTipos.addType(id.getLexema(), typeFunction);
+            	
+				// Crea ambito de la funcion y obtener sus tablas						
 				ScopeIF scope = scopeManager.openScope("Funcion " + id.getLexema());					
 				System.out.println("Abriendo ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
 						
-				// Obtenemos la tabla de tipos y la de simbolos 
-				SymbolTableIF tablaSimbolos = scope.getSymbolTable();
+				SymbolTableIF tablaSimbolos = scope.getSymbolTable(); // las necesito?
 				TypeTableIF tablaTipos = scope.getTypeTable();					
 				
 				String name = id.getLexema();	
@@ -437,12 +454,22 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 			 
 	      | VACIO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN_PARENTHESIS 
 	        {:
-				// Crea ambito de la funcion 							
+	        	//Declarar funcion en tabla de tipos y tabla de simbolos global                     	
+                ScopeIF globalScope = scopeManager.getCurrentScope();
+                SymbolTableIF globalTablaSimbolos = globalScope.getSymbolTable();
+				TypeTableIF globalTablaTipos = globalScope.getTypeTable();	
+                     	
+                TypeIF type = scopeManager.searchType("VACIO");  
+				SymbolFunction symbolFunction = new SymbolFunction(globalScope, id.getLexema(), type);
+				globalTablaSimbolos.addSymbol(symbolFunction);	
+				TypeFunction typeFunction = new TypeFunction(globalScope, id.getLexema());
+				globalTablaTipos.addType(id.getLexema(), typeFunction);
+				
+				// Crea ambito de la funcion y obtener sus tablas							
 				ScopeIF scope = scopeManager.openScope("Funcion " + id.getLexema());					
 				System.out.println("Abriendo ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
 						
-				// Obtenemos la tabla de tipos y la de simbolos 
-				SymbolTableIF tablaSimbolos = scope.getSymbolTable();
+				SymbolTableIF tablaSimbolos = scope.getSymbolTable();   // las necesito?
 				TypeTableIF tablaTipos = scope.getTypeTable();
 				
 				String name = id.getLexema();	
