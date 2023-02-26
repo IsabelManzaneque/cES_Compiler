@@ -374,13 +374,14 @@ seccionFunciones ::= funcion seccionFunciones | funcionPrincipal;
 funcionPrincipal ::= VACIO principal OPEN_KEY CLOSE_KEY OPEN_PARENTHESIS                      
                      {:
 						// Crea ambito de la funcion principal							
-						ScopeIF scope = scopeManager.openScope("Funcion principal");
-						
+						ScopeIF scope = scopeManager.openScope("Funcion principal");						
 						System.out.println("Abriendo ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
 						
 						// Obtenemos la tabla de tipos y la de simbolos 
 						SymbolTableIF symbolTable = scope.getSymbolTable();
-						TypeTableIF typeTable = scope.getTypeTable();								
+						TypeTableIF typeTable = scope.getTypeTable();		
+						
+												
 				  	 :} 
 				  	 
 				  	 cuerpoFuncion CLOSE_PARENTHESIS 
@@ -405,22 +406,23 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 				String name = id.getLexema();	
 				DeclaracionParametros listaParam = (DeclaracionParametros)sP;
 				
-				//Declaracion de parametros en el ambito de la funcion											
-				for(Parametro param : listaParam.getListaParam()){							
-					String paramName = param.getName();
-					String paramType = param.getType();					
-																				
-					if(!scopeManager.containsType(paramType)){
-						semanticErrorManager.semanticFatalError("Tipo del parametro no declarado");
+				if(listaParam != null){
+					//Declaracion de parametros en el ambito de la funcion											
+					for(Parametro param : listaParam.getListaParam()){							
+						String paramName = param.getName();
+						String paramType = param.getType();					
+																					
+						if(!scopeManager.containsType(paramType)){
+							semanticErrorManager.semanticFatalError("Tipo del parametro no declarado");
+						}
+								
+						System.out.println("Generando parametro: " + paramName);
+												
+						TypeIF tipo = scopeManager.searchType(paramType);  
+						SymbolParameter symbolParameter = new SymbolParameter(scope, paramName, tipo);							
+						tablaSimbolos.addSymbol(symbolParameter);
 					}
-							
-					System.out.println("Generando parametro: " + paramName);
-											
-					TypeIF tipo = scopeManager.searchType(paramType);  
-					SymbolParameter symbolParameter = new SymbolParameter(scope, paramName, tipo);							
-					tablaSimbolos.addSymbol(symbolParameter);
 				}
-				
 													
 			:} 
 			 
@@ -446,22 +448,23 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 				String name = id.getLexema();	
 				DeclaracionParametros listaParam = (DeclaracionParametros)sP;
 				
-				//Declaracion de parametros en el ambito de la funcion											
-				for(Parametro param : listaParam.getListaParam()){							
-					String paramName = param.getName();
-					String paramType = param.getType();					
-																				
-					if(!scopeManager.containsType(paramType)){
-						semanticErrorManager.semanticFatalError("Tipo del parametro no declarado");
-					}
-							
-					System.out.println("Generando parametro: " + paramName);
-											
-					TypeIF tipo = scopeManager.searchType(paramType);  
-					SymbolParameter symbolParameter = new SymbolParameter(scope, paramName, tipo);							
-					tablaSimbolos.addSymbol(symbolParameter);
-				}				
-				
+				if(listaParam != null){
+					//Declaracion de parametros en el ambito de la funcion											
+					for(Parametro param : listaParam.getListaParam()){							
+						String paramName = param.getName();
+						String paramType = param.getType();					
+																					
+						if(!scopeManager.containsType(paramType)){
+							semanticErrorManager.semanticFatalError("Tipo del parametro no declarado");
+						}
+								
+						System.out.println("Generando parametro: " + paramName);
+												
+						TypeIF tipo = scopeManager.searchType(paramType);  
+						SymbolParameter symbolParameter = new SymbolParameter(scope, paramName, tipo);							
+						tablaSimbolos.addSymbol(symbolParameter);
+					}				
+				}
 												
 			:} 
 			 
