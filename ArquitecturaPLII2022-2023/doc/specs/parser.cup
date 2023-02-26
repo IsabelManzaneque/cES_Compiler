@@ -230,7 +230,7 @@ declaracionConstante ::= CONSTANTE IDENTIFICADOR:id NUMERO:value SEMI_COLON{:
 								TypeTableIF tablaTipos = scope.getTypeTable();
 								TypeIF tipo = scopeManager.searchType("ENTERO");  
 								SymbolConstant symbolConstant = new SymbolConstant(scope, name, tipo);
-								symbolConstant.setValue(value.getLexema()); // para esto se ha modificado la clase SymbolConstant en semantic.symbol
+								symbolConstant.setValue(value.getLexema()); 
 								tablaSimbolos.addSymbol(symbolConstant);								
 							}
 					   :};
@@ -342,28 +342,22 @@ declaracionVariable ::= ENTERO listadoIDs:listaId SEMI_COLON{:
 							}					
 					   :};
 
-listadoIDs ::= id:id  COLON listadoIDs:listaId {:
-			   		
+listadoIDs ::= id:id  COLON listadoIDs:listaId {:			   		
 			   		listaId.add(id);
-			   		RESULT = listaId;	
-			 :}
-			 			 
-			 | id:id{:
-			 
+			   		RESULT = listaId;
+			 :}			 			 
+			 | id:id{:			 
 			   		ListadoIDs listaId = new ListadoIDs();
 			   		listaId.add(id);
 			   		RESULT = listaId;			 
 			 :} ;
 
 id ::= IDENTIFICADOR:id{:	      		   
-         
-			String name = id.getLexema();			
+            String name = id.getLexema();			
 			RESULT = new Id(name, 0);						
-     :}
-     
-	 | IDENTIFICADOR:id ASSIGN NUMERO:num{:	   				
-   
-			String name = id.getLexema();
+     :}     
+	 | IDENTIFICADOR:id ASSIGN NUMERO:num{:	   		
+   			String name = id.getLexema();
 			int value = Integer.parseInt(num.getLexema());			
 			RESULT = new Id(name, value);					
      :};
@@ -374,6 +368,7 @@ id ::= IDENTIFICADOR:id{:
 
 // Se han modificado las producciones de la funcion principal y las funciones para que
 // ambas uilicen el no terminal "cuerpoFuncion" y asi evitar conflictos
+
 seccionFunciones ::= funcion seccionFunciones | funcionPrincipal;
 
 funcionPrincipal ::= VACIO principal OPEN_KEY CLOSE_KEY OPEN_PARENTHESIS                      
@@ -445,9 +440,25 @@ cuerpoFuncion ::= seccionTipos listadoSentencias
                 
 seccionParametros ::= declaracionParametros | epsilon;
 
-declaracionParametros  ::= parametro | parametro COLON declaracionParametros;
+declaracionParametros  ::= parametro:param COLON declaracionParametros:listaParam{:						   		
+						   		listaParam.add(param);
+						   		RESULT = listaParam;	 	
+						 :}
+                         | parametro:param {:
+                         		DeclaracionParametros listaParam = new DeclaracionParametros();
+                         		listaParam.add(param);
+                         		RESULT = listaParam;                         
+                         :};
 
-parametro ::= ENTERO IDENTIFICADOR | IDENTIFICADOR IDENTIFICADOR;
+parametro ::= ENTERO IDENTIFICADOR:id{:
+				String name = id.getLexema();						
+				RESULT = new Parametro("ENTERO", name);		    	
+            :} 
+            | IDENTIFICADOR:iden IDENTIFICADOR:id{:
+            	String type = iden.getLexema();	
+            	String name = id.getLexema();						
+				RESULT = new Parametro(type, name);            
+            :};
 
 
 
