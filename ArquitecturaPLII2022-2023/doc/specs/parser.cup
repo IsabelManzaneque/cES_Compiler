@@ -113,7 +113,7 @@ non terminal DeclaracionVariable     declaracionVariable;
 non terminal ListadoIDs			     listadoIDs;
 non terminal Id			             id;
 non terminal Expresion               expresion;
-non terminal AccesoVector		     accesoVector;
+non terminal  		     accesoVector;
 non terminal LlamadaFuncion		     llamadaFuncion;
 non terminal Bloque			         bloque;
 non terminal ListadoSentencias       listadoSentencias;
@@ -179,28 +179,20 @@ program ::=
 initAxiom ::= {:
 				// Creamos ambito global 							
 				ScopeIF scope = scopeManager.openScope("global");
-				
-				System.out.println("Abriendo ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
-								
-				// Obtenemos la tabla de tipos y la de simbolos 
-				// en cada scope debemos tener una de cada
-				SymbolTableIF symbolTable = scope.getSymbolTable();
-				TypeTableIF typeTable = scope.getTypeTable();	
-				
-				// Introduccion de tipos primitivos en la tabla de tipos
+												
+				// Obtener tablas de tipos e introducir tipos primitivos
+				TypeTableIF typeTable = scope.getTypeTable();					
 				TypeSimpleEntero tipoEntero = new TypeSimpleEntero(scope, "ENTERO");
 				typeTable.addType("ENTERO", tipoEntero);
 				TypeSimpleVacio tipoVacio = new TypeSimpleVacio(scope, "VACIO");
-				typeTable.addType("VACIO", tipoVacio);
-							
+				typeTable.addType("VACIO", tipoVacio);							
 		  	  :}
 			
 			  axiom
 			
 			  {:			
-				//cerramos ambito global
+				// Cerrar ambito global
 				ScopeIF scope = scopeManager.getCurrentScope();
-				System.out.println("Cerrando ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
 				scopeManager.closeScope();				
 		      :};
 
@@ -215,18 +207,17 @@ epsilon ::= ;
 
 declaracionConstante ::= CONSTANTE IDENTIFICADOR:id NUMERO:value SEMI_COLON{:
 							
-							// Obtenemos el ambito donde nos encontramos y obtenemos la tabla de simbolos 
+							// Obtener ambito actual y tablas de simbolos y tipos 
 							ScopeIF scope = scopeManager.getCurrentScope();
 							SymbolTableIF tablaSimbolos = scope.getSymbolTable();
 							TypeTableIF tablaTipos = scope.getTypeTable();
 							String name = id.getLexema();
 							
-							// Comprobamos que la constante no este ya declarada en la tabla de simbolos
+							// Comprobar que la constante no este ya declarada
 							if(tablaSimbolos.containsSymbol(name)){
 								semanticErrorManager.semanticFatalError("Constante " + name + " ya declarada");								
 							}else{														
-								// Introducimos en la tabla de simbolos la constante con su ambito, nombre, tipo y valor	
-								System.out.println("Generando constante: " + name);	
+								// Introduce constante en tabla de simbolos	
 								TypeIF tipo = scopeManager.searchType("ENTERO");  
 								SymbolConstant symbolConstant = new SymbolConstant(scope, name, tipo);
 								symbolConstant.setValue(value.getLexema()); 
@@ -240,19 +231,16 @@ seccionTipos ::= declaracionTipo seccionTipos | epsilon;
 
 declaracionTipo ::= TIPO ENTERO IDENTIFICADOR:id OPEN_BRACKET tamTipo:tt CLOSE_BRACKET SEMI_COLON {:			      		 		
 							
-						// Obtenemos el ambito donde nos encontramos y la tabla de simbolos 
+						// Obtener ambito actual y tablas de simbolos y tipos  
 						ScopeIF scope = scopeManager.getCurrentScope();
-						SymbolTableIF tablaSimbolos = scope.getSymbolTable();
+						TypeTableIF tablaTipos = scope.getTypeTable();	
 						String name = id.getLexema();
 							
-						// Comprobamos que el tipo no este ya declarado en la tabla de tipos de ningun ambito
+						// Comprobar que el tipo no este ya declarado
 						if(scopeManager.containsType(name)){
-							semanticErrorManager.semanticFatalError("Tipo " + name + " ya declarado");			
-												
+							semanticErrorManager.semanticFatalError("Tipo " + name + " ya declarado");													
 						}else{																												
-							// Introducimos en la tabla de tipos el nuevo tipo								
-							System.out.println("Generando tipo: " + name);						
-							TypeTableIF tablaTipos = scope.getTypeTable();							
+							// Introducir tipo en tabla de tipos								
 							TypeArray tipoVector = new TypeArray(scope, name, (int)tt);
 							tablaTipos.addType(name, tipoVector);
 												
@@ -264,8 +252,7 @@ tamTipo ::= NUMERO:num {:
 		  :}
           | IDENTIFICADOR:id {:
           
-                //Buscamos la constante en el ambito y si existe tomamos su valor
-                
+                // Buscar la constante en el ambito                 
 				SymbolTableIF tablaSimbolos = scopeManager.getCurrentScope().getSymbolTable();
 				String name = id.getLexema();
 				
@@ -284,11 +271,11 @@ seccionVariables ::= seccionVariables declaracionVariable
 		
 declaracionVariable ::= ENTERO listadoIDs:listaId SEMI_COLON{:
 							
-							// Obtenemos actual y la tabla de simbolos 
+							// Obtener ambito actual y tabla de simbolos
 							ScopeIF scope = scopeManager.getCurrentScope();
 							SymbolTableIF tablaSimbolos = scope.getSymbolTable();
-							TypeTableIF tablaTipos = scope.getTypeTable();
 							
+							// Anadir cada identificador a tabla de simbolos							
 							for(Id id : listaId.getListaIds()){
 								
 								String idName = id.getName();
@@ -296,12 +283,7 @@ declaracionVariable ::= ENTERO listadoIDs:listaId SEMI_COLON{:
 								
 								if(tablaSimbolos.containsSymbol(idName)){
 									semanticErrorManager.semanticFatalError("Variable " + idName + " ya declarada");								
-								}else{
-																							
-									// Introducimos en la tabla de simbolos la variable 
-									
-									System.out.println("Generando variable: " + idName);									
-								
+								}else{										
 									TypeIF tipo = scopeManager.searchType("ENTERO");  
 									SymbolVariable symbolVariable = new SymbolVariable(scope, idName, tipo);
 									symbolVariable.setValue(idValue); 
@@ -312,28 +294,23 @@ declaracionVariable ::= ENTERO listadoIDs:listaId SEMI_COLON{:
 					   
  	                  | IDENTIFICADOR:iden listadoIDs:listaId SEMI_COLON{:
 							
-							// Obtenemos actual y la tabla de simbolos 
+							// Obtener ambito actual y tabla de simbolos 
 							ScopeIF scope = scopeManager.getCurrentScope();
-							SymbolTableIF tablaSimbolos = scope.getSymbolTable();
-							TypeTableIF tablaTipos = scope.getTypeTable();
+							SymbolTableIF tablaSimbolos = scope.getSymbolTable();				
+							
 							String type = iden.getLexema();
 							
+							// Anadir cada identificador a tabla de simbolos
 							for(Id id : listaId.getListaIds()){
 								
 								String idName = id.getName();
 																								
 								if(tablaSimbolos.containsSymbol(idName)){
 									semanticErrorManager.semanticFatalError("Variable " + idName + " ya declarada");								
-								}else{
-																							
-									// Introducimos en la tabla de simbolos la variable 
-									
-									System.out.println("Generando variable: " + idName);
-									
+								}else{									
 									if(!scopeManager.containsType(type)){
 										semanticErrorManager.semanticFatalError("Tipo no declarado");
-									}
-									
+									}									
 									TypeIF tipo = scopeManager.searchType(type);  
 									SymbolVariable symbolVariable = new SymbolVariable(scope, idName, tipo);							
 									tablaSimbolos.addSymbol(symbolVariable);
@@ -382,9 +359,7 @@ funcionPrincipal ::= VACIO principal OPEN_KEY CLOSE_KEY OPEN_PARENTHESIS
 						globalTablaTipos.addType("principal", typeFunction);
 						
 						// Crear ambito de la funcion principal y obtener sus tablas						
-						ScopeIF scope = scopeManager.openScope("Funcion principal");						
-						System.out.println("Abriendo ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
-						
+						ScopeIF scope = scopeManager.openScope("Funcion principal");							
 						SymbolTableIF tablaSimbolos = scope.getSymbolTable();  // las necesito?
 						TypeTableIF tablaTipos = scope.getTypeTable();		
 						
@@ -394,15 +369,14 @@ funcionPrincipal ::= VACIO principal OPEN_KEY CLOSE_KEY OPEN_PARENTHESIS
 				  	 cuerpoFuncion CLOSE_PARENTHESIS 
 				  	 
 				  	 {:			
-						//cerramos ambito 
+						//cerrar ambito 
 						ScopeIF scope = scopeManager.getCurrentScope();
-						System.out.println("Cerrando ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
 						scopeManager.closeScope();				
 					 :};
 
 funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN_PARENTHESIS
             {:
-            	//Declarar funcion en tabla de tipos y tabla de simbolos global                     	
+            	//Declarar funcion en tabla de tipos y tabla de simbolos global             	                  	
                 ScopeIF globalScope = scopeManager.getCurrentScope();
                 SymbolTableIF globalTablaSimbolos = globalScope.getSymbolTable();
 				TypeTableIF globalTablaTipos = globalScope.getTypeTable();	
@@ -413,18 +387,16 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 				TypeFunction typeFunction = new TypeFunction(globalScope, id.getLexema());
 				globalTablaTipos.addType(id.getLexema(), typeFunction);
             	
-				// Crea ambito de la funcion y obtener sus tablas						
+				// Crear ambito de la funcion y obtener sus tablas								
 				ScopeIF scope = scopeManager.openScope("Funcion " + id.getLexema());					
-				System.out.println("Abriendo ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
-						
 				SymbolTableIF tablaSimbolos = scope.getSymbolTable(); // las necesito?
 				TypeTableIF tablaTipos = scope.getTypeTable();					
+							
 				
-				String name = id.getLexema();	
+				//Declaracion de parametros en el ambito de la funcion					
 				DeclaracionParametros listaParam = (DeclaracionParametros)sP;
 				
-				if(listaParam != null){
-					//Declaracion de parametros en el ambito de la funcion											
+				if(listaParam != null){										
 					for(Parametro param : listaParam.getListaParam()){							
 						String paramName = param.getName();
 						String paramType = param.getType();					
@@ -432,9 +404,7 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 						if(!scopeManager.containsType(paramType)){
 							semanticErrorManager.semanticFatalError("Tipo del parametro no declarado");
 						}
-								
-						System.out.println("Generando parametro: " + paramName);
-												
+											
 						TypeIF tipo = scopeManager.searchType(paramType);  
 						SymbolParameter symbolParameter = new SymbolParameter(scope, paramName, tipo);							
 						tablaSimbolos.addSymbol(symbolParameter);
@@ -446,15 +416,14 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 			cuerpoFuncion CLOSE_PARENTHESIS
 			
 			{:			
-				//cerramos ambito 
+				//cerrars ambito 
 				ScopeIF scope = scopeManager.getCurrentScope();
-				System.out.println("Cerrando ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
 				scopeManager.closeScope();				
 			:}
 			 
 	      | VACIO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN_PARENTHESIS 
 	        {:
-	        	//Declarar funcion en tabla de tipos y tabla de simbolos global                     	
+	        	//Declarar funcion en tabla de tipos y tabla de simbolos global  	        	               	
                 ScopeIF globalScope = scopeManager.getCurrentScope();
                 SymbolTableIF globalTablaSimbolos = globalScope.getSymbolTable();
 				TypeTableIF globalTablaTipos = globalScope.getTypeTable();	
@@ -465,18 +434,15 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 				TypeFunction typeFunction = new TypeFunction(globalScope, id.getLexema());
 				globalTablaTipos.addType(id.getLexema(), typeFunction);
 				
-				// Crea ambito de la funcion y obtener sus tablas							
+				// Crea ambito de la funcion y obtener sus tablas									
 				ScopeIF scope = scopeManager.openScope("Funcion " + id.getLexema());					
-				System.out.println("Abriendo ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
-						
 				SymbolTableIF tablaSimbolos = scope.getSymbolTable();   // las necesito?
 				TypeTableIF tablaTipos = scope.getTypeTable();
-				
-				String name = id.getLexema();	
+								
+				//Declaracion de parametros en el ambito de la funcion	
 				DeclaracionParametros listaParam = (DeclaracionParametros)sP;
 				
-				if(listaParam != null){
-					//Declaracion de parametros en el ambito de la funcion											
+				if(listaParam != null){										
 					for(Parametro param : listaParam.getListaParam()){							
 						String paramName = param.getName();
 						String paramType = param.getType();					
@@ -484,9 +450,7 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 						if(!scopeManager.containsType(paramType)){
 							semanticErrorManager.semanticFatalError("Tipo del parametro no declarado");
 						}
-								
-						System.out.println("Generando parametro: " + paramName);
-												
+									
 						TypeIF tipo = scopeManager.searchType(paramType);  
 						SymbolParameter symbolParameter = new SymbolParameter(scope, paramName, tipo);							
 						tablaSimbolos.addSymbol(symbolParameter);
@@ -498,9 +462,8 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 			cuerpoFuncion CLOSE_PARENTHESIS
 			
 			{:			
-				//cerramos ambito 
+				//cerrar ambito 
 				ScopeIF scope = scopeManager.getCurrentScope();
-				System.out.println("Cerrando ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
 				scopeManager.closeScope();				
 			:};
 			
@@ -537,28 +500,60 @@ parametro ::= ENTERO IDENTIFICADOR:id{:
 
 // EXPRESIONES
 
-expresion ::= NUMERO | IDENTIFICADOR
-		    | OPEN_KEY expresion:e1 CLOSE_KEY {:		    	
-		        Expresion e = new Expresion();  // generamos un objeto nuevo del tipo de la parte izq de la regla (en este caso, el antecedente es expresion y su clase Expresion)
-		        RESULT = e; :}
+expresion ::= NUMERO{:RESULT = new Expresion(scopeManager.searchType("ENTERO"));:}
+            | IDENTIFICADOR:id{:
+                if(!scopeManager.containsSymbol(id.getLexema())){
+                	semanticErrorManager.semanticFatalError("El simbolo " + id.getLexema() + " no ha sido declarado");
+				}				
+				SymbolIF symbol = scopeManager.searchSymbol(id.getLexema());				
+				RESULT = new Expresion(symbol.getType()); 							
+            :}
+            
+		    | OPEN_KEY expresion:e1 CLOSE_KEY {::}
 		        
-			| expresion:e1 PLUS expresion:e2 {:
-			 	Expresion e = new Expresion(e1, e2);
-			 	// comprobacion de tipos de e1 y e2
-			 	// generacion de codigo de e1 + e2
-			 	// ...
-			 	RESULT = e;	:}
-			 	
-			| expresion MULT expresion
-		 	| expresion AUTO_INCREMENTO
-		 	| NEGACION expresion
-		 	| expresion LOWER_THAN expresion
-		 	| expresion EQUAL expresion
-		 	| expresion AND_LOGICA expresion
+			| expresion:e1 PLUS expresion:e2 {:			 	
+			 	if(!(e1.getType() instanceof TypeSimpleEntero) || !(e2.getType() instanceof TypeSimpleEntero)){
+					semanticErrorManager.semanticFatalError("No se pueden sumar tipos incompatibles");
+				}				
+				RESULT = new Expresion(e1.getType());
+			:}			 	
+			| expresion:e1 MULT expresion:e2 {:			 	
+			 	if(!(e1.getType() instanceof TypeSimpleEntero) || !(e2.getType() instanceof TypeSimpleEntero)){
+					semanticErrorManager.semanticFatalError("No se pueden multiplicar tipos incompatibles");
+				}				
+				RESULT = new Expresion(e1.getType());
+			:}
+		 	| expresion:e1 AUTO_INCREMENTO{:
+		 		RESULT = new Expresion(e1.getType());
+		 	:}
+		 	| NEGACION expresion:e1{:
+		 		//RESULT = new Expresion(e1.getType());
+		 	:}
+		 	| expresion:e1 LOWER_THAN expresion:e2{:			 	
+			 	if(!(e1.getType() instanceof TypeSimpleEntero) || !(e2.getType() instanceof TypeSimpleEntero)){
+					semanticErrorManager.semanticFatalError("No se comparar expresiones de tipos incompatibles");
+				}
+				RESULT = new Expresion(e1.getType());				
+				
+			:}
+		 	| expresion:e1 EQUAL expresion:e2{:		 		
+		 		if(!(e1.getType() instanceof TypeSimpleEntero) || !(e2.getType() instanceof TypeSimpleEntero)){
+					semanticErrorManager.semanticFatalError("Tipos incompatibles");
+				}
+				RESULT = new Expresion(e1.getType());		 	
+		 	:}
+		 	| expresion:e1 AND_LOGICA expresion:e2{:			 	
+			 	if(!(e1.getType() instanceof TypeSimpleEntero) || !(e2.getType() instanceof TypeSimpleEntero)){
+					semanticErrorManager.semanticFatalError("No se comparar expresiones de tipos incompatibles");
+				}	
+				RESULT = new Expresion(e1.getType());			
+			:}
 		 	| accesoVector
 			| llamadaFuncion;
 
-accesoVector ::= IDENTIFICADOR OPEN_BRACKET expresion CLOSE_BRACKET;
+accesoVector ::= IDENTIFICADOR OPEN_BRACKET expresion:e1 CLOSE_BRACKET{:
+                 	RESULT = new Expresion(e1.getType());
+               :};
 
 llamadaFuncion ::= IDENTIFICADOR OPEN_KEY parametros CLOSE_KEY
 	| IDENTIFICADOR OPEN_KEY CLOSE_KEY;
@@ -571,17 +566,14 @@ bloque ::= OPEN_PARENTHESIS
 				// Crea ambito del bloque							
 				ScopeIF scope = scopeManager.openScope("bloque");
 					
-				System.out.println("Abriendo ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
-						
 				// Obtenemos la tabla de tipos y la de simbolos 
 				SymbolTableIF symbolTable = scope.getSymbolTable();
 				TypeTableIF typeTable = scope.getTypeTable();								
 			:}
 			cuerpoBloque CLOSE_PARENTHESIS
 			{:			
-				//cerramos ambito 
+				//cerrar ambito 
 				ScopeIF scope = scopeManager.getCurrentScope();
-				System.out.println("Cerrando ambito: " + scope.getName() + ", Nivel: "+ scope.getLevel());
 				scopeManager.closeScope();				
 			:};    	 
 
@@ -606,8 +598,25 @@ sentenciaDevuelve ::= DEVUELVE SEMI_COLON
 
 sentenciaIncremento ::= IDENTIFICADOR AUTO_INCREMENTO SEMI_COLON;
 
-sentenciaAsignacion ::= ref ASSIGN expresion SEMI_COLON;
-ref ::= IDENTIFICADOR | accesoVector;
+sentenciaAsignacion ::= ref:r ASSIGN expresion:exp SEMI_COLON{:
+							
+							// comprobar si ref existe en el ambito, si no existe es una asignacion en linea
+							// comprobar que ref no es una constante, no se puede asignar valor a una constante
+							// comprobar que si ref existe, sea del mismo tipo que expresion 
+							// expresion podria incluir una constante
+							// expresion podria ser una variable
+							
+							
+						//	if(!scopeManager.containsSymbol()){
+							//	semanticErrorManager.semanticFatalError("No existe el simbolo " + );							
+							//}
+							//SymbolIF symbol = scopeManager.searchSymbol();
+                      :};
+
+ref ::= IDENTIFICADOR{:
+		
+	  :}
+      | accesoVector; // devuelve una expresion
 
 sentenciaAsignacionSuma ::= ref ASSIGN_SUMA expresion SEMI_COLON;
 

@@ -1,22 +1,23 @@
 package compiler.syntax.nonTerminal;
 
+import es.uned.lsi.compiler.semantic.type.TypeIF;
 
 public class Expresion extends NonTerminal {
 	
-	private String tipo;
+	private TypeIF type;
 	
 	/** 
 	 * @param tipo
 	 */
 	public Expresion() {};
 	
-	public Expresion(String tipo) {
+	public Expresion(TypeIF type) {
 		this();
-		this.tipo = tipo;
+		this.type = type;
 	}
 	
 	public Expresion(Expresion e1) {
-		this.tipo = e1.tipo;
+		this.type = e1.type;
 	}
 	
 	public Expresion(Expresion e1, Expresion e2) {
@@ -24,12 +25,12 @@ public class Expresion extends NonTerminal {
 	}
 
 	
-	public void setTipo(String tipo) {
-		this.tipo = tipo;
+	public void setType(TypeIF type) {
+		this.type = type;
 	}
 
-	public String getTipo() {
-		return tipo;
+	public TypeIF getType() {
+		return type;
 	} 
 	
 //	@Override

@@ -10,6 +10,7 @@ tipo entero vector1[MAX];
 /* VARIABLES */
 entero a, b;
 entero suma;
+entero mayorDiez;
 entero uno = 1;
 entero ocho = 8, tres = 3;
 
@@ -34,7 +35,7 @@ vacio principal () {
 	entero a, b;
 	entero i;
 	suma = funSuma (a, b);
-	mayorDiez = ! (suma < 10);
+	mayorDiez = !(suma < 10);
 	si (mayorDiez == VERDADERO) { escribe ("mayor"); }
 	sino {escribe ("menor");}
 
