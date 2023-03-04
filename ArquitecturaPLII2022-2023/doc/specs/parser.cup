@@ -581,10 +581,9 @@ llamadaFuncion ::= IDENTIFICADOR:id OPEN_KEY parametros:param CLOSE_KEY{:
 				        if(!scopeManager.containsSymbol(id.getLexema())){
 				            semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": La función '" + id.getLexema() + "' no ha sido declarada");
 					    }
-					    SymbolIF symbolFun = scopeManager.searchSymbol(id.getLexema());
 					    
 					    // Verificar orden y tipo del los parametros
-						SymbolFunction sF = (SymbolFunction) symbolFun;
+						SymbolFunction sF = (SymbolFunction) scopeManager.searchSymbol(id.getLexema());
 						
 						if(sF.getParametros().size() == param.getListaExpr().size()){											
 							for(int i = 0; i< sF.getParametros().size(); i++){					
@@ -707,7 +706,13 @@ porDefecto ::= PORDEFECTO TWO_POINTS bloque CORTE SEMI_COLON | epsilon;
 
 sentenciaMientras ::= MIENTRAS OPEN_KEY expresion CLOSE_KEY sentencia;
 
-sentenciaLlamadaFuncion ::= llamadaFuncion SEMI_COLON;
+sentenciaLlamadaFuncion ::= llamadaFuncion:fun SEMI_COLON:sc{:
+								// Verificar que la funcion es de tipo vacio	
+								SymbolIF symbolFun = scopeManager.searchSymbol(fun.getName());
+								if(!(symbolFun.getType() instanceof TypeSimpleVacio)){
+									semanticErrorManager.semanticFatalError("Error en linea " + sc.getLine() + ": La funcion debe ser de tipo vacio");
+								}	
+                          :};
 
 sentenciaSalida ::=ESCRIBE OPEN_KEY opcionesEscribe CLOSE_KEY SEMI_COLON
 	| ESCRIBE_ENT OPEN_KEY opcionesEscribeEnt CLOSE_KEY SEMI_COLON;
