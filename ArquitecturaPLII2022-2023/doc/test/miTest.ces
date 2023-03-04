@@ -36,12 +36,11 @@ vacio principal () {
 	entero a, b;
 	entero i;
 	
-	v[0] = 1; 
-	v[1] = 2; 
-	v[2] = 3;
+	v[0] = 1 + MAX; 
+	/*b = v[a]; */
 	
 	suma = funSuma (a, b);
-	/*mayorDiez = !(suma < 10);*/
+	mayorDiez = !(suma < 10);
 	si (mayorDiez == VERDADERO) { escribe ("mayor"); }
 	sino {escribe ("menor");}
 

@@ -503,25 +503,23 @@ parametro ::= ENTERO IDENTIFICADOR:id{:
 expresion ::= NUMERO{:RESULT = new Expresion(scopeManager.searchType("ENTERO"));:}
             | IDENTIFICADOR:id{:
                 if(!scopeManager.containsSymbol(id.getLexema())){
-                	semanticErrorManager.semanticFatalError("El simbolo " + id.getLexema() + " no ha sido declarado");
+                	semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": No existe " + id.getLexema());
 				}				
 				SymbolIF symbol = scopeManager.searchSymbol(id.getLexema());				
 				RESULT = new Expresion(symbol.getType()); 							
-            :}
-            
+            :}            
 		    | OPEN_KEY expresion:e1 CLOSE_KEY {:
 		    	RESULT = new Expresion(e1.getType()); 
-		    :}
-		        
-			| expresion:e1 PLUS expresion:e2 {:			 	
+		    :}		        
+			| expresion:e1 PLUS:op expresion:e2 {:			 	
 			 	if(!(e1.getType() instanceof TypeSimpleEntero) || !(e2.getType() instanceof TypeSimpleEntero)){
-					semanticErrorManager.semanticFatalError("No se pueden sumar tipos incompatibles");
+					semanticErrorManager.semanticFatalError("Error en linea " + op.getLine() + ": Incompatibilidad de tipos");
 				}				
 				RESULT = new Expresion(e1.getType());
 			:}			 	
-			| expresion:e1 MULT expresion:e2 {:			 	
+			| expresion:e1 MULT:op expresion:e2 {:			 	
 			 	if(!(e1.getType() instanceof TypeSimpleEntero) || !(e2.getType() instanceof TypeSimpleEntero)){
-					semanticErrorManager.semanticFatalError("No se pueden multiplicar tipos incompatibles");
+					semanticErrorManager.semanticFatalError("Error en linea " + op.getLine() + ": Incompatibilidad de tipos");
 				}				
 				RESULT = new Expresion(e1.getType());
 			:}
@@ -529,28 +527,29 @@ expresion ::= NUMERO{:RESULT = new Expresion(scopeManager.searchType("ENTERO"));
 		 		RESULT = new Expresion(e1.getType());
 		 	:}
 		 	| NEGACION expresion:e1{:
-		 		//RESULT = new Expresion(e1.getType());
+		 		RESULT = new Expresion(e1.getType());
 		 	:}
-		 	| expresion:e1 LOWER_THAN expresion:e2{:			 	
+		 	| expresion:e1 LOWER_THAN:op expresion:e2{:			 	
 			 	if(!(e1.getType() instanceof TypeSimpleEntero) || !(e2.getType() instanceof TypeSimpleEntero)){
-					semanticErrorManager.semanticFatalError("No se comparar expresiones de tipos incompatibles");
+					semanticErrorManager.semanticFatalError("Error en linea " + op.getLine() + ": Incompatibilidad de tipos");
 				}
-				RESULT = new Expresion(e1.getType());				
-				
+				RESULT = new Expresion(e1.getType());			
 			:}
-		 	| expresion:e1 EQUAL expresion:e2{:		 		
+		 	| expresion:e1 EQUAL:op expresion:e2{:		 		
 		 		if(!(e1.getType() instanceof TypeSimpleEntero) || !(e2.getType() instanceof TypeSimpleEntero)){
-					semanticErrorManager.semanticFatalError("Tipos incompatibles");
+					semanticErrorManager.semanticFatalError("Error en linea " + op.getLine() + ": Incompatibilidad de tipos");
 				}
 				RESULT = new Expresion(e1.getType());		 	
 		 	:}
-		 	| expresion:e1 AND_LOGICA expresion:e2{:			 	
+		 	| expresion:e1 AND_LOGICA:op expresion:e2{:			 	
 			 	if(!(e1.getType() instanceof TypeSimpleEntero) || !(e2.getType() instanceof TypeSimpleEntero)){
-					semanticErrorManager.semanticFatalError("No se comparar expresiones de tipos incompatibles");
+					semanticErrorManager.semanticFatalError("Error en linea " + op.getLine() + ": Incompatibilidad de tipos");
 				}	
 				RESULT = new Expresion(e1.getType());			
 			:}
-		 	| accesoVector
+		 	| accesoVector{:
+		 	 
+		 	:}
 			| llamadaFuncion:fun{:				
 				SymbolIF symbolFun = scopeManager.searchSymbol(fun.getName());
 				if(!(symbolFun.getType() instanceof TypeSimpleEntero)){
@@ -628,18 +627,18 @@ sentenciaAsignacion ::= ref:r ASSIGN:a expresion:exp SEMI_COLON{:
 							// comprobar si ref existe en el ambito
 							String refName = (String)r;
 							if(!scopeManager.containsSymbol(refName)){
-								semanticErrorManager.semanticFatalError("No existe el simbolo " + refName );							
+								semanticErrorManager.semanticFatalError("Error en linea " + a.getLine() + ": No existe " + refName );							
 							}
 							SymbolIF symbol = scopeManager.searchSymbol(refName);
 							
 							// compatibilidad de tipos de ref y expresion
 							if(!(exp.getType() instanceof TypeSimpleEntero)){
-								semanticErrorManager.semanticFatalError("Incompatibilidad de tipos en linea " + a.getLine());
+								semanticErrorManager.semanticFatalError("Error en linea " + a.getLine() + ": Incompatibilidad de tipos");
 							}
 							
 							// comprobar que ref no es una constante
 							if(symbol instanceof SymbolConstant){
-								semanticErrorManager.semanticFatalError("No se puede modificar el valor de la constante " + refName );
+								semanticErrorManager.semanticFatalError("Error en linea " + a.getLine() + ": No se puede modificar una constante");
 							}
                       :};
 
