@@ -38,6 +38,7 @@ vacio principal () {
 	
 	v[i] = 1 + MAX;  
 	b = v[a]; 
+	a = 2 * funSuma(2,2);
 	
 	suma = funSuma (a, b);
 	mayorDiez = !(suma < 10);

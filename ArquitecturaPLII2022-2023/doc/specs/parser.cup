@@ -546,28 +546,13 @@ expresion ::= NUMERO{:
 		 	| accesoVector:aV{:
 		 	  	RESULT = aV.getExpresion();
 		 	:}
-			| llamadaFuncion:fun{:	
-			
+			| llamadaFuncion:fun{:				
 			    // Verificar que la llamada a la funcion devuelve un tipo	
 				SymbolIF symbolFun = scopeManager.searchSymbol(fun.getName());
 				if(!(symbolFun.getType() instanceof TypeSimpleEntero)){
 					semanticErrorManager.semanticFatalError("Asignacion de tipos incompatibles");
-				}
-				
-				// Verificar orden y tipo del los parametros
-				SymbolFunction sF = (SymbolFunction) symbolFun;
-				
-				if(sF.getParametros().size() == fun.getListaExpr().size()){
-									
-					for(int i = 0; i< sF.getParametros().size(); i++){					
-						if(sF.getParametros().get(i).getType() != fun.getListaExpr().get(i).getType()){
-							semanticErrorManager.semanticFatalError("Error en el tipo de los parámetros en la llamada a " + fun.getName());
-						}
-					}					
-				}else{
-					semanticErrorManager.semanticFatalError("Error en el número de parámetros en la llamada a " + fun.getName());
-				}				
-								
+				}	
+												
 				RESULT = new Expresion(symbolFun.getType());	
 			:};
 
@@ -590,11 +575,34 @@ accesoVector ::= IDENTIFICADOR:id OPEN_BRACKET expresion:expr CLOSE_BRACKET{:
                  	RESULT = new AccesoVector(id.getLexema(), expr);
                :};
 
-llamadaFuncion ::= IDENTIFICADOR:id OPEN_KEY parametros:param CLOSE_KEY{:
-				   	RESULT = new LlamadaFuncion(id.getLexema(), param.getListaExpr()); 	
+llamadaFuncion ::= IDENTIFICADOR:id OPEN_KEY parametros:param CLOSE_KEY{:					
+				        
+				        //Comprobar si existe la funcion referenciada
+				        if(!scopeManager.containsSymbol(id.getLexema())){
+				            semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": La función '" + id.getLexema() + "' no ha sido declarada");
+					    }
+					    SymbolIF symbolFun = scopeManager.searchSymbol(id.getLexema());
+					    
+					    // Verificar orden y tipo del los parametros
+						SymbolFunction sF = (SymbolFunction) symbolFun;
+						
+						if(sF.getParametros().size() == param.getListaExpr().size()){											
+							for(int i = 0; i< sF.getParametros().size(); i++){					
+								if(sF.getParametros().get(i).getType() != param.getListaExpr().get(i).getType()){
+									semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": Error en tipo/orden de los parámetros en '" + id.getLexema() + "'");
+								}
+							}					
+						}else{
+							semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": Error en el número de parámetros en '" + id.getLexema() + "'");
+						}
+					   
+					   RESULT = new LlamadaFuncion(id.getLexema(), param.getListaExpr()); 	
                  :}
 	             | IDENTIFICADOR:id OPEN_KEY CLOSE_KEY{:
-					RESULT = new LlamadaFuncion(id.getLexema()); 
+	             	   if(!scopeManager.containsSymbol(id.getLexema())){
+				          semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": La función '" + id.getLexema() + "' no ha sido declarada");
+					   }
+					   RESULT = new LlamadaFuncion(id.getLexema()); 
                  :};
 	
 	
@@ -612,10 +620,8 @@ parametros ::= expresion:expr{:
 
 bloque ::= OPEN_PARENTHESIS 
 		   {:
-				// Crea ambito del bloque							
+				// Crea ambito del bloque y obtener sus tablas						
 				ScopeIF scope = scopeManager.openScope("bloque");
-					
-				// Obtenemos la tabla de tipos y la de simbolos 
 				SymbolTableIF symbolTable = scope.getSymbolTable();
 				TypeTableIF typeTable = scope.getTypeTable();								
 			:}
@@ -705,5 +711,7 @@ sentenciaLlamadaFuncion ::= llamadaFuncion SEMI_COLON;
 
 sentenciaSalida ::=ESCRIBE OPEN_KEY opcionesEscribe CLOSE_KEY SEMI_COLON
 	| ESCRIBE_ENT OPEN_KEY opcionesEscribeEnt CLOSE_KEY SEMI_COLON;
+	
+	
 opcionesEscribe ::= epsilon | STRING;
 opcionesEscribeEnt ::= epsilon | expresion;
