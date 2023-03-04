@@ -113,7 +113,7 @@ non terminal DeclaracionVariable     declaracionVariable;
 non terminal ListadoIDs			     listadoIDs;
 non terminal Id			             id;
 non terminal Expresion               expresion;
-non terminal  		     accesoVector;
+non terminal AccesoVector 		     accesoVector;
 non terminal LlamadaFuncion		     llamadaFuncion;
 non terminal Bloque			         bloque;
 non terminal ListadoSentencias       listadoSentencias;
@@ -235,13 +235,18 @@ declaracionTipo ::= TIPO ENTERO IDENTIFICADOR:id OPEN_BRACKET tamTipo:tt CLOSE_B
 						ScopeIF scope = scopeManager.getCurrentScope();
 						TypeTableIF tablaTipos = scope.getTypeTable();	
 						String name = id.getLexema();
-							
+						int size = (int)tt;
+						
 						// Comprobar que el tipo no este ya declarado
 						if(scopeManager.containsType(name)){
-							semanticErrorManager.semanticFatalError("Tipo " + name + " ya declarado");													
-						}else{																												
+							semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": Tipo ya declarado");	
+																			
+						}else{								
+							if( size < 1){
+								semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": El tamano de un vector debe ser mayor que 0");
+							}																									
 							// Introducir tipo en tabla de tipos								
-							TypeArray tipoVector = new TypeArray(scope, name, (int)tt);
+							TypeArray tipoVector = new TypeArray(scope, name, size);
 							tablaTipos.addType(name, tipoVector);
 												
 						}
@@ -250,8 +255,7 @@ declaracionTipo ::= TIPO ENTERO IDENTIFICADOR:id OPEN_BRACKET tamTipo:tt CLOSE_B
 tamTipo ::= NUMERO:num {: 
 				RESULT = Integer.parseInt(num.getLexema()); 
 		  :}
-          | IDENTIFICADOR:id {:
-          
+          | IDENTIFICADOR:id {:          
                 // Buscar la constante en el ambito                 
 				SymbolTableIF tablaSimbolos = scopeManager.getCurrentScope().getSymbolTable();
 				String name = id.getLexema();
@@ -509,7 +513,7 @@ expresion ::= NUMERO{:RESULT = new Expresion(scopeManager.searchType("ENTERO"));
 				RESULT = new Expresion(symbol.getType()); 							
             :}            
 		    | OPEN_KEY expresion:e1 CLOSE_KEY {:
-		    	RESULT = new Expresion(e1.getType()); 
+		    	RESULT = e1; 
 		    :}		        
 			| expresion:e1 PLUS:op expresion:e2 {:			 	
 			 	if(!(e1.getType() instanceof TypeSimpleEntero) || !(e2.getType() instanceof TypeSimpleEntero)){
@@ -547,8 +551,8 @@ expresion ::= NUMERO{:RESULT = new Expresion(scopeManager.searchType("ENTERO"));
 				}	
 				RESULT = new Expresion(e1.getType());			
 			:}
-		 	| accesoVector{:
-		 	 
+		 	| accesoVector:aV{:
+		 	  	RESULT = aV.getExpresion();
 		 	:}
 			| llamadaFuncion:fun{:				
 				SymbolIF symbolFun = scopeManager.searchSymbol(fun.getName());
@@ -558,8 +562,22 @@ expresion ::= NUMERO{:RESULT = new Expresion(scopeManager.searchType("ENTERO"));
 				RESULT = new Expresion(symbolFun.getType());	
 			:};
 
-accesoVector ::= IDENTIFICADOR:id OPEN_BRACKET expresion:e1 CLOSE_BRACKET{:
-                 	RESULT = id;
+accesoVector ::= IDENTIFICADOR:id OPEN_BRACKET expresion:expr CLOSE_BRACKET{:
+                 	
+                 	//comprobar que la variable existe y se trata de un vector
+                 	if(!scopeManager.containsSymbol(id.getLexema())){
+						semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": No existe " + id.getLexema());							
+					}
+					
+                 	SymbolIF symbol = scopeManager.searchSymbol(id.getLexema());
+                 	
+                 	if(!(symbol.getType() instanceof TypeArray)){
+                 		semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": " + id.getLexema() + " no es un array");
+                 	}
+                 	
+                 	//comprobar que expresion respeta el rango del vector                					
+                 	
+                 	RESULT = new AccesoVector(id.getLexema(), expr);
                :};
 
 llamadaFuncion ::= IDENTIFICADOR:id OPEN_KEY parametros:param CLOSE_KEY{:
@@ -621,10 +639,7 @@ sentenciaIncremento ::= IDENTIFICADOR AUTO_INCREMENTO SEMI_COLON;
 
 sentenciaAsignacion ::= ref:r ASSIGN:a expresion:exp SEMI_COLON{:
 							
-							// expresion podria incluir una constante
-							// expresion podria ser una variable
-							
-							// comprobar si ref existe en el ambito
+							// comprobar si ref existe 
 							String refName = (String)r;
 							if(!scopeManager.containsSymbol(refName)){
 								semanticErrorManager.semanticFatalError("Error en linea " + a.getLine() + ": No existe " + refName );							
@@ -646,8 +661,7 @@ ref ::= IDENTIFICADOR:id {:
 			RESULT = id.getLexema();
 	  :}
       | accesoVector:aV{:
-      		Token token = (Token)aV;
-      		RESULT = token.getLexema();
+      		RESULT = aV.getName();
       :}; 
 
 sentenciaAsignacionSuma ::= ref ASSIGN_SUMA expresion SEMI_COLON;
