@@ -364,7 +364,7 @@ funcionPrincipal ::= VACIO principal OPEN_KEY CLOSE_KEY OPEN_PARENTHESIS
 						
 						// Crear ambito de la funcion principal y obtener sus tablas						
 						ScopeIF scope = scopeManager.openScope("Funcion principal");							
-						SymbolTableIF tablaSimbolos = scope.getSymbolTable();  // las necesito?
+						SymbolTableIF tablaSimbolos = scope.getSymbolTable();                      // las necesito?
 						TypeTableIF tablaTipos = scope.getTypeTable();		
 						
 																						
@@ -393,24 +393,17 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
             	
 				// Crear ambito de la funcion y obtener sus tablas								
 				ScopeIF scope = scopeManager.openScope("Funcion " + id.getLexema());					
-				SymbolTableIF tablaSimbolos = scope.getSymbolTable(); // las necesito?
+				SymbolTableIF tablaSimbolos = scope.getSymbolTable();                         // las necesito?
 				TypeTableIF tablaTipos = scope.getTypeTable();					
 							
 				
 				//Declaracion de parametros en el ambito de la funcion					
 				DeclaracionParametros listaParam = (DeclaracionParametros)sP;
 				
-				if(listaParam != null){										
-					for(Parametro param : listaParam.getListaParam()){							
-						String paramName = param.getName();
-						String paramType = param.getType();					
-																					
-						if(!scopeManager.containsType(paramType)){
-							semanticErrorManager.semanticFatalError("Tipo del parametro no declarado");
-						}
-											
-						TypeIF tipo = scopeManager.searchType(paramType);  
-						SymbolParameter symbolParameter = new SymbolParameter(scope, paramName, tipo);							
+				if(listaParam != null){						
+					symbolFunction.setParametros(listaParam.getListaParam());									
+					for(Parametro param : listaParam.getListaParam()){					 
+						SymbolParameter symbolParameter = new SymbolParameter(scope, param.getName(), param.getType());							
 						tablaSimbolos.addSymbol(symbolParameter);
 					}
 				}
@@ -440,27 +433,19 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 				
 				// Crea ambito de la funcion y obtener sus tablas									
 				ScopeIF scope = scopeManager.openScope("Funcion " + id.getLexema());					
-				SymbolTableIF tablaSimbolos = scope.getSymbolTable();   // las necesito?
+				SymbolTableIF tablaSimbolos = scope.getSymbolTable();                              // las necesito?
 				TypeTableIF tablaTipos = scope.getTypeTable();
 								
 				//Declaracion de parametros en el ambito de la funcion	
 				DeclaracionParametros listaParam = (DeclaracionParametros)sP;
 				
-				if(listaParam != null){										
+				if(listaParam != null){			
+				    symbolFunction.setParametros(listaParam.getListaParam());								
 					for(Parametro param : listaParam.getListaParam()){							
-						String paramName = param.getName();
-						String paramType = param.getType();					
-																					
-						if(!scopeManager.containsType(paramType)){
-							semanticErrorManager.semanticFatalError("Tipo del parametro no declarado");
-						}
-									
-						TypeIF tipo = scopeManager.searchType(paramType);  
-						SymbolParameter symbolParameter = new SymbolParameter(scope, paramName, tipo);							
+						SymbolParameter symbolParameter = new SymbolParameter(scope, param.getName(), param.getType());							
 						tablaSimbolos.addSymbol(symbolParameter);
 					}				
-				}
-												
+				}											
 			:} 
 			 
 			cuerpoFuncion CLOSE_PARENTHESIS
@@ -491,13 +476,18 @@ declaracionParametros  ::= parametro:param COLON declaracionParametros:listaPara
                          :};
 
 parametro ::= ENTERO IDENTIFICADOR:id{:
-				String name = id.getLexema();						
-				RESULT = new Parametro("ENTERO", name);		    	
+				String name = id.getLexema();	
+				TypeIF tipo = scopeManager.searchType("ENTERO"); 					
+				RESULT = new Parametro(tipo, name);		    	
             :} 
             | IDENTIFICADOR:iden IDENTIFICADOR:id{:
-            	String type = iden.getLexema();	
+            	
+            	if(!scopeManager.containsType(iden.getLexema())){
+					semanticErrorManager.semanticFatalError("Error en linea " + iden.getLine() + ": Tipo de parametro sin declarar");
+				}
+            	TypeIF tipo = scopeManager.searchType(iden.getLexema());
             	String name = id.getLexema();						
-				RESULT = new Parametro(type, name);            
+				RESULT = new Parametro(tipo, name);            
             :};
 
 
@@ -558,7 +548,22 @@ expresion ::= NUMERO{:RESULT = new Expresion(scopeManager.searchType("ENTERO"));
 				SymbolIF symbolFun = scopeManager.searchSymbol(fun.getName());
 				if(!(symbolFun.getType() instanceof TypeSimpleEntero)){
 					semanticErrorManager.semanticFatalError("Asignacion de tipos incompatibles");
+				}
+				
+				//Verificar parametros orden y tipo del los parametros
+				SymbolFunction sF = (SymbolFunction) symbolFun;
+				
+				if(sF.getParametros().size() == fun.getListaExpr().size()){
+					
+					for(int i = 0; i< sF.getParametros().size(); i++){					
+						if(sF.getParametros().get(i).getType() != fun.getListaExpr().get(i).getType()){
+							semanticErrorManager.semanticFatalError("Error en el tipo de los parámetros en la llamada a " + fun.getName());
+						}
+					}					
+				}else{
+					semanticErrorManager.semanticFatalError("Error en el número de parámetros en la llamada a " + fun.getName());
 				}				
+								
 				RESULT = new Expresion(symbolFun.getType());	
 			:};
 
@@ -651,9 +656,12 @@ sentenciaAsignacion ::= ref:r ASSIGN:a expresion:exp SEMI_COLON{:
 								semanticErrorManager.semanticFatalError("Error en linea " + a.getLine() + ": Incompatibilidad de tipos");
 							}
 							
-							// comprobar que ref no es una constante
+							// comprobar que ref no es una constante o una funcion
 							if(symbol instanceof SymbolConstant){
 								semanticErrorManager.semanticFatalError("Error en linea " + a.getLine() + ": No se puede modificar una constante");
+							}							
+							if(symbol instanceof SymbolFunction){
+								semanticErrorManager.semanticFatalError("Error en linea " + a.getLine() + ": No se asignar a una funcion");
 							}
                       :};
 

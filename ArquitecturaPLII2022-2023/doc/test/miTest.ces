@@ -36,7 +36,7 @@ vacio principal () {
 	entero a, b;
 	entero i;
 	
-	v[0] = 1 + MAX; 
+	v = 1 + MAX;  /*Esto deberia dar error, a un vector no se le puede hacer esa asignacion*/
 	b = v[a]; 
 	
 	suma = funSuma (a, b);
