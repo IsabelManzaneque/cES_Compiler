@@ -582,7 +582,7 @@ llamadaFuncion ::= IDENTIFICADOR:id OPEN_KEY parametros:param CLOSE_KEY{:
 				            semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": La función '" + id.getLexema() + "' no ha sido declarada");
 					    }
 					    
-					    // Verificar orden y tipo del los parametros
+					    // Verificar que se corresponden los parametros actuales y formales
 						SymbolFunction sF = (SymbolFunction) scopeManager.searchSymbol(id.getLexema());
 						
 						if(sF.getParametros().size() == param.getListaExpr().size()){											
@@ -634,8 +634,17 @@ bloque ::= OPEN_PARENTHESIS
 cuerpoBloque ::= listadoSentencias
 			   | seccionVariables listadoSentencias;
 
-listadoSentencias ::= listadoSentencias sentencia | sentencia;
-
+listadoSentencias ::= listadoSentencias:listaSent sentencia:sent {:
+						listaSent.add(sent);
+						RESULT = listaSent;
+					:}
+                    | sentencia:sent{:
+                    	ListadoSentencias listaSent = new ListadoSentencias();
+                    	listaSent.add(sent);
+                    	RESULT = listaSent;
+                    :};
+                    
+			 
 sentencia ::= sentenciaDevuelve
 	| sentenciaIncremento
 	| sentenciaAsignacion
@@ -647,15 +656,14 @@ sentencia ::= sentenciaDevuelve
 	| sentenciaSalida
 	| bloque;
 
-sentenciaDevuelve ::= DEVUELVE SEMI_COLON	
+sentenciaDevuelve ::= DEVUELVE SEMI_COLON	// poner una expresion como atributo en su clase 
 	| DEVUELVE expresion SEMI_COLON;
 
 sentenciaIncremento ::= IDENTIFICADOR AUTO_INCREMENTO SEMI_COLON;
 
 sentenciaAsignacion ::= ref:r ASSIGN:a expresion:exp SEMI_COLON{:
 							
-							// ref puede ser una variable o un acceso a vector
-							
+							// ref puede ser una variable o un acceso a vector							
 							if(r instanceof AccesoVector){
 								
 							}else{								
@@ -714,8 +722,8 @@ sentenciaLlamadaFuncion ::= llamadaFuncion:fun SEMI_COLON:sc{:
 								}	
                           :};
 
-sentenciaSalida ::=ESCRIBE OPEN_KEY opcionesEscribe CLOSE_KEY SEMI_COLON
-	| ESCRIBE_ENT OPEN_KEY opcionesEscribeEnt CLOSE_KEY SEMI_COLON;
+sentenciaSalida ::= ESCRIBE OPEN_KEY opcionesEscribe CLOSE_KEY SEMI_COLON
+	              | ESCRIBE_ENT OPEN_KEY opcionesEscribeEnt CLOSE_KEY SEMI_COLON;
 	
 	
 opcionesEscribe ::= epsilon | STRING;
