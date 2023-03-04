@@ -15,6 +15,7 @@ entero uno = 1;
 entero ocho = 8, tres = 3;
 
 vector v0;
+vector v;
 vector1 v1, v2;
 
 
@@ -34,8 +35,13 @@ vacio principal () {
 
 	entero a, b;
 	entero i;
+	
+	v[0] = 1; 
+	v[1] = 2; 
+	v[2] = 3;
+	
 	suma = funSuma (a, b);
-	mayorDiez = !(suma < 10);
+	/*mayorDiez = !(suma < 10);*/
 	si (mayorDiez == VERDADERO) { escribe ("mayor"); }
 	sino {escribe ("menor");}
 
