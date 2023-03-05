@@ -47,6 +47,7 @@ vacio principal () {
 	mayorDiez = !(suma < 10);
 	a +=2;
 	
+	
 	/* Sentencias */	
 	
 	a++;
@@ -64,8 +65,7 @@ vacio principal () {
 	 escribe ("verdadero");
 	}
 	
-	si (a==b) escribe ("iguales");
-	
+	si (a==b) escribe ("iguales");	
 	
 	alternativas (dia){
 	 caso 1: {escribe("lunes");} corte;
@@ -75,6 +75,13 @@ vacio principal () {
 	 } corte;
 	 pordefecto: {escribe ("no es lunes ni martes");} corte;
 	}
+	
+	mientras (a<5){
+	 a=a+1;
+	 escribeEnt(a);
+	}
+	
+	mientras (a<5) a=a+1;
 
 devuelve;
 

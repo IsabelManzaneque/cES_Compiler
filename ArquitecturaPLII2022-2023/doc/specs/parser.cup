@@ -651,8 +651,8 @@ sentencia ::= sentenciaDevuelve: sentDevl {: RESULT = sentDevl; :}
 	        | sentenciaAsignacionSuma:sentAsignSum {: RESULT = sentAsignSum; :}
 	        | sentenciaSi:sentSi {: RESULT = sentSi; :}
 	        | sentenciaAlternativas:sentAlt {: RESULT = sentAlt; :}
-	        | sentenciaMientras
-	        | sentenciaLlamadaFuncion
+	        | sentenciaMientras:sentMien {: RESULT = sentMien; :}
+	        | sentenciaLlamadaFuncion:sentLlamFun {: RESULT = sentLlamFun; :}
 	        | sentenciaSalida
 	        | bloque;
 
@@ -782,7 +782,13 @@ porDefecto ::= PORDEFECTO TWO_POINTS bloque:blq CORTE SEMI_COLON{:
 			 :}
              | epsilon; 
 
-sentenciaMientras ::= MIENTRAS OPEN_KEY expresion CLOSE_KEY sentencia;
+sentenciaMientras ::= MIENTRAS OPEN_KEY expresion:expr CLOSE_KEY sentencia:sent{:
+							
+							//comprobar la expresion. Se evalua como falsa si es 0 y verdadera si es distinto de 0
+							SentenciaMientras sentM = new SentenciaMientras(expr,sent);
+							RESULT = sentM;
+
+                    :};
 
 sentenciaLlamadaFuncion ::= llamadaFuncion:fun SEMI_COLON:sc{:
 								// Verificar que la funcion es de tipo vacio	
@@ -790,6 +796,9 @@ sentenciaLlamadaFuncion ::= llamadaFuncion:fun SEMI_COLON:sc{:
 								if(!(symbolFun.getType() instanceof TypeSimpleVacio)){
 									semanticErrorManager.semanticFatalError("Error en linea " + sc.getLine() + ": La funcion debe ser de tipo vacio");
 								}	
+								
+								SentenciaLlamadaFuncion sentLlamFun = new SentenciaLlamadaFuncion(fun);
+								RESULT = sentLlamFun;
                           :};
 
 sentenciaSalida ::= ESCRIBE OPEN_KEY opcionesEscribe CLOSE_KEY SEMI_COLON
