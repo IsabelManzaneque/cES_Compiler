@@ -657,9 +657,26 @@ sentencia ::= sentenciaDevuelve
 	| bloque;
 
 sentenciaDevuelve ::= DEVUELVE SEMI_COLON	// poner una expresion como atributo en su clase 
-	| DEVUELVE expresion SEMI_COLON;
+	                | DEVUELVE expresion SEMI_COLON;
 
-sentenciaIncremento ::= IDENTIFICADOR AUTO_INCREMENTO SEMI_COLON;
+sentenciaIncremento ::= IDENTIFICADOR:id AUTO_INCREMENTO SEMI_COLON{:
+							// comprobar identificador ref existe 
+							if(!scopeManager.containsSymbol(id.getLexema())){
+								semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": El simbolo '" + id.getLexema() + "' no ha sido declarado");							
+							}
+							
+							// comprobar que identificadpr es de un tipo que se puede autoincrementar
+							SymbolIF symbol = scopeManager.searchSymbol(id.getLexema());			
+							if(symbol instanceof SymbolConstant){
+								semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": No es posible modificar una constante");
+							}							
+							if(symbol instanceof SymbolFunction){
+								semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": No es posible autoincrementar a una funcion");
+							}
+							if(symbol.getType() instanceof TypeArray){
+								semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": No es posible autoincrementar vector");
+							}
+					  :};
 
 sentenciaAsignacion ::= ref:r ASSIGN:a expresion:exp SEMI_COLON{:
 							
@@ -717,14 +734,18 @@ ref ::= IDENTIFICADOR:id {:
       :}; 
 
 
+// puede contener una sentencia que puede ser un bloque con llaves
+// si no hay llaves, es una sola sentencia y no se abre ambito
 
 sentenciaSi ::= SI OPEN_KEY expresion CLOSE_KEY sentencia SINO sentencia
-	 | SI OPEN_KEY expresion CLOSE_KEY sentencia;
+	          | SI OPEN_KEY expresion CLOSE_KEY sentencia;
 	
 sentenciaAlternativas ::= ALTENATIVAS OPEN_KEY expresion CLOSE_KEY OPEN_PARENTHESIS casosAlternativa porDefecto CLOSE_PARENTHESIS;
+
 casosAlternativa ::= casosAlternativa casoAlt | casoAlt;
 
 casoAlt ::= CASO NUMERO TWO_POINTS bloque CORTE SEMI_COLON;
+
 porDefecto ::= PORDEFECTO TWO_POINTS bloque CORTE SEMI_COLON | epsilon; 
 
 sentenciaMientras ::= MIENTRAS OPEN_KEY expresion CLOSE_KEY sentencia;

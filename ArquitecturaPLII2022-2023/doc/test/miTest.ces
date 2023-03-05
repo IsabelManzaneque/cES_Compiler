@@ -32,21 +32,38 @@ vacio escribeEntero (entero x) {
 }
 
 vacio principal () {
-
+	
+	/* Declaraciones */
 	entero a, b;
 	entero i;
 	
+	/* Asignaciones */
 	v[i] = 1 + MAX;  
 	b = v[a]; 
+	b = v[a++];
 	a = 2 * funSuma(2,2);
-	a +=2;
-	
-	escribeEntero(2);
-	
 	suma = funSuma (a, b);
 	mayorDiez = !(suma < 10);
+	a +=2;
+	
+	/* Sentencias */	
+	
+	a++;
+	
+	escribeEntero(2);	
+
 	si (mayorDiez == VERDADERO) { escribe ("mayor"); }
 	sino {escribe ("menor");}
+	
+	si (a==0){
+	 escribe ("es");
+	 escribe ("falso");
+	} sino {
+	 escribe ("es");
+	 escribe ("verdadero");
+	}
+	
+	si (a==b) escribe ("iguales");
 
 devuelve;
 
