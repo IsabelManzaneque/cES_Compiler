@@ -136,7 +136,7 @@ non terminal 		 opcionesEscribeEnt;
 non terminal SentenciaDevuelve		 sentenciaDevuelve;
 
 non terminal cuerpoFuncion;
-non terminal cuerpoBloque;
+non terminal CuerpoBloque cuerpoBloque;
 
 // Declaracion de relaciones de precedencia
 precedence left 	OPEN_KEY, CLOSE_KEY;
@@ -624,15 +624,24 @@ bloque ::= OPEN_PARENTHESIS
 				SymbolTableIF symbolTable = scope.getSymbolTable();
 				TypeTableIF typeTable = scope.getTypeTable();								
 			:}
-			cuerpoBloque CLOSE_PARENTHESIS
+			cuerpoBloque:cBlq CLOSE_PARENTHESIS
 			{:			
+				
 				//cerrar ambito 
 				ScopeIF scope = scopeManager.getCurrentScope();
-				scopeManager.closeScope();				
+				scopeManager.closeScope();	
+				
+				Bloque blq = new Bloque(cBlq);
+				RESULT = blq;				
+							
 			:};    	 
 
-cuerpoBloque ::= listadoSentencias
-			   | seccionVariables listadoSentencias;
+cuerpoBloque ::= listadoSentencias:lS{:
+					RESULT = new CuerpoBloque(lS);
+			   :}
+			   | seccionVariables:sV listadoSentencias:lS{:
+					RESULT = new CuerpoBloque(lS,sV);
+			   :};
 
 listadoSentencias ::= listadoSentencias:listaSent sentencia:sent {:
 						listaSent.add(sent);
@@ -653,8 +662,8 @@ sentencia ::= sentenciaDevuelve: sentDevl {: RESULT = sentDevl; :}
 	        | sentenciaAlternativas:sentAlt {: RESULT = sentAlt; :}
 	        | sentenciaMientras:sentMien {: RESULT = sentMien; :}
 	        | sentenciaLlamadaFuncion:sentLlamFun {: RESULT = sentLlamFun; :}
-	        | sentenciaSalida
-	        | bloque;
+	        | sentenciaSalida:sentSld {: RESULT = sentSld; :}
+	        | bloque:blq {: RESULT = blq; :};
 
 sentenciaDevuelve ::= DEVUELVE SEMI_COLON{:						 
 						 RESULT = new SentenciaDevuelve();					  

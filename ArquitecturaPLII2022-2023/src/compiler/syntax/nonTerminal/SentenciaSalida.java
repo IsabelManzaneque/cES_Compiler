@@ -1,6 +1,6 @@
 package compiler.syntax.nonTerminal;
 
-public class SentenciaSalida extends NonTerminal {
+public class SentenciaSalida extends Sentencia {
 	
 	private String opcionEscribe;
 	private Expresion opcionEscribeEntero;
