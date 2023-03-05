@@ -36,6 +36,7 @@ vacio principal () {
 	/* Declaraciones */
 	entero a, b;
 	entero i;
+	entero dia = 1;
 	
 	/* Asignaciones */
 	v[i] = 1 + MAX;  
@@ -64,6 +65,16 @@ vacio principal () {
 	}
 	
 	si (a==b) escribe ("iguales");
+	
+	
+	alternativas (dia){
+	 caso 1: {escribe("lunes");} corte;
+	 caso 2: {
+	 escribe("es ");
+	 escribe("martes");
+	 } corte;
+	 pordefecto: {escribe ("no es lunes ni martes");} corte;
+	}
 
 devuelve;
 

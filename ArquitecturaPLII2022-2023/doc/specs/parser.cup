@@ -650,7 +650,7 @@ sentencia ::= sentenciaDevuelve: sentDevl {: RESULT = sentDevl; :}
 	        | sentenciaAsignacion:sentAsign {: RESULT = sentAsign; :}
 	        | sentenciaAsignacionSuma:sentAsignSum {: RESULT = sentAsignSum; :}
 	        | sentenciaSi:sentSi {: RESULT = sentSi; :}
-	        | sentenciaAlternativas
+	        | sentenciaAlternativas:sentAlt {: RESULT = sentAlt; :}
 	        | sentenciaMientras
 	        | sentenciaLlamadaFuncion
 	        | sentenciaSalida
@@ -739,7 +739,7 @@ ref ::= IDENTIFICADOR:id {:
 
 sentenciaSi ::= SI OPEN_KEY expresion:expr CLOSE_KEY sentencia:sSi SINO sentencia:sSino{:
 					
-					//comprobar la expresion para saber que sentencia ejecutar
+					//comprobar la expresion. Se evalua como falsa si es 0 y verdadera si es distinto de 0
 					
 					SentenciaSi sentSi = new SentenciaSi(expr, sSi, sSino);
 					RESULT = sentSi;			
@@ -747,20 +747,40 @@ sentenciaSi ::= SI OPEN_KEY expresion:expr CLOSE_KEY sentencia:sSi SINO sentenci
 			  :}
 	          | SI OPEN_KEY expresion:expr CLOSE_KEY sentencia:sSi{:
 	          		
-	          		//comprobar la expresion 
+	          		//comprobar la expresion. Se evalua como falsa si es 0 y verdadera si es distinto de 0
 					
 					SentenciaSi sentSi = new SentenciaSi(expr, sSi, null);
 					RESULT = sentSi;
 	          
 	          :};
 	
-sentenciaAlternativas ::= ALTENATIVAS OPEN_KEY expresion CLOSE_KEY OPEN_PARENTHESIS casosAlternativa porDefecto CLOSE_PARENTHESIS;
+sentenciaAlternativas ::= ALTENATIVAS OPEN_KEY expresion:expr CLOSE_KEY OPEN_PARENTHESIS casosAlternativa:casosA porDefecto:porD CLOSE_PARENTHESIS{:
+								
+								SentenciaAlternativas sentAlt = new SentenciaAlternativas(expr, casosA, porD);
+								RESULT = sentAlt;
+						:};
 
-casosAlternativa ::= casosAlternativa casoAlt | casoAlt;
 
-casoAlt ::= CASO NUMERO TWO_POINTS bloque CORTE SEMI_COLON;
 
-porDefecto ::= PORDEFECTO TWO_POINTS bloque CORTE SEMI_COLON | epsilon; 
+casosAlternativa ::= casosAlternativa:casosA casoAlt:casoA{:						
+						casosA.add(casoA);
+						RESULT = casosA;
+				   :}
+                   | casoAlt:casoA{:
+                   		CasosAlternativa casosA = new CasosAlternativa();
+                   		casosA.add(casoA);
+                   		RESULT = casosA;
+                   :};
+
+casoAlt ::= CASO NUMERO:num TWO_POINTS bloque:blq CORTE SEMI_COLON{:					
+				int numero = Integer.parseInt(num.getLexema());
+				RESULT = new CasoAlt(numero,blq);
+          :};
+
+porDefecto ::= PORDEFECTO TWO_POINTS bloque:blq CORTE SEMI_COLON{:			   		
+			   		RESULT = new PorDefecto(blq);
+			 :}
+             | epsilon; 
 
 sentenciaMientras ::= MIENTRAS OPEN_KEY expresion CLOSE_KEY sentencia;
 

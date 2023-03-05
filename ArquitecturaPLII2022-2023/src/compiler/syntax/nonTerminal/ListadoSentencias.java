@@ -8,6 +8,7 @@ public class ListadoSentencias extends NonTerminal {
 	private Boolean devuelve;
 	
 	public ListadoSentencias() {
+		super();
 		this.listaSentencias = new ArrayList<>();
 		this.devuelve = false;
 	}
