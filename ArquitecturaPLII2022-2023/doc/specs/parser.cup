@@ -131,8 +131,8 @@ non terminal SentenciaMientras		 sentenciaMientras;
 non terminal SentenciaLlamadaFuncion sentenciaLlamadaFuncion;
 non terminal Parametros			     parametros;
 non terminal SentenciaSalida         sentenciaSalida;
-non terminal OpcionesEscribe         opcionesEscribe;
-non terminal OpcionesEscribeEnt		 opcionesEscribeEnt;
+non terminal         opcionesEscribe;
+non terminal 		 opcionesEscribeEnt;
 non terminal SentenciaDevuelve		 sentenciaDevuelve;
 
 non terminal cuerpoFuncion;
@@ -787,7 +787,6 @@ sentenciaMientras ::= MIENTRAS OPEN_KEY expresion:expr CLOSE_KEY sentencia:sent{
 							//comprobar la expresion. Se evalua como falsa si es 0 y verdadera si es distinto de 0
 							SentenciaMientras sentM = new SentenciaMientras(expr,sent);
 							RESULT = sentM;
-
                     :};
 
 sentenciaLlamadaFuncion ::= llamadaFuncion:fun SEMI_COLON:sc{:
@@ -801,9 +800,24 @@ sentenciaLlamadaFuncion ::= llamadaFuncion:fun SEMI_COLON:sc{:
 								RESULT = sentLlamFun;
                           :};
 
-sentenciaSalida ::= ESCRIBE OPEN_KEY opcionesEscribe CLOSE_KEY SEMI_COLON
-	              | ESCRIBE_ENT OPEN_KEY opcionesEscribeEnt CLOSE_KEY SEMI_COLON;
+sentenciaSalida ::= ESCRIBE OPEN_KEY opcionesEscribe:opEsc CLOSE_KEY SEMI_COLON{:
+							
+							SentenciaSalida sentSld = new SentenciaSalida();	
+							if(opEsc != null){
+								sentSld.setOpcionEscribe((String)opEsc);								
+							}
+							RESULT = sentSld;
+						
+                  :}
+	              | ESCRIBE_ENT OPEN_KEY opcionesEscribeEnt:opEscEnt CLOSE_KEY SEMI_COLON{:
+	              			
+	              			SentenciaSalida sentSld = new SentenciaSalida();
+	              			if(opEscEnt != null){
+								sentSld.setOpcionEscribeEntero((Expresion)opEscEnt);								
+							}
+							RESULT = sentSld;
+                  :};
 	
 	
-opcionesEscribe ::= epsilon | STRING;
-opcionesEscribeEnt ::= epsilon | expresion;
+opcionesEscribe ::= epsilon | STRING:str {: RESULT = str.getLexema(); :};
+opcionesEscribeEnt ::= epsilon | expresion:expr {: RESULT = expr; :};
