@@ -649,7 +649,7 @@ sentencia ::= sentenciaDevuelve: sentDevl {: RESULT = sentDevl; :}
   	        | sentenciaIncremento:sentIncrm {: RESULT = sentIncrm; :}
 	        | sentenciaAsignacion:sentAsign {: RESULT = sentAsign; :}
 	        | sentenciaAsignacionSuma:sentAsignSum {: RESULT = sentAsignSum; :}
-	        | sentenciaSi
+	        | sentenciaSi:sentSi {: RESULT = sentSi; :}
 	        | sentenciaAlternativas
 	        | sentenciaMientras
 	        | sentenciaLlamadaFuncion
@@ -737,8 +737,22 @@ ref ::= IDENTIFICADOR:id {:
 // puede contener una sentencia que puede ser un bloque con llaves
 // si no hay llaves, es una sola sentencia y no se abre ambito
 
-sentenciaSi ::= SI OPEN_KEY expresion CLOSE_KEY sentencia SINO sentencia
-	          | SI OPEN_KEY expresion CLOSE_KEY sentencia;
+sentenciaSi ::= SI OPEN_KEY expresion:expr CLOSE_KEY sentencia:sSi SINO sentencia:sSino{:
+					
+					//comprobar la expresion para saber que sentencia ejecutar
+					
+					SentenciaSi sentSi = new SentenciaSi(expr, sSi, sSino);
+					RESULT = sentSi;			
+						
+			  :}
+	          | SI OPEN_KEY expresion:expr CLOSE_KEY sentencia:sSi{:
+	          		
+	          		//comprobar la expresion 
+					
+					SentenciaSi sentSi = new SentenciaSi(expr, sSi, null);
+					RESULT = sentSi;
+	          
+	          :};
 	
 sentenciaAlternativas ::= ALTENATIVAS OPEN_KEY expresion CLOSE_KEY OPEN_PARENTHESIS casosAlternativa porDefecto CLOSE_PARENTHESIS;
 

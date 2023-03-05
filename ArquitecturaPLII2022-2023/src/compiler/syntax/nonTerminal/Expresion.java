@@ -5,6 +5,7 @@ import es.uned.lsi.compiler.semantic.type.TypeIF;
 public class Expresion extends NonTerminal {
 	
 	private TypeIF type;
+	private int value;
 	
 	/** 
 	 * @param tipo
@@ -23,7 +24,6 @@ public class Expresion extends NonTerminal {
 	public Expresion(Expresion e1, Expresion e2) {
 		this();
 	}
-
 	
 	public void setType(TypeIF type) {
 		this.type = type;
@@ -31,7 +31,17 @@ public class Expresion extends NonTerminal {
 
 	public TypeIF getType() {
 		return type;
+	}
+
+	public int getValue() {
+		return value;
+	}
+
+	public void setValue(int value) {
+		this.value = value;
 	} 
+	
+	
 	
 //	@Override
 //	public int compareTo(Expresion e) {		
