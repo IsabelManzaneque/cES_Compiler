@@ -270,8 +270,16 @@ tamTipo ::= NUMERO:num {:
 
 //  VARIABLES
 
-seccionVariables ::= seccionVariables declaracionVariable 
-	               | declaracionVariable;
+
+seccionVariables ::= seccionVariables:secVar declaracionVariable:decVar{:
+						secVar.add(decVar);
+						RESULT = secVar;
+				   :}
+	               | declaracionVariable:decVar{:
+	               		SeccionVariables secVar = new SeccionVariables();
+	               		secVar.add(decVar);
+	               		RESULT = secVar;
+				   :};
 		
 declaracionVariable ::= ENTERO listadoIDs:listaId SEMI_COLON{:
 							
@@ -632,8 +640,7 @@ bloque ::= OPEN_PARENTHESIS
 				scopeManager.closeScope();	
 				
 				Bloque blq = new Bloque(cBlq);
-				RESULT = blq;				
-							
+				RESULT = blq;								
 			:};    	 
 
 cuerpoBloque ::= listadoSentencias:lS{:
