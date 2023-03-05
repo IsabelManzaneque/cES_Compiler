@@ -550,7 +550,7 @@ expresion ::= NUMERO{:
 			    // Verificar que la llamada a la funcion devuelve un tipo	
 				SymbolIF symbolFun = scopeManager.searchSymbol(fun.getName());
 				if(!(symbolFun.getType() instanceof TypeSimpleEntero)){
-					semanticErrorManager.semanticFatalError("Asignacion de tipos incompatibles");
+					semanticErrorManager.semanticFatalError("La funcion '" + fun.getName() + "' debe devolver un tipo");
 				}	
 												
 				RESULT = new Expresion(symbolFun.getType());	
@@ -567,7 +567,7 @@ accesoVector ::= IDENTIFICADOR:id OPEN_BRACKET expresion:expr CLOSE_BRACKET{:
                  	SymbolIF symbol = scopeManager.searchSymbol(id.getLexema());
                  	
                  	if(!(symbol.getType() instanceof TypeArray)){
-                 		semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": " + id.getLexema() + " no es un array");
+                 		semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": '" + id.getLexema() + "' no es un array");
                  	}
                  	
                  	//comprobar que expresion respeta el rango del vector                					
@@ -666,42 +666,57 @@ sentenciaAsignacion ::= ref:r ASSIGN:a expresion:exp SEMI_COLON{:
 							// ref puede ser una variable o un acceso a vector							
 							if(r instanceof AccesoVector){
 								
-							}else{								
-								// comprobar si ref existe 
-								String refName = (String)r;
-								if(!scopeManager.containsSymbol(refName)){
-									semanticErrorManager.semanticFatalError("Error en linea " + a.getLine() + ": El simbolo '" + refName + "' no ha sido declarado");							
-								}
-								SymbolIF symbol = scopeManager.searchSymbol(refName);	
-								
-								// comprobar que ref no es una constante o una funcion
-								if(symbol instanceof SymbolConstant){
-									semanticErrorManager.semanticFatalError("Error en linea " + a.getLine() + ": No es posible modificar una constante");
-								}							
-								if(symbol instanceof SymbolFunction){
-									semanticErrorManager.semanticFatalError("Error en linea " + a.getLine() + ": No es posible asignar a una funcion");
-								}
-								if(symbol.getType() instanceof TypeArray){
-									semanticErrorManager.semanticFatalError("Error en linea " + a.getLine() + ": No es posible hacer asignacion directa a vector");
-								}							
+							}else{													
 								
 							}							
 							
-							// El lado derecho de la asignacion debe ser de tipo entero
+							// El lado derecho de la asignacion debe ser de tipo entero  ME LO DETECTA EXPRESION
 							if(!(exp.getType() instanceof TypeSimpleEntero)){
 								semanticErrorManager.semanticFatalError("Error en linea " + a.getLine() + ": Incompatibilidad de tipos");
 							}						
                       :};
                       
+sentenciaAsignacionSuma ::= ref:r ASSIGN_SUMA:as expresion:exp SEMI_COLON{:
+							
+								// ref puede ser una variable o un acceso a vector							
+								if(r instanceof AccesoVector){
+									
+								}else{													
+									
+								}							
+								
+								// El lado derecho de la asignacion debe ser de tipo entero  ME LO DETECTA EXPRESION
+								if(!(exp.getType() instanceof TypeSimpleEntero)){
+									semanticErrorManager.semanticFatalError("Error en linea " + as.getLine() + ": Incompatibilidad de tipos");
+								}						
+	                      :};
+
 
 ref ::= IDENTIFICADOR:id {:
+			// comprobar si ref existe 
+			if(!scopeManager.containsSymbol(id.getLexema())){
+				semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": El simbolo '" + id.getLexema() + "' no ha sido declarado");							
+			}
+			
+			// comprobar que ref es de un tipo asignable
+			SymbolIF symbol = scopeManager.searchSymbol(id.getLexema());			
+			if(symbol instanceof SymbolConstant){
+				semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": No es posible modificar una constante");
+			}							
+			if(symbol instanceof SymbolFunction){
+				semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": No es posible asignar a una funcion");
+			}
+			if(symbol.getType() instanceof TypeArray){
+				semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": No es posible hacer asignacion directa a vector");
+			}	
+			
 			RESULT = id.getLexema();
 	  :}
       | accesoVector:aV{:
       		RESULT = aV;
       :}; 
 
-sentenciaAsignacionSuma ::= ref ASSIGN_SUMA expresion SEMI_COLON;
+
 
 sentenciaSi ::= SI OPEN_KEY expresion CLOSE_KEY sentencia SINO sentencia
 	 | SI OPEN_KEY expresion CLOSE_KEY sentencia;
