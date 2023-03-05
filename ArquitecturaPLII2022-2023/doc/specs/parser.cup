@@ -120,7 +120,7 @@ non terminal ListadoSentencias       listadoSentencias;
 non terminal Sentencia			     sentencia;
 non terminal SentenciaIncremento     sentenciaIncremento;
 non terminal SentenciaAsignacion     sentenciaAsignacion;
-non terminal  			         ref;
+non terminal Ref			         ref;
 non terminal SentenciaAsignacionSuma sentenciaAsignacionSuma;
 non terminal SentenciaSi			 sentenciaSi;
 non terminal SentenciaAlternativas   sentenciaAlternativas;
@@ -645,19 +645,23 @@ listadoSentencias ::= listadoSentencias:listaSent sentencia:sent {:
                     :};
                     
 			 
-sentencia ::= sentenciaDevuelve
-	| sentenciaIncremento
-	| sentenciaAsignacion
-	| sentenciaAsignacionSuma
-	| sentenciaSi
-	| sentenciaAlternativas
-	| sentenciaMientras
-	| sentenciaLlamadaFuncion
-	| sentenciaSalida
-	| bloque;
+sentencia ::= sentenciaDevuelve: sentDevl {: RESULT = sentDevl; :}
+  	        | sentenciaIncremento:sentIncrm {: RESULT = sentIncrm; :}
+	        | sentenciaAsignacion:sentAsign {: RESULT = sentAsign; :}
+	        | sentenciaAsignacionSuma:sentAsignSum {: RESULT = sentAsignSum; :}
+	        | sentenciaSi
+	        | sentenciaAlternativas
+	        | sentenciaMientras
+	        | sentenciaLlamadaFuncion
+	        | sentenciaSalida
+	        | bloque;
 
-sentenciaDevuelve ::= DEVUELVE SEMI_COLON	// poner una expresion como atributo en su clase 
-	                | DEVUELVE expresion SEMI_COLON;
+sentenciaDevuelve ::= DEVUELVE SEMI_COLON{:						 
+						 RESULT = new SentenciaDevuelve();					  
+					:}
+	                | DEVUELVE expresion:expr SEMI_COLON{:						 
+						 RESULT = new SentenciaDevuelve(expr);					  
+					:};
 
 sentenciaIncremento ::= IDENTIFICADOR:id AUTO_INCREMENTO SEMI_COLON{:
 							// comprobar identificador ref existe 
@@ -676,36 +680,32 @@ sentenciaIncremento ::= IDENTIFICADOR:id AUTO_INCREMENTO SEMI_COLON{:
 							if(symbol.getType() instanceof TypeArray){
 								semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": No es posible autoincrementar vector");
 							}
+							
+							SentenciaIncremento sentIncrm = new SentenciaIncremento(id.getLexema());
+							RESULT = sentIncrm;
 					  :};
 
-sentenciaAsignacion ::= ref:r ASSIGN:a expresion:exp SEMI_COLON{:
-							
-							// ref puede ser una variable o un acceso a vector							
-							if(r instanceof AccesoVector){
-								
-							}else{													
-								
-							}							
-							
-							// El lado derecho de la asignacion debe ser de tipo entero  ME LO DETECTA EXPRESION
+sentenciaAsignacion ::= ref:r ASSIGN:a expresion:exp SEMI_COLON{:							
+														
+							// El lado derecho de la asignacion debe ser de tipo entero  
 							if(!(exp.getType() instanceof TypeSimpleEntero)){
 								semanticErrorManager.semanticFatalError("Error en linea " + a.getLine() + ": Incompatibilidad de tipos");
-							}						
+							}
+							
+							SentenciaAsignacion sentAsign = new SentenciaAsignacion(r,exp);
+							RESULT = sentAsign;						
+													
                       :};
                       
-sentenciaAsignacionSuma ::= ref:r ASSIGN_SUMA:as expresion:exp SEMI_COLON{:
-							
-								// ref puede ser una variable o un acceso a vector							
-								if(r instanceof AccesoVector){
-									
-								}else{													
-									
-								}							
+sentenciaAsignacionSuma ::= ref:r ASSIGN_SUMA:as expresion:exp SEMI_COLON{:															
 								
-								// El lado derecho de la asignacion debe ser de tipo entero  ME LO DETECTA EXPRESION
+								// El lado derecho de la asignacion debe ser de tipo entero  
 								if(!(exp.getType() instanceof TypeSimpleEntero)){
 									semanticErrorManager.semanticFatalError("Error en linea " + as.getLine() + ": Incompatibilidad de tipos");
-								}						
+								}	
+								
+								SentenciaAsignacionSuma sentAsignSum = new SentenciaAsignacionSuma(r,exp);
+								RESULT = sentAsignSum;					
 	                      :};
 
 
@@ -727,10 +727,10 @@ ref ::= IDENTIFICADOR:id {:
 				semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": No es posible hacer asignacion directa a vector");
 			}	
 			
-			RESULT = id.getLexema();
+			RESULT = new Ref(id.getLexema());
 	  :}
       | accesoVector:aV{:
-      		RESULT = aV;
+      		RESULT = new Ref(aV);
       :}; 
 
 
