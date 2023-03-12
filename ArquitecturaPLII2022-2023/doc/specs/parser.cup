@@ -135,7 +135,7 @@ non terminal         opcionesEscribe;
 non terminal 		 opcionesEscribeEnt;
 non terminal SentenciaDevuelve		 sentenciaDevuelve;
 
-non terminal cuerpoFuncion;
+non terminal CuerpoFuncion cuerpoFuncion;
 non terminal CuerpoBloque cuerpoBloque;
 
 // Declaracion de relaciones de precedencia
@@ -202,10 +202,16 @@ axiom ::= seccionConstantes seccionTipos seccionVariables seccionFunciones
  
 //  CONSTANTES
 
-seccionConstantes ::= declaracionConstante seccionConstantes | epsilon;
+seccionConstantes ::= declaracionConstante:decConst seccionConstantes:secConst{:
+						  if(secConst != null){					     
+						  	secConst.add(decConst);		
+						  }			  
+						  RESULT = secConst;
+                    :}
+                    | epsilon;
 epsilon ::= ;
 
-declaracionConstante ::= CONSTANTE IDENTIFICADOR:id NUMERO:value SEMI_COLON{:
+declaracionConstante ::= CONSTANTE IDENTIFICADOR:id NUMERO:value SEMI_COLON{:  	      		 	
 							
 							// Obtener ambito actual y tablas de simbolos y tipos 
 							ScopeIF scope = scopeManager.getCurrentScope();
@@ -216,20 +222,29 @@ declaracionConstante ::= CONSTANTE IDENTIFICADOR:id NUMERO:value SEMI_COLON{:
 							// Comprobar que la constante no este ya declarada
 							if(tablaSimbolos.containsSymbol(name)){
 								semanticErrorManager.semanticFatalError("Constante " + name + " ya declarada");								
-							}else{														
-								// Introduce constante en tabla de simbolos	
-								TypeIF tipo = scopeManager.searchType("ENTERO");  
-								SymbolConstant symbolConstant = new SymbolConstant(scope, name, tipo);
-								symbolConstant.setValue(value.getLexema()); 
-								tablaSimbolos.addSymbol(symbolConstant);								
-							}
+							}	
+																				
+							// Introduce constante en tabla de simbolos	
+							TypeIF tipo = scopeManager.searchType("ENTERO");  
+							SymbolConstant symbolConstant = new SymbolConstant(scope, name, tipo);
+							symbolConstant.setValue(value.getLexema()); 
+							tablaSimbolos.addSymbol(symbolConstant);	
+							
+							RESULT = new DeclaracionConstante(symbolConstant);							
+							
 					   :};
 
 //  TIPOS 
 
-seccionTipos ::= declaracionTipo seccionTipos | epsilon;
+seccionTipos ::= declaracionTipo:decTip seccionTipos:secTip{:	
+					if(secTip != null){			
+						secTip.add(decTip); 
+					}        
+					RESULT = secTip;
+               :} 
+               | epsilon;
 
-declaracionTipo ::= TIPO ENTERO IDENTIFICADOR:id OPEN_BRACKET tamTipo:tt CLOSE_BRACKET SEMI_COLON {:			      		 		
+declaracionTipo ::= TIPO ENTERO IDENTIFICADOR:id OPEN_BRACKET tamTipo:tt CLOSE_BRACKET SEMI_COLON {:		      		 		
 							
 						// Obtener ambito actual y tablas de simbolos y tipos  
 						ScopeIF scope = scopeManager.getCurrentScope();
@@ -237,19 +252,19 @@ declaracionTipo ::= TIPO ENTERO IDENTIFICADOR:id OPEN_BRACKET tamTipo:tt CLOSE_B
 						String name = id.getLexema();
 						int size = (int)tt;
 						
-						// Comprobar que el tipo no este ya declarado
+						// Comprobar que el tipo no este ya declarado y el tamano sea mayor que 0
 						if(scopeManager.containsType(name)){
-							semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": Tipo ya declarado");	
-																			
-						}else{								
-							if( size < 1){
-								semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": El tamano de un vector debe ser mayor que 0");
-							}																									
-							// Introducir tipo en tabla de tipos								
-							TypeArray tipoVector = new TypeArray(scope, name, size);
-							tablaTipos.addType(name, tipoVector);
-												
-						}
+							semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": Tipo ya declarado");																				
+						}								
+						if( size < 1){
+							semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": El tamano de un vector debe ser mayor que 0");
+						}	
+																														
+						// Introducir tipo en tabla de tipos								
+						TypeArray tipoVector = new TypeArray(scope, name, size);
+						tablaTipos.addType(name, tipoVector);
+							
+						RESULT = new DeclaracionTipo(tipoVector);							
 					:}; 
 
 tamTipo ::= NUMERO:num {: 
@@ -281,7 +296,7 @@ seccionVariables ::= seccionVariables:secVar declaracionVariable:decVar{:
 	               		RESULT = secVar;
 				   :};
 		
-declaracionVariable ::= ENTERO listadoIDs:listaId SEMI_COLON{:
+declaracionVariable ::= ENTERO listadoIDs:listaId SEMI_COLON{:  
 							
 							// Obtener ambito actual y tabla de simbolos
 							ScopeIF scope = scopeManager.getCurrentScope();
@@ -294,13 +309,16 @@ declaracionVariable ::= ENTERO listadoIDs:listaId SEMI_COLON{:
 								int idValue = id.getValue();
 								
 								if(tablaSimbolos.containsSymbol(idName)){
-									semanticErrorManager.semanticFatalError("Variable " + idName + " ya declarada");								
-								}else{										
-									TypeIF tipo = scopeManager.searchType("ENTERO");  
-									SymbolVariable symbolVariable = new SymbolVariable(scope, idName, tipo);
-									symbolVariable.setValue(idValue); 
-									tablaSimbolos.addSymbol(symbolVariable);
-								}
+									semanticErrorManager.semanticFatalError("Variable '" + idName + "' ya declarada");								
+								}	
+																	
+								TypeIF tipo = scopeManager.searchType("ENTERO");  
+								SymbolVariable symbolVariable = new SymbolVariable(scope, idName, tipo);
+								symbolVariable.setValue(idValue); 
+								tablaSimbolos.addSymbol(symbolVariable);
+								
+								RESULT = new DeclaracionVariable(symbolVariable);
+								
 							}					
 					   :}
 					   
@@ -318,15 +336,17 @@ declaracionVariable ::= ENTERO listadoIDs:listaId SEMI_COLON{:
 								String idName = id.getName();
 																								
 								if(tablaSimbolos.containsSymbol(idName)){
-									semanticErrorManager.semanticFatalError("Variable " + idName + " ya declarada");								
-								}else{									
-									if(!scopeManager.containsType(type)){
-										semanticErrorManager.semanticFatalError("Tipo no declarado");
-									}									
-									TypeIF tipo = scopeManager.searchType(type);  
-									SymbolVariable symbolVariable = new SymbolVariable(scope, idName, tipo);							
-									tablaSimbolos.addSymbol(symbolVariable);
-								}
+									semanticErrorManager.semanticFatalError("Variable '" + idName + "' ya declarada");								
+								}																	
+								if(!scopeManager.containsType(type)){
+									semanticErrorManager.semanticFatalError("Tipo '" + type + "' no declarado");
+								}	
+																
+								TypeIF tipo = scopeManager.searchType(type);  
+								SymbolVariable symbolVariable = new SymbolVariable(scope, idName, tipo);							
+								tablaSimbolos.addSymbol(symbolVariable);
+								
+								RESULT = new DeclaracionVariable(symbolVariable);
 							}					
 					   :};
 
@@ -355,7 +375,12 @@ id ::= IDENTIFICADOR:id{:
 // Se han modificado las producciones de la funcion principal y las funciones para que
 // ambas uilicen el no terminal "cuerpoFuncion" y asi evitar conflictos
 
-seccionFunciones ::= funcion seccionFunciones | funcionPrincipal;
+seccionFunciones ::= funcion:fun seccionFunciones:secFun{:
+
+                   :}
+                   | funcionPrincipal{:
+                   
+                   :};
 
 funcionPrincipal ::= VACIO principal OPEN_KEY CLOSE_KEY OPEN_PARENTHESIS                      
                      {:	
@@ -373,17 +398,17 @@ funcionPrincipal ::= VACIO principal OPEN_KEY CLOSE_KEY OPEN_PARENTHESIS
 						// Crear ambito de la funcion principal y obtener sus tablas						
 						ScopeIF scope = scopeManager.openScope("Funcion principal");							
 						SymbolTableIF tablaSimbolos = scope.getSymbolTable();                      // las necesito?
-						TypeTableIF tablaTipos = scope.getTypeTable();		
-						
-																						
+						TypeTableIF tablaTipos = scope.getTypeTable();																								
 				  	 :} 
 				  	 
-				  	 cuerpoFuncion CLOSE_PARENTHESIS 
-				  	 
+				  	 cuerpoFuncion:cFunc CLOSE_PARENTHESIS 				  	 
 				  	 {:			
 						//cerrar ambito 
 						ScopeIF scope = scopeManager.getCurrentScope();
-						scopeManager.closeScope();				
+						scopeManager.closeScope();	
+						
+						FuncionPrincipal funP = new FuncionPrincipal(cFunc);
+						RESULT = funP;			
 					 :};
 
 funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN_PARENTHESIS
@@ -418,12 +443,15 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 													
 			:} 
 			 
-			cuerpoFuncion CLOSE_PARENTHESIS
+			cuerpoFuncion:cFunc CLOSE_PARENTHESIS
 			
 			{:			
 				//cerrars ambito 
 				ScopeIF scope = scopeManager.getCurrentScope();
-				scopeManager.closeScope();				
+				scopeManager.closeScope();	
+				
+				Funcion fun = new Funcion(cFunc);
+			    RESULT = fun;			
 			:}
 			 
 	      | VACIO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN_PARENTHESIS 
@@ -456,17 +484,24 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 				}											
 			:} 
 			 
-			cuerpoFuncion CLOSE_PARENTHESIS
+			cuerpoFuncion:cFunc CLOSE_PARENTHESIS
 			
 			{:			
 				//cerrar ambito 
 				ScopeIF scope = scopeManager.getCurrentScope();
-				scopeManager.closeScope();				
+				scopeManager.closeScope();		
+				
+				Funcion fun = new Funcion(cFunc);
+			    RESULT = fun;		
 			:};
 			
-
-cuerpoFuncion ::= seccionTipos listadoSentencias
-                | seccionTipos seccionVariables listadoSentencias;
+			   
+cuerpoFuncion ::= seccionTipos:sT listadoSentencias:lS{:
+					RESULT = new CuerpoFuncion(sT,lS);
+                :}
+                | seccionTipos:sT seccionVariables:sV listadoSentencias:lS{:
+                	RESULT = new CuerpoFuncion(sT,sV,lS);
+                :};
                 
 seccionParametros ::= declaracionParametros:listaParam{:						
 						RESULT = listaParam;						

@@ -9,11 +9,11 @@ tipo entero vector1[MAX];
 
 /* VARIABLES */
 entero a, b;
+entero x;
 entero suma;
 entero mayorDiez;
 entero uno = 1;
 entero ocho = 8, tres = 3;
-
 vector v0;
 vector v;
 vector1 v1, v2;

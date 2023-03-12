@@ -2,8 +2,8 @@ package compiler.syntax.nonTerminal;
 
 public class CuerpoBloque extends NonTerminal {
 	
-	ListadoSentencias listadoSentencias;
-	SeccionVariables seccionVariables;
+	private ListadoSentencias listadoSentencias;
+	private SeccionVariables seccionVariables;
 	
 	public CuerpoBloque() {
 		super();

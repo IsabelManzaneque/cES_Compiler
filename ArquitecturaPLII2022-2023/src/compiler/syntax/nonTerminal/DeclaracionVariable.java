@@ -1,26 +1,25 @@
 package compiler.syntax.nonTerminal;
 
+import compiler.semantic.symbol.SymbolVariable;
+
 public class DeclaracionVariable extends NonTerminal {
 	
-	private int value;
-	private String type;
+	private SymbolVariable symbolVariable;
+
+	public DeclaracionVariable(SymbolVariable symbolVariable) {
+		super();
+		this.symbolVariable = symbolVariable;
+	}
+
+	public SymbolVariable getSymbolVariable() {
+		return symbolVariable;
+	}
+
+	public void setSymbolVariable(SymbolVariable symbolVariable) {
+		this.symbolVariable = symbolVariable;
+	}
 	
-	/**
-	 * @param value
-	 * @param type
-	 */
-	public DeclaracionVariable(int value, String type) {
-		this.value = value;
-		this.type = type;
-	}
-
-	public int getValue() {
-		return value;
-	}
-
-	public String getType() {
-		return type;
-	} 	
+		
 	
 
 }

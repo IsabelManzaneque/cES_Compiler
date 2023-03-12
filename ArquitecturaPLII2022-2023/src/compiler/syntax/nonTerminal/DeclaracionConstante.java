@@ -1,26 +1,26 @@
 package compiler.syntax.nonTerminal;
 
+import compiler.semantic.symbol.SymbolConstant;
+import es.uned.lsi.compiler.semantic.type.TypeIF;
+
 public class DeclaracionConstante extends NonTerminal {
 	
-	private String valor;
-	private String tipo;  
-	
-	/**
-	 * @param valor
-	 * @param tipo
-	 */
-	public DeclaracionConstante(String valor, String tipo) {
-		this.valor = valor;
-		this.tipo = tipo;
+	private SymbolConstant symbolConstant;
+
+	public DeclaracionConstante(SymbolConstant symbolConstant) {
+		super();
+		this.symbolConstant = symbolConstant;
 	}
 
-	public String getValor() {
-		return valor;
+	public SymbolConstant getSymbolConstant() {
+		return symbolConstant;
 	}
 
-	public String getTipo() {
-		return tipo;
+	public void setSymbolConstant(SymbolConstant symbolConstant) {
+		this.symbolConstant = symbolConstant;
 	}
 	
 	
+	
+		
 }
