@@ -286,8 +286,9 @@ tamTipo ::= NUMERO:num {:
 				RESULT = Integer.parseInt(c.getValue());					
           :};
 
-//  VARIABLES
 
+
+//  VARIABLES
 
 seccionVariables ::= seccionVariables:secVar declaracionVariable:decVar{:
 						secVar.add(decVar);
@@ -299,54 +300,46 @@ seccionVariables ::= seccionVariables:secVar declaracionVariable:decVar{:
 	               		RESULT = secVar;
 				   :};
 		
-declaracionVariable ::= ENTERO listadoIDs:listaId SEMI_COLON{:  
+declaracionVariable ::= ENTERO listadoIDs:listaId SEMI_COLON:sc{:  
 							
 							// Obtener ambito actual y tabla de simbolos
 							ScopeIF scope = scopeManager.getCurrentScope();
 							SymbolTableIF tablaSimbolos = scope.getSymbolTable();
 							
 							// Anadir cada identificador a tabla de simbolos							
-							for(Id id : listaId.getListaIds()){
-								
-								String idName = id.getName();
-								int idValue = id.getValue();
-								
-								if(tablaSimbolos.containsSymbol(idName)){
-									semanticErrorManager.semanticFatalError("Variable '" + idName + "' ya declarada");								
+							for(Id id : listaId.getListaIds()){								
+												
+								if(tablaSimbolos.containsSymbol(id.getName())){
+									semanticErrorManager.semanticFatalError("Error en linea " + sc.getLine() + ": variable '" + id.getName() + "' ya declarada");								
 								}	
 																	
 								TypeIF tipo = scopeManager.searchType("ENTERO");  
-								SymbolVariable symbolVariable = new SymbolVariable(scope, idName, tipo);
-								symbolVariable.setValue(idValue); 
+								SymbolVariable symbolVariable = new SymbolVariable(scope, id.getName(), tipo);
+								symbolVariable.setValue(id.getValue()); 
 								tablaSimbolos.addSymbol(symbolVariable);
 								
-								RESULT = new DeclaracionVariable(symbolVariable);
-								
+								RESULT = new DeclaracionVariable(symbolVariable);								
 							}					
 					   :}
 					   
- 	                  | IDENTIFICADOR:iden listadoIDs:listaId SEMI_COLON{:
+ 	                  | IDENTIFICADOR:iden listadoIDs:listaId SEMI_COLON:sc{:
 							
 							// Obtener ambito actual y tabla de simbolos 
 							ScopeIF scope = scopeManager.getCurrentScope();
 							SymbolTableIF tablaSimbolos = scope.getSymbolTable();				
 							
-							String type = iden.getLexema();
-							
 							// Anadir cada identificador a tabla de simbolos
 							for(Id id : listaId.getListaIds()){
-								
-								String idName = id.getName();
 																								
-								if(tablaSimbolos.containsSymbol(idName)){
-									semanticErrorManager.semanticFatalError("Variable '" + idName + "' ya declarada");								
+								if(tablaSimbolos.containsSymbol(id.getName())){
+									semanticErrorManager.semanticFatalError("Error en linea " + sc.getLine() + ": variable '" + id.getName() + "' ya declarada");								
 								}																	
-								if(!scopeManager.containsType(type)){
-									semanticErrorManager.semanticFatalError("Tipo '" + type + "' no declarado");
+								if(!scopeManager.containsType(iden.getLexema())){
+									semanticErrorManager.semanticFatalError("Error en linea " + sc.getLine() + ": tipo '" + iden.getLexema() + "' no declarado");
 								}	
 																
-								TypeIF tipo = scopeManager.searchType(type);  
-								SymbolVariable symbolVariable = new SymbolVariable(scope, idName, tipo);							
+								TypeIF tipo = scopeManager.searchType(iden.getLexema());  
+								SymbolVariable symbolVariable = new SymbolVariable(scope, id.getName(), tipo);							
 								tablaSimbolos.addSymbol(symbolVariable);
 								
 								RESULT = new DeclaracionVariable(symbolVariable);

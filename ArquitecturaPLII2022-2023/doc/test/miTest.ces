@@ -86,9 +86,11 @@ vacio principal () {
 	sino {escribe ("menor");}
 	
 	si (a==0){
+	 entero a;
 	 escribe ("es");
 	 escribe ("falso");
 	} sino {
+	 entero varSino = 66;
 	 escribe ("es");
 	 escribe ("verdadero");
 	}
