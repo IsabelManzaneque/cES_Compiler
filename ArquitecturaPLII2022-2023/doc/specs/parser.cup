@@ -196,16 +196,20 @@ initAxiom ::= {:
 				scopeManager.closeScope();				
 		      :};
 
-axiom ::= seccionConstantes seccionTipos seccionVariables seccionFunciones
-        | seccionConstantes seccionTipos seccionFunciones;
- 
+axiom ::= seccionConstantes:sC seccionTipos:sT seccionVariables:sV seccionFunciones:sF{:
+			//sC.getListaConstantes().forEach((n) -> System.out.println(n));
+		:}
+        | seccionConstantes:sC seccionTipos:sT seccionFunciones:sF{:
+        	//sC.getListaConstantes().forEach((n) -> System.out.println(n));
+		:};
  
 //  CONSTANTES
 
 seccionConstantes ::= declaracionConstante:decConst seccionConstantes:secConst{:
-						  if(secConst != null){					     
-						  	secConst.add(decConst);		
-						  }			  
+						  if(secConst == null){							    			     
+						  	secConst = new SeccionConstantes();		
+						  }
+						  secConst.add(decConst);				  
 						  RESULT = secConst;
                     :}
                     | epsilon;
@@ -398,7 +402,7 @@ funcionPrincipal ::= VACIO principal OPEN_KEY CLOSE_KEY OPEN_PARENTHESIS
 						
 						// Crear ambito de la funcion principal y obtener sus tablas						
 						ScopeIF scope = scopeManager.openScope("Funcion principal");							
-						SymbolTableIF tablaSimbolos = scope.getSymbolTable();                      // las necesito?
+						SymbolTableIF tablaSimbolos = scope.getSymbolTable();                      
 						TypeTableIF tablaTipos = scope.getTypeTable();																								
 				  	 :} 
 				  	 
@@ -433,12 +437,10 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
             	
 				// Crear ambito de la funcion y obtener sus tablas								
 				ScopeIF scope = scopeManager.openScope("Funcion " + id.getLexema());					
-				SymbolTableIF tablaSimbolos = scope.getSymbolTable();                         // las necesito?
-				TypeTableIF tablaTipos = scope.getTypeTable();					
-							
+				SymbolTableIF tablaSimbolos = scope.getSymbolTable();                        
+				TypeTableIF tablaTipos = scope.getTypeTable();							
 				
-				//Declaracion de parametros en el ambito de la funcion					
-								
+				//Declaracion de parametros en el ambito de la funcion								
 				if(sP != null){							
 					symbolFunction.setParametros(sP.getDeclaracionParametros().getListaParam());									
 					for(Parametro param : sP.getDeclaracionParametros().getListaParam()){					 
@@ -480,11 +482,10 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 				
 				// Crea ambito de la funcion y obtener sus tablas									
 				ScopeIF scope = scopeManager.openScope("Funcion " + id.getLexema());					
-				SymbolTableIF tablaSimbolos = scope.getSymbolTable();                              // las necesito?
+				SymbolTableIF tablaSimbolos = scope.getSymbolTable();                             
 				TypeTableIF tablaTipos = scope.getTypeTable();
 								
-				//Declaracion de parametros en el ambito de la funcion	
-				
+				//Declaracion de parametros en el ambito de la funcion					
 				if(sP != null){								
 				    symbolFunction.setParametros(sP.getDeclaracionParametros().getListaParam());								
 					for(Parametro param : sP.getDeclaracionParametros().getListaParam()){							
@@ -708,8 +709,7 @@ listadoSentencias ::= listadoSentencias:listaSent sentencia:sent {:
 								listaSent.setDevuelve(true);
 								listaSent.setTipoDevuelto(sentDevuelve.getExpresion().getType());
 							}
-						}
-						
+						}						
 						listaSent.add(sent);
 						RESULT = listaSent;
 					:}
@@ -722,8 +722,7 @@ listadoSentencias ::= listadoSentencias:listaSent sentencia:sent {:
 								listaSent.setDevuelve(true);
 								listaSent.setTipoDevuelto(sentDevuelve.getExpresion().getType());
 							}
-						}
-												
+						}												
                     	listaSent.add(sent);
                     	RESULT = listaSent;
                     :};

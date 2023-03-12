@@ -20,6 +20,9 @@ public class DeclaracionTipo extends NonTerminal {
 		this.typeArray = typeArray;
 	}
 	
-	
+	@Override
+	public String toString() {		
+		return "name: " + typeArray.getName() + ", size: " + typeArray.getSize();
+	} 
 
 }

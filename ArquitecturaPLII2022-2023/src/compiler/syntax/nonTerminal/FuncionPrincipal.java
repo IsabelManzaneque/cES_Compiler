@@ -38,7 +38,11 @@ public class FuncionPrincipal extends NonTerminal {
 	public void setCuerpoFuncion(CuerpoFuncion cuerpoFuncion) {
 		this.cuerpoFuncion = cuerpoFuncion;
 	}
-
+	
+	@Override
+	public String toString() {		
+		return "name: " + name + ", type: " + type.getName();
+	}
 		
 	
 }

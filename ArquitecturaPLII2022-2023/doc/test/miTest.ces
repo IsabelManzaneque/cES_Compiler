@@ -3,9 +3,11 @@
 #constante FALSO 0;
 #constante MAX 10;
 
+
 /* TIPOS COMPUESTOS */ 
 tipo entero vector[3];
 tipo entero vector1[MAX];
+
 
 /* VARIABLES */
 entero a, b;
@@ -18,16 +20,33 @@ vector v0;
 vector v;
 vector1 v1, v2;
 
+/* FUNCIONES */
 
 entero funSuma (entero x, entero y) {
+
+	/*variables locales*/
 	entero i;
 	entero suma;
+	
+	/*sentencias*/
 	suma = x + y;
+	suma = funSuma(i,suma);
+	
 	devuelve suma;
+	
 }
 
 vacio escribeEntero (entero x) {
+	
+	/*variables*/
+	entero nueve = 9;
+	entero fS;
+		
+	/*sentencias*/
+	fS = funSuma(x,nueve);
 	escribeEnt (x);
+	escribeEntero(9);
+	
 	devuelve;
 }
 

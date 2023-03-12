@@ -30,7 +30,7 @@ public class Parametro extends NonTerminal {
 	
 	@Override
 	public String toString() {		
-		return type.getName() + " " + name;
+		return "name: " + name + ", type: " + type.getName();
 	} 
 	
 

@@ -29,6 +29,12 @@ public class Id extends NonTerminal {
 		return value;
 	}
 	
+	
+	@Override
+	public String toString() {		
+		return "name: " + name + ", value: " + value;
+	}
+	
 		
 
 }

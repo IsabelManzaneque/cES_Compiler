@@ -1,7 +1,6 @@
 package compiler.syntax.nonTerminal;
 
 import compiler.semantic.symbol.SymbolConstant;
-import es.uned.lsi.compiler.semantic.type.TypeIF;
 
 public class DeclaracionConstante extends NonTerminal {
 	
@@ -20,7 +19,10 @@ public class DeclaracionConstante extends NonTerminal {
 		this.symbolConstant = symbolConstant;
 	}
 	
-	
+	@Override
+	public String toString() {		
+		return "name: " + symbolConstant.getName() + ", type: " + symbolConstant.getType() + ", value: " + symbolConstant.getValue();
+	} 
 	
 		
 }

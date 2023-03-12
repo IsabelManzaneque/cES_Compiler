@@ -19,7 +19,10 @@ public class DeclaracionVariable extends NonTerminal {
 		this.symbolVariable = symbolVariable;
 	}
 	
-		
+	@Override
+	public String toString() {		
+		return "name: " + symbolVariable.getName() + ", type: " + symbolVariable.getType() + ", value: " + symbolVariable.getValue();
+	}
 	
 
 }
