@@ -100,7 +100,7 @@ non terminal FuncionPrincipal        funcionPrincipal;
 non terminal Epsilon   			     epsilon;
 non terminal SeccionFunciones        seccionFunciones;
 non terminal Funcion 			     funcion;
-non terminal                	     seccionParametros;
+non terminal SeccionParametros	     seccionParametros;
 non terminal DeclaracionParametros   declaracionParametros;
 non terminal Parametro			     parametro;
 non terminal SeccionConstantes	     seccionConstantes;
@@ -433,11 +433,10 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 							
 				
 				//Declaracion de parametros en el ambito de la funcion					
-				DeclaracionParametros listaParam = (DeclaracionParametros)sP;
-				
-				if(listaParam != null){						
-					symbolFunction.setParametros(listaParam.getListaParam());									
-					for(Parametro param : listaParam.getListaParam()){					 
+								
+				if(sP != null){							
+					symbolFunction.setParametros(sP.getDeclaracionParametros().getListaParam());									
+					for(Parametro param : sP.getDeclaracionParametros().getListaParam()){					 
 						SymbolParameter symbolParameter = new SymbolParameter(scope, param.getName(), param.getType());							
 						tablaSimbolos.addSymbol(symbolParameter);
 					}
@@ -452,7 +451,8 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 				ScopeIF scope = scopeManager.getCurrentScope();
 				scopeManager.closeScope();	
 				
-				Funcion fun = new Funcion(cFunc);
+				TypeIF tipo = scopeManager.searchType("ENTERO");
+				Funcion fun = new Funcion(tipo,id.getLexema(),sP,cFunc);
 			    RESULT = fun;			
 			:}
 			 
@@ -475,11 +475,10 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 				TypeTableIF tablaTipos = scope.getTypeTable();
 								
 				//Declaracion de parametros en el ambito de la funcion	
-				DeclaracionParametros listaParam = (DeclaracionParametros)sP;
 				
-				if(listaParam != null){			
-				    symbolFunction.setParametros(listaParam.getListaParam());								
-					for(Parametro param : listaParam.getListaParam()){							
+				if(sP != null){								
+				    symbolFunction.setParametros(sP.getDeclaracionParametros().getListaParam());								
+					for(Parametro param : sP.getDeclaracionParametros().getListaParam()){							
 						SymbolParameter symbolParameter = new SymbolParameter(scope, param.getName(), param.getType());							
 						tablaSimbolos.addSymbol(symbolParameter);
 					}				
@@ -493,7 +492,8 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 				ScopeIF scope = scopeManager.getCurrentScope();
 				scopeManager.closeScope();		
 				
-				Funcion fun = new Funcion(cFunc);
+				TypeIF tipo = scopeManager.searchType("VACIO");
+				Funcion fun = new Funcion(tipo,id.getLexema(),sP,cFunc);
 			    RESULT = fun;		
 			:};
 			
@@ -505,8 +505,8 @@ cuerpoFuncion ::= seccionTipos:sT listadoSentencias:lS{:
                 	RESULT = new CuerpoFuncion(sT,sV,lS);
                 :};
                 
-seccionParametros ::= declaracionParametros:listaParam{:						
-						RESULT = listaParam;						
+seccionParametros ::= declaracionParametros:decParam{:						
+						RESULT = new SeccionParametros(decParam);						
 			        :} 
 			        | epsilon;
 
