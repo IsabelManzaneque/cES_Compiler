@@ -403,7 +403,12 @@ funcionPrincipal ::= VACIO principal OPEN_KEY CLOSE_KEY OPEN_PARENTHESIS
 				  	 :} 
 				  	 
 				  	 cuerpoFuncion:cFunc CLOSE_PARENTHESIS 				  	 
-				  	 {:			
+				  	 {:		
+				  	 	
+				  	 	if(cFunc.getListadoSentencias().getDevuelve()){
+							semanticErrorManager.semanticFatalError("Error: La funcion principal no debe devolver una expresión");
+						}	
+						
 						//cerrar ambito 
 						ScopeIF scope = scopeManager.getCurrentScope();
 						scopeManager.closeScope();	
@@ -440,14 +445,18 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 						SymbolParameter symbolParameter = new SymbolParameter(scope, param.getName(), param.getType());							
 						tablaSimbolos.addSymbol(symbolParameter);
 					}
-				}
-													
+				}													
 			:} 
 			 
 			cuerpoFuncion:cFunc CLOSE_PARENTHESIS
 			
-			{:			
-				//cerrars ambito 
+			{:		
+				if(!cFunc.getListadoSentencias().getDevuelve() ||
+				   !(cFunc.getListadoSentencias().getTipoDevuelto() instanceof TypeSimpleEntero)){
+					semanticErrorManager.semanticFatalError("Error: La funcion de tipo entero '" +id.getLexema()+"' debe devolver una expresión de tipo entero");
+				}
+				
+				//cerrar ambito 
 				ScopeIF scope = scopeManager.getCurrentScope();
 				scopeManager.closeScope();	
 				
@@ -485,9 +494,13 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 				}											
 			:} 
 			 
-			cuerpoFuncion:cFunc CLOSE_PARENTHESIS
-			
+			cuerpoFuncion:cFunc CLOSE_PARENTHESIS			
 			{:			
+				
+				if(cFunc.getListadoSentencias().getDevuelve()){
+					semanticErrorManager.semanticFatalError("Error: La funcion de tipo vacio '" +id.getLexema()+"' no debe devolver una expresión");
+				}
+				
 				//cerrar ambito 
 				ScopeIF scope = scopeManager.getCurrentScope();
 				scopeManager.closeScope();		
@@ -688,11 +701,29 @@ cuerpoBloque ::= listadoSentencias:lS{:
 			   :};
 
 listadoSentencias ::= listadoSentencias:listaSent sentencia:sent {:
+						
+						if(sent instanceof SentenciaDevuelve){
+							SentenciaDevuelve sentDevuelve = (SentenciaDevuelve)sent;
+							if(sentDevuelve.getExpresion() != null){
+								listaSent.setDevuelve(true);
+								listaSent.setTipoDevuelto(sentDevuelve.getExpresion().getType());
+							}
+						}
+						
 						listaSent.add(sent);
 						RESULT = listaSent;
 					:}
                     | sentencia:sent{:
                     	ListadoSentencias listaSent = new ListadoSentencias();
+                    	
+                    	if(sent instanceof SentenciaDevuelve){
+							SentenciaDevuelve sentDevuelve = (SentenciaDevuelve)sent;
+							if(sentDevuelve.getExpresion() != null){
+								listaSent.setDevuelve(true);
+								listaSent.setTipoDevuelto(sentDevuelve.getExpresion().getType());
+							}
+						}
+												
                     	listaSent.add(sent);
                     	RESULT = listaSent;
                     :};
