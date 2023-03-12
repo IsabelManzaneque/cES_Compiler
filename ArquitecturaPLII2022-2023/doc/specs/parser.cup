@@ -276,13 +276,11 @@ tamTipo ::= NUMERO:num {:
           | IDENTIFICADOR:id {:          
                 // Buscar la constante en el ambito                 
 				SymbolTableIF tablaSimbolos = scopeManager.getCurrentScope().getSymbolTable();
-				String name = id.getLexema();
-				
-				if(!scopeManager.containsSymbol(name)){
-					semanticErrorManager.semanticFatalError("No existe la constante");
+				if(!scopeManager.containsSymbol(id.getLexema())){
+					semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": No existe la constante '" + id.getLexema() + "'");
 				}
 				
-				SymbolConstant c = (SymbolConstant)scopeManager.searchSymbol(name);
+				SymbolConstant c = (SymbolConstant)scopeManager.searchSymbol(id.getLexema());
 				RESULT = Integer.parseInt(c.getValue());					
           :};
 
@@ -346,7 +344,7 @@ declaracionVariable ::= ENTERO listadoIDs:listaId SEMI_COLON:sc{:
 							}					
 					   :};
 
-listadoIDs ::= id:id  COLON listadoIDs:listaId {:			   		
+listadoIDs ::= id:id COLON listadoIDs:listaId {:			   		
 			   		listaId.add(id);
 			   		RESULT = listaId;
 			 :}			 			 
@@ -366,6 +364,8 @@ id ::= IDENTIFICADOR:id{:
 			RESULT = new Id(name, value);					
      :};
 
+
+
 // FUNCIONES
 
 // Se han modificado las producciones de la funcion principal y las funciones para que
@@ -379,8 +379,8 @@ seccionFunciones ::= funcion:fun seccionFunciones:secFun{:
                    		RESULT = new SeccionFunciones(funP);                  
                    :};
 
-funcionPrincipal ::= VACIO principal OPEN_KEY CLOSE_KEY OPEN_PARENTHESIS                      
-                     {:	
+funcionPrincipal ::= VACIO principal OPEN_KEY CLOSE_KEY OPEN_PARENTHESIS{:	
+
                      	//Declarar funcion principal en tabla de tipos y simbolos global                     	
                         ScopeIF globalScope = scopeManager.getCurrentScope();
                      	SymbolTableIF globalTablaSimbolos = globalScope.getSymbolTable();
@@ -398,8 +398,7 @@ funcionPrincipal ::= VACIO principal OPEN_KEY CLOSE_KEY OPEN_PARENTHESIS
 						TypeTableIF tablaTipos = scope.getTypeTable();																								
 				  	 :} 
 				  	 
-				  	 cuerpoFuncion:cFunc CLOSE_PARENTHESIS 				  	 
-				  	 {:		
+				  	 cuerpoFuncion:cFunc CLOSE_PARENTHESIS {:		
 				  	 	
 				  	 	if(cFunc.getListadoSentencias().getDevuelve()){
 							semanticErrorManager.semanticFatalError("Error: La funcion principal no debe devolver una expresión");
@@ -442,9 +441,8 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 				}													
 			:} 
 			 
-			cuerpoFuncion:cFunc CLOSE_PARENTHESIS
-			
-			{:		
+			cuerpoFuncion:cFunc CLOSE_PARENTHESIS {:	
+				
 				if(!cFunc.getListadoSentencias().getDevuelve() ||
 				   !(cFunc.getListadoSentencias().getTipoDevuelto() instanceof TypeSimpleEntero)){
 					semanticErrorManager.semanticFatalError("Error: La funcion de tipo entero '" +id.getLexema()+"' debe devolver una expresión de tipo entero");
@@ -459,8 +457,8 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 			    RESULT = fun;			
 			:}
 			 
-	      | VACIO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN_PARENTHESIS 
-	        {:
+	      | VACIO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN_PARENTHESIS {:
+	      
 	        	//Declarar funcion en tabla de tipos y tabla de simbolos global  	        	               	
                 ScopeIF globalScope = scopeManager.getCurrentScope();
                 SymbolTableIF globalTablaSimbolos = globalScope.getSymbolTable();
@@ -487,8 +485,7 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 				}											
 			:} 
 			 
-			cuerpoFuncion:cFunc CLOSE_PARENTHESIS			
-			{:			
+			cuerpoFuncion:cFunc CLOSE_PARENTHESIS {:			
 				
 				if(cFunc.getListadoSentencias().getDevuelve()){
 					semanticErrorManager.semanticFatalError("Error: La funcion de tipo vacio '" +id.getLexema()+"' no debe devolver una expresión");
@@ -526,19 +523,16 @@ declaracionParametros  ::= parametro:param COLON declaracionParametros:listaPara
                          		RESULT = listaParam;                         
                          :};
 
-parametro ::= ENTERO IDENTIFICADOR:id{:
-				String name = id.getLexema();	
-				TypeIF tipo = scopeManager.searchType("ENTERO"); 					
-				RESULT = new Parametro(tipo, name);		    	
+parametro ::= ENTERO IDENTIFICADOR:id{:	
+		          TypeIF tipo = scopeManager.searchType("ENTERO"); 					
+				  RESULT = new Parametro(tipo, id.getLexema());		    	
             :} 
-            | IDENTIFICADOR:iden IDENTIFICADOR:id{:
-            	
-            	if(!scopeManager.containsType(iden.getLexema())){
-					semanticErrorManager.semanticFatalError("Error en linea " + iden.getLine() + ": Tipo de parametro sin declarar");
-				}
-            	TypeIF tipo = scopeManager.searchType(iden.getLexema());
-            	String name = id.getLexema();						
-				RESULT = new Parametro(tipo, name);            
+            | IDENTIFICADOR:iden IDENTIFICADOR:id {:            	
+            	  if(!scopeManager.containsType(iden.getLexema())){
+					  semanticErrorManager.semanticFatalError("Error en linea " + iden.getLine() + ": Tipo de parametro sin declarar");
+				  }
+            	  TypeIF tipo = scopeManager.searchType(iden.getLexema());					
+				  RESULT = new Parametro(tipo, id.getLexema());            
             :};
 
 

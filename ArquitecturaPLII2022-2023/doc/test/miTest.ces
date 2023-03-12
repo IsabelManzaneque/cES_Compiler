@@ -29,11 +29,12 @@ entero funSuma (entero x, entero y) {
 	
 	/*variables locales*/
 	entero i;
+	vectorFunSuma v3;
 	entero suma;
 	
 	/*sentencias*/
 	suma = x + y;
-	suma = funSuma(i,suma);
+	suma = funSuma(i,v3[2]);
 	
 	devuelve suma;
 	
@@ -54,6 +55,10 @@ vacio escribeEntero (entero x) {
 	escribeEntero(9);
 	
 	devuelve;
+}
+
+vacio saluda () {
+ 	escribe ("Hola mundo");
 }
 
 vacio principal () {
