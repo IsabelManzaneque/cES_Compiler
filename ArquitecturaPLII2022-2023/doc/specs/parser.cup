@@ -197,10 +197,10 @@ initAxiom ::= {:
 		      :};
 
 axiom ::= seccionConstantes:sC seccionTipos:sT seccionVariables:sV seccionFunciones:sF{:
-			//sC.getListaConstantes().forEach((n) -> System.out.println(n));
+			//sT.getListaTipos().forEach((n) -> System.out.println(n));
 		:}
         | seccionConstantes:sC seccionTipos:sT seccionFunciones:sF{:
-        	//sC.getListaConstantes().forEach((n) -> System.out.println(n));
+        	//sT.getListaTipos().forEach((n) -> System.out.println(n));
 		:};
  
 //  CONSTANTES
@@ -221,29 +221,28 @@ declaracionConstante ::= CONSTANTE IDENTIFICADOR:id NUMERO:value SEMI_COLON{:
 							ScopeIF scope = scopeManager.getCurrentScope();
 							SymbolTableIF tablaSimbolos = scope.getSymbolTable();
 							TypeTableIF tablaTipos = scope.getTypeTable();
-							String name = id.getLexema();
-							
+														
 							// Comprobar que la constante no este ya declarada
-							if(tablaSimbolos.containsSymbol(name)){
-								semanticErrorManager.semanticFatalError("Constante " + name + " ya declarada");								
+							if(tablaSimbolos.containsSymbol(id.getLexema())){
+								semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": constante '" + id.getLexema() + "' ya declarada");								
 							}	
 																				
 							// Introduce constante en tabla de simbolos	
 							TypeIF tipo = scopeManager.searchType("ENTERO");  
-							SymbolConstant symbolConstant = new SymbolConstant(scope, name, tipo);
+							SymbolConstant symbolConstant = new SymbolConstant(scope, id.getLexema(), tipo);
 							symbolConstant.setValue(value.getLexema()); 
 							tablaSimbolos.addSymbol(symbolConstant);	
 							
 							RESULT = new DeclaracionConstante(symbolConstant);							
-							
 					   :};
 
 //  TIPOS 
 
 seccionTipos ::= declaracionTipo:decTip seccionTipos:secTip{:	
-					if(secTip != null){			
-						secTip.add(decTip); 
-					}        
+					if(secTip == null){			
+						secTip = new SeccionTipos();
+					}  
+					secTip.add(decTip);       
 					RESULT = secTip;
                :} 
                | epsilon;
@@ -253,20 +252,20 @@ declaracionTipo ::= TIPO ENTERO IDENTIFICADOR:id OPEN_BRACKET tamTipo:tt CLOSE_B
 						// Obtener ambito actual y tablas de simbolos y tipos  
 						ScopeIF scope = scopeManager.getCurrentScope();
 						TypeTableIF tablaTipos = scope.getTypeTable();	
-						String name = id.getLexema();
-						int size = (int)tt;
-						
+
+												
 						// Comprobar que el tipo no este ya declarado y el tamano sea mayor que 0
-						if(scopeManager.containsType(name)){
-							semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": Tipo ya declarado");																				
+						int size = (int)tt;
+						if(scopeManager.containsType(id.getLexema())){
+							semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": Tipo '" +id.getLexema()+"' ya declarado");																				
 						}								
 						if( size < 1){
 							semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": El tamano de un vector debe ser mayor que 0");
 						}	
 																														
 						// Introducir tipo en tabla de tipos								
-						TypeArray tipoVector = new TypeArray(scope, name, size);
-						tablaTipos.addType(name, tipoVector);
+						TypeArray tipoVector = new TypeArray(scope, id.getLexema(), size);
+						tablaTipos.addType(id.getLexema(), tipoVector);
 							
 						RESULT = new DeclaracionTipo(tipoVector);							
 					:}; 

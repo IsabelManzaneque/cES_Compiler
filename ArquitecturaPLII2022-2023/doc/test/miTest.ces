@@ -23,7 +23,10 @@ vector1 v1, v2;
 /* FUNCIONES */
 
 entero funSuma (entero x, entero y) {
-
+	
+	/*tipos*/
+	tipo entero vectorFunSuma[15];
+	
 	/*variables locales*/
 	entero i;
 	entero suma;
@@ -38,6 +41,9 @@ entero funSuma (entero x, entero y) {
 
 vacio escribeEntero (entero x) {
 	
+	/*tipos*/
+	tipo entero vectorFunSuma[15];
+	
 	/*variables*/
 	entero nueve = 9;
 	entero fS;
@@ -51,6 +57,9 @@ vacio escribeEntero (entero x) {
 }
 
 vacio principal () {
+	
+	/*tipos*/
+	tipo entero vectorPrincipal[20];
 	
 	/* Declaraciones */
 	entero a, b;
