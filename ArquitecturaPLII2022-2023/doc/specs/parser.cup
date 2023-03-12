@@ -376,10 +376,11 @@ id ::= IDENTIFICADOR:id{:
 // ambas uilicen el no terminal "cuerpoFuncion" y asi evitar conflictos
 
 seccionFunciones ::= funcion:fun seccionFunciones:secFun{:
-
+                        secFun.addFuncion(fun);
+                        RESULT = secFun;						
                    :}
-                   | funcionPrincipal{:
-                   
+                   | funcionPrincipal:funP{:
+                   		RESULT = new SeccionFunciones(funP);                  
                    :};
 
 funcionPrincipal ::= VACIO principal OPEN_KEY CLOSE_KEY OPEN_PARENTHESIS                      
@@ -407,7 +408,8 @@ funcionPrincipal ::= VACIO principal OPEN_KEY CLOSE_KEY OPEN_PARENTHESIS
 						ScopeIF scope = scopeManager.getCurrentScope();
 						scopeManager.closeScope();	
 						
-						FuncionPrincipal funP = new FuncionPrincipal(cFunc);
+						TypeIF tipo = scopeManager.searchType("VACIO");
+						FuncionPrincipal funP = new FuncionPrincipal(tipo,"principal",cFunc);
 						RESULT = funP;			
 					 :};
 
