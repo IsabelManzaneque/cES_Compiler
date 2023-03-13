@@ -230,7 +230,7 @@ declaracionConstante ::= CONSTANTE IDENTIFICADOR:id NUMERO:value SEMI_COLON{:
 							// Introduce constante en tabla de simbolos	
 							TypeIF tipo = scopeManager.searchType("ENTERO");  
 							SymbolConstant symbolConstant = new SymbolConstant(scope, id.getLexema(), tipo);
-							symbolConstant.setValue(value.getLexema()); 
+							symbolConstant.setValue(Integer.parseInt(value.getLexema())); 
 							tablaSimbolos.addSymbol(symbolConstant);	
 							
 							RESULT = new DeclaracionConstante(symbolConstant);							
@@ -281,7 +281,7 @@ tamTipo ::= NUMERO:num {:
 				}
 				
 				SymbolConstant c = (SymbolConstant)scopeManager.searchSymbol(id.getLexema());
-				RESULT = Integer.parseInt(c.getValue());					
+				RESULT = c.getValue();					
           :};
 
 
@@ -539,15 +539,29 @@ parametro ::= ENTERO IDENTIFICADOR:id{:
 
 // EXPRESIONES
 
-expresion ::= NUMERO{:
-				RESULT = new Expresion(scopeManager.searchType("ENTERO"));
+expresion ::= NUMERO:num{:
+				
+				Expresion exp = new Expresion(scopeManager.searchType("ENTERO"));
+				exp.setValue(Integer.parseInt(num.getLexema()));
+				RESULT = exp;
 			:}
             | IDENTIFICADOR:id{:
                 if(!scopeManager.containsSymbol(id.getLexema())){
                 	semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": El simbolo '" + id.getLexema() + "' no ha sido declarado");
 				}				
-				SymbolIF symbol = scopeManager.searchSymbol(id.getLexema());				
-				RESULT = new Expresion(symbol.getType()); 							
+				SymbolIF symbol = scopeManager.searchSymbol(id.getLexema());
+				Expresion exp = new Expresion(symbol.getType()); 
+				
+				if(symbol instanceof SymbolConstant){
+					SymbolConstant sC = (SymbolConstant) symbol;
+					exp.setValue(sC.getValue());
+				}
+				if(symbol instanceof SymbolVariable){
+					SymbolVariable sV = (SymbolVariable) symbol;
+					exp.setValue(sV.getValue());
+				}
+						
+				RESULT = exp; 							
             :}            
 		    | OPEN_KEY expresion:e1 CLOSE_KEY {:
 		    	RESULT = e1; 
@@ -607,15 +621,18 @@ accesoVector ::= IDENTIFICADOR:id OPEN_BRACKET expresion:expr CLOSE_BRACKET{:
                  	//comprobar que la variable existe y se trata de un vector
                  	if(!scopeManager.containsSymbol(id.getLexema())){
 						semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": No existe " + id.getLexema());							
-					}
-					
+					}					
                  	SymbolIF symbol = scopeManager.searchSymbol(id.getLexema());
                  	
                  	if(!(symbol.getType() instanceof TypeArray)){
                  		semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": '" + id.getLexema() + "' no es un array");
                  	}
+                 	TypeArray typeArray = (TypeArray)symbol.getType(); 
                  	
-                 	//comprobar que expresion respeta el rango del vector                					
+                 	//comprobar que expresion respeta el rango del vector                   	
+                 	if(expr.getValue() < 0 || expr.getValue() > typeArray.getSize() -1){
+                 		semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": acceso a '" + id.getLexema() + "' fuera de límites");
+                 	}                	          					
                  	
                  	RESULT = new AccesoVector(id.getLexema(), expr);
                :};

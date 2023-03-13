@@ -42,7 +42,10 @@ public class Expresion extends NonTerminal {
 	} 
 	
 	
-	
+	@Override
+	public String toString() {		
+		return "Type: " + type + ", value: " + value;
+	}
 //	@Override
 //	public int compareTo(Expresion e) {		
 //		return Double.compare(this.tipo, e.tipo);
