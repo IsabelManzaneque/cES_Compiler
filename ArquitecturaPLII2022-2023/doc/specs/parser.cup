@@ -686,17 +686,17 @@ parametros ::= expresion:expr{:
 				    RESULT = listaExpr;	 	
 			 :};
 
+
 //  SENTENCIAS
 
-bloque ::= OPEN_PARENTHESIS 
-		   {:
+bloque ::= OPEN_PARENTHESIS {:
+
 				// Crea ambito del bloque y obtener sus tablas						
 				ScopeIF scope = scopeManager.openScope("bloque");
 				SymbolTableIF symbolTable = scope.getSymbolTable();
 				TypeTableIF typeTable = scope.getTypeTable();								
 			:}
-			cuerpoBloque:cBlq CLOSE_PARENTHESIS
-			{:			
+			cuerpoBloque:cBlq CLOSE_PARENTHESIS	{:			
 				
 				//cerrar ambito 
 				ScopeIF scope = scopeManager.getCurrentScope();
@@ -766,16 +766,10 @@ sentenciaIncremento ::= IDENTIFICADOR:id AUTO_INCREMENTO SEMI_COLON{:
 							
 							// comprobar que identificadpr es de un tipo que se puede autoincrementar
 							SymbolIF symbol = scopeManager.searchSymbol(id.getLexema());			
-							if(symbol instanceof SymbolConstant){
-								semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": No es posible modificar una constante");
+							if(symbol instanceof SymbolConstant || symbol instanceof SymbolFunction || symbol.getType() instanceof TypeArray){
+								semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": No es posible incrementar '" + id.getLexema() + "'");
 							}							
-							if(symbol instanceof SymbolFunction){
-								semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": No es posible autoincrementar a una funcion");
-							}
-							if(symbol.getType() instanceof TypeArray){
-								semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": No es posible autoincrementar vector");
-							}
-							
+														
 							SentenciaIncremento sentIncrm = new SentenciaIncremento(id.getLexema());
 							RESULT = sentIncrm;
 					  :};
@@ -784,7 +778,7 @@ sentenciaAsignacion ::= ref:r ASSIGN:a expresion:exp SEMI_COLON{:
 														
 							// El lado derecho de la asignacion debe ser de tipo entero  
 							if(!(exp.getType() instanceof TypeSimpleEntero)){
-								semanticErrorManager.semanticFatalError("Error en linea " + a.getLine() + ": Incompatibilidad de tipos");
+								semanticErrorManager.semanticFatalError("Error en linea " + a.getLine() + ": Asignación de tipos incompatibles");
 							}
 							
 							SentenciaAsignacion sentAsign = new SentenciaAsignacion(r,exp);
@@ -834,7 +828,7 @@ ref ::= IDENTIFICADOR:id {:
 
 sentenciaSi ::= SI OPEN_KEY expresion:expr CLOSE_KEY sentencia:sSi SINO sentencia:sSino{:
 					
-					//comprobar la expresion. Se evalua como falsa si es 0 y verdadera si es distinto de 0
+					//Se evalua como falsa si expresion = 0, verdadera en caso contrario
 					
 					SentenciaSi sentSi = new SentenciaSi(expr, sSi, sSino);
 					RESULT = sentSi;			
@@ -842,7 +836,7 @@ sentenciaSi ::= SI OPEN_KEY expresion:expr CLOSE_KEY sentencia:sSi SINO sentenci
 			  :}
 	          | SI OPEN_KEY expresion:expr CLOSE_KEY sentencia:sSi{:
 	          		
-	          		//comprobar la expresion. Se evalua como falsa si es 0 y verdadera si es distinto de 0
+	          		//Se evalua como falsa si expresion = 0, verdadera en caso contrario
 					
 					SentenciaSi sentSi = new SentenciaSi(expr, sSi, null);
 					RESULT = sentSi;
