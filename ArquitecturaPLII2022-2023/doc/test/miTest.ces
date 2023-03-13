@@ -40,6 +40,10 @@ entero funSuma (entero x, entero y) {
 	
 }
 
+entero funResta (entero a, entero b){
+	devuelve a;
+}
+
 vacio escribeEntero (entero x) {
 	
 	/*tipos*/
@@ -85,7 +89,7 @@ vacio principal () {
 	
 	a++;
 	
-	escribeEntero(2);	
+	escribeEntero(funResta(a,b));	
 
 	si (mayorDiez == VERDADERO) { escribe ("mayor"); }
 	sino {escribe ("menor");}

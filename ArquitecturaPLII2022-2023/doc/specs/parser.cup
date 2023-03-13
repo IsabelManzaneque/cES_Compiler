@@ -609,7 +609,7 @@ expresion ::= NUMERO:num{:
 			    // Verificar que la llamada a la funcion devuelve un tipo	
 				SymbolIF symbolFun = scopeManager.searchSymbol(fun.getName());
 				if(!(symbolFun.getType() instanceof TypeSimpleEntero)){
-					semanticErrorManager.semanticFatalError("La funcion '" + fun.getName() + "' debe devolver un tipo");
+					semanticErrorManager.semanticFatalError("Error: La funcion '" + fun.getName() + "' no devuelve un valor");
 				}	
 												
 				RESULT = new Expresion(symbolFun.getType());	
@@ -647,22 +647,31 @@ llamadaFuncion ::= IDENTIFICADOR:id OPEN_KEY parametros:param CLOSE_KEY{:
 					    // Verificar que se corresponden los parametros actuales y formales
 						SymbolFunction sF = (SymbolFunction) scopeManager.searchSymbol(id.getLexema());
 						
-						if(sF.getParametros().size() == param.getListaExpr().size()){											
-							for(int i = 0; i< sF.getParametros().size(); i++){					
-								if(sF.getParametros().get(i).getType() != param.getListaExpr().get(i).getType()){
-									semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": Error en tipo/orden de los parámetros en '" + id.getLexema() + "'");
-								}
-							}					
-						}else{
-							semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": Error en el número de parámetros en '" + id.getLexema() + "'");
-						}
+						if(sF.getParametros().size() != param.getListaExpr().size()){
+							semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": Incorrecto número de parámetros en '" + id.getLexema() + "'");
+						}	
+																
+						for(int i = 0; i< sF.getParametros().size(); i++){					
+							if(sF.getParametros().get(i).getType() != param.getListaExpr().get(i).getType()){
+								semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": Incorrecto tipo/orden de parámetros en '" + id.getLexema() + "'");
+							}
+						}						
 					   
 					   RESULT = new LlamadaFuncion(id.getLexema(), param.getListaExpr()); 	
                  :}
 	             | IDENTIFICADOR:id OPEN_KEY CLOSE_KEY{:
+	             
 	             	   if(!scopeManager.containsSymbol(id.getLexema())){
 				          semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": La función '" + id.getLexema() + "' no ha sido declarada");
 					   }
+					   
+					   // Verificar que se corresponden los parametros actuales y formales
+					   SymbolFunction sF = (SymbolFunction) scopeManager.searchSymbol(id.getLexema());
+						
+					   if(sF.getParametros().size() > 0){
+							semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": Incorrecto número de parámetros en '" + id.getLexema() + "'");
+				       }
+						
 					   RESULT = new LlamadaFuncion(id.getLexema()); 
                  :};
 	
@@ -868,8 +877,7 @@ porDefecto ::= PORDEFECTO TWO_POINTS bloque:blq CORTE SEMI_COLON{:
 			 :}
              | epsilon; 
 
-sentenciaMientras ::= MIENTRAS OPEN_KEY expresion:expr CLOSE_KEY sentencia:sent{:
-							
+sentenciaMientras ::= MIENTRAS OPEN_KEY expresion:expr CLOSE_KEY sentencia:sent{:							
 							//comprobar la expresion. Se evalua como falsa si es 0 y verdadera si es distinto de 0
 							SentenciaMientras sentM = new SentenciaMientras(expr,sent);
 							RESULT = sentM;
