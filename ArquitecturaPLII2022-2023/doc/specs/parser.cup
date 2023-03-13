@@ -574,12 +574,6 @@ expresion ::= NUMERO:num{:
 				SymbolIF symbol = scopeManager.searchSymbol(id.getLexema());
 				exp.setType(symbol.getType()); 
 				
-				if(symbol instanceof SymbolConstant){
-					exp.setValue(((SymbolConstant)symbol).getValue());
-				}
-				if(symbol instanceof SymbolVariable){
-					exp.setValue(((SymbolVariable)symbol).getValue());
-				}
 				
 				/*----- Código intermedio -----*/
 				
@@ -590,9 +584,11 @@ expresion ::= NUMERO:num{:
 				if(symbol instanceof SymbolConstant){
 					Value value = new Value(((SymbolConstant)symbol).getValue());
 					cb.addQuadruple("MV",temp,value);
+					exp.setValue(((SymbolConstant)symbol).getValue()); //para el acceso a vector
 				}else if(symbol instanceof SymbolVariable){
 					Variable var = new Variable(id.getLexema(), symbol.getScope());
 					cb.addQuadruple("MV",temp,var);
+					exp.setValue(((SymbolVariable)symbol).getValue()); //para el acceso a vector
 				}
 				
 				// anadir temporal y codigo intermedio a la expresion y propagar
@@ -601,7 +597,7 @@ expresion ::= NUMERO:num{:
 				RESULT = exp; 		
 									
             :}            
-		    | OPEN_KEY expresion:e1 CLOSE_KEY {:
+		    | OPEN_KEY expresion:e1 CLOSE_KEY {:  // esta se queda asi segun el pdf
 		    	RESULT = e1; 
 		    	
 		    :}		        
@@ -693,23 +689,93 @@ expresion ::= NUMERO:num{:
 				RESULT = exp;
 				
 		 	:}		 	
-		 	| expresion:e1 LOWER_THAN:op expresion:e2{:			 	
+		 	| expresion:e1 LOWER_THAN:op expresion:e2{:			
+		 		
+		 		Expresion exp = new Expresion(); 
+            	ScopeIF scope = scopeManager.getCurrentScope();
+            	
+            	/*----- Análisis semántico -----*/
+            	 	
 			 	if(!(e1.getType() instanceof TypeSimpleEntero) || !(e2.getType() instanceof TypeSimpleEntero)){
 					semanticErrorManager.semanticFatalError("Error en linea " + op.getLine() + ": Incompatibilidad de tipos");
 				}
-				RESULT = new Expresion(e1.getType());			
+				exp.setType(e1.getType());
+				
+				/*----- Código intermedio -----*/
+				
+				TemporalFactory tf = new TemporalFactory(scope);
+				IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+				TemporalIF temp1 = e1.getTemporal();
+				TemporalIF temp2 = e2.getTemporal();
+				TemporalIF temp = tf.create();
+				cb.addQuadruples (e1.getIntermediateCode());
+				cb.addQuadruples (e2.getIntermediateCode());
+				cb.addQuadruple ("LS", temp, temp1, temp2);
+				
+				// anadir temporal y codigo intermedio a la expresion y propagar
+				exp.setTemporal(temp);
+				exp.setIntermediateCode(cb.create());						
+				RESULT = exp;
+						
 			:}
-		 	| expresion:e1 EQUAL:op expresion:e2{:		 		
+		 	| expresion:e1 EQUAL:op expresion:e2{:	
+		 		
+		 		Expresion exp = new Expresion(); 
+            	ScopeIF scope = scopeManager.getCurrentScope();
+            	
+            	/*----- Análisis semántico -----*/
+            		 		
 		 		if(!(e1.getType() instanceof TypeSimpleEntero) || !(e2.getType() instanceof TypeSimpleEntero)){
 					semanticErrorManager.semanticFatalError("Error en linea " + op.getLine() + ": Incompatibilidad de tipos");
 				}
-				RESULT = new Expresion(e1.getType());		 	
+				exp.setType(e1.getType());
+				
+				
+				/*----- Código intermedio -----*/
+				
+				TemporalFactory tf = new TemporalFactory(scope);
+				IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+				TemporalIF temp1 = e1.getTemporal();
+				TemporalIF temp2 = e2.getTemporal();
+				TemporalIF temp = tf.create();
+				cb.addQuadruples (e1.getIntermediateCode());
+				cb.addQuadruples (e2.getIntermediateCode());
+				cb.addQuadruple ("EQ", temp, temp1, temp2);
+				
+				// anadir temporal y codigo intermedio a la expresion y propagar
+				exp.setTemporal(temp);
+				exp.setIntermediateCode(cb.create());						
+				RESULT = exp;
+						 	
 		 	:}
-		 	| expresion:e1 AND_LOGICA:op expresion:e2{:			 	
+		 	| expresion:e1 AND_LOGICA:op expresion:e2{:		
+		 		
+		 		Expresion exp = new Expresion(); 
+            	ScopeIF scope = scopeManager.getCurrentScope();
+            	
+            	/*----- Análisis semántico -----*/
+            		 	
 			 	if(!(e1.getType() instanceof TypeSimpleEntero) || !(e2.getType() instanceof TypeSimpleEntero)){
 					semanticErrorManager.semanticFatalError("Error en linea " + op.getLine() + ": Incompatibilidad de tipos");
 				}	
-				RESULT = new Expresion(e1.getType());			
+				exp.setType(e1.getType());
+				
+				/*----- Código intermedio -----*/
+				
+				TemporalFactory tf = new TemporalFactory(scope);
+				IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+				TemporalIF temp1 = e1.getTemporal();
+				TemporalIF temp2 = e2.getTemporal();
+				TemporalIF temp = tf.create();
+				cb.addQuadruples (e1.getIntermediateCode());
+				cb.addQuadruples (e2.getIntermediateCode());
+				cb.addQuadruple ("AND", temp, temp1, temp2);
+				
+				// anadir temporal y codigo intermedio a la expresion y propagar
+				exp.setTemporal(temp);
+				exp.setIntermediateCode(cb.create());						
+				RESULT = exp;
+						
 			:}
 		 	| accesoVector:aV{:
 		 	  	RESULT = aV.getExpresion();
@@ -725,7 +791,12 @@ expresion ::= NUMERO:num{:
 			:};
 
 
-accesoVector ::= IDENTIFICADOR:id OPEN_BRACKET expresion:expr CLOSE_BRACKET{:
+accesoVector ::= IDENTIFICADOR:id OPEN_BRACKET expresion:e CLOSE_BRACKET{:
+                 	
+                 	Expresion exp = new Expresion(); 
+            		ScopeIF scope = scopeManager.getCurrentScope();
+            		
+                 	/*----- Análisis semántico -----*/
                  	
                  	//comprobar que la variable existe y se trata de un vector
                  	if(!scopeManager.containsSymbol(id.getLexema())){
@@ -739,11 +810,15 @@ accesoVector ::= IDENTIFICADOR:id OPEN_BRACKET expresion:expr CLOSE_BRACKET{:
                  	TypeArray typeArray = (TypeArray)symbol.getType(); 
                  	
                  	//comprobar que expresion respeta el rango del vector                   	
-                 	if(expr.getValue() < 0 || expr.getValue() > typeArray.getSize() -1){
+                 	if(e.getValue() < 0 || e.getValue() > typeArray.getSize() -1){
                  		semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": acceso a '" + id.getLexema() + "' fuera de límites");
                  	}                	          					
                  	
-                 	RESULT = new AccesoVector(id.getLexema(), expr);
+                 	/*----- Código intermedio -----*/
+                 	
+                 	
+                 	
+                 	RESULT = new AccesoVector(id.getLexema(), e);
                :};
 
 llamadaFuncion ::= IDENTIFICADOR:id OPEN_KEY parametros:param CLOSE_KEY{:					
