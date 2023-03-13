@@ -542,48 +542,157 @@ parametro ::= ENTERO IDENTIFICADOR:id{:
 expresion ::= NUMERO:num{:
 				
 				Expresion exp = new Expresion(scopeManager.searchType("ENTERO"));
-				exp.setValue(Integer.parseInt(num.getLexema()));
-				RESULT = exp;
+				ScopeIF scope = scopeManager.getCurrentScope();
+				
+				/*----- Análisis semántico -----*/
+				
+				exp.setValue(Integer.parseInt(num.getLexema()));				
+				
+				/*----- Código intermedio -----*/
+				
+				TemporalFactory tf = new TemporalFactory(scope);
+				IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+				TemporalIF temp = tf.create();
+				cb.addQuadruple ("MV", temp, Integer.parseInt(num.getLexema()));
+				
+				// anadir temporal y codigo intermedio a la expresion y propagar
+				exp.setTemporal(temp);
+				exp.setIntermediateCode(cb.create());						
+				RESULT = exp; 
+				
 			:}
             | IDENTIFICADOR:id{:
+            	
+            	Expresion exp = new Expresion(); 
+            	ScopeIF scope = scopeManager.getCurrentScope();
+            	
+            	/*----- Análisis semántico -----*/
+            	
                 if(!scopeManager.containsSymbol(id.getLexema())){
                 	semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": El simbolo '" + id.getLexema() + "' no ha sido declarado");
 				}				
 				SymbolIF symbol = scopeManager.searchSymbol(id.getLexema());
-				Expresion exp = new Expresion(symbol.getType()); 
+				exp.setType(symbol.getType()); 
 				
 				if(symbol instanceof SymbolConstant){
-					SymbolConstant sC = (SymbolConstant) symbol;
-					exp.setValue(sC.getValue());
+					exp.setValue(((SymbolConstant)symbol).getValue());
 				}
 				if(symbol instanceof SymbolVariable){
-					SymbolVariable sV = (SymbolVariable) symbol;
-					exp.setValue(sV.getValue());
+					exp.setValue(((SymbolVariable)symbol).getValue());
 				}
-						
-				RESULT = exp; 							
+				
+				/*----- Código intermedio -----*/
+				
+				TemporalFactory tf = new TemporalFactory(scope);
+				IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+				TemporalIF temp = tf.create();
+				
+				if(symbol instanceof SymbolConstant){
+					Value value = new Value(((SymbolConstant)symbol).getValue());
+					cb.addQuadruple("MV",temp,value);
+				}else if(symbol instanceof SymbolVariable){
+					Variable var = new Variable(id.getLexema(), symbol.getScope());
+					cb.addQuadruple("MV",temp,var);
+				}
+				
+				// anadir temporal y codigo intermedio a la expresion y propagar
+				exp.setTemporal(temp);
+				exp.setIntermediateCode(cb.create());						
+				RESULT = exp; 		
+									
             :}            
 		    | OPEN_KEY expresion:e1 CLOSE_KEY {:
 		    	RESULT = e1; 
+		    	
 		    :}		        
-			| expresion:e1 PLUS:op expresion:e2 {:			 	
+			| expresion:e1 PLUS:op expresion:e2 {:	
+				
+				Expresion exp = new Expresion(); 
+            	ScopeIF scope = scopeManager.getCurrentScope();
+            	
+				/*----- Análisis semántico -----*/
+						 	
 			 	if(!(e1.getType() instanceof TypeSimpleEntero) || !(e2.getType() instanceof TypeSimpleEntero)){
 					semanticErrorManager.semanticFatalError("Error en linea " + op.getLine() + ": Incompatibilidad de tipos");
 				}				
-				RESULT = new Expresion(e1.getType());
-			:}			 	
-			| expresion:e1 MULT:op expresion:e2 {:			 	
+				exp.setType(e1.getType());
+				
+				/*----- Código intermedio -----*/
+				
+				TemporalFactory tf = new TemporalFactory(scope);
+				IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+				TemporalIF temp1 = e1.getTemporal();
+				TemporalIF temp2 = e2.getTemporal();
+				TemporalIF temp = tf.create();
+				cb.addQuadruples (e1.getIntermediateCode());
+				cb.addQuadruples (e2.getIntermediateCode());
+				cb.addQuadruple ("ADD", temp, temp1, temp2);
+				
+				// anadir temporal y codigo intermedio a la expresion y propagar
+				exp.setTemporal(temp);
+				exp.setIntermediateCode(cb.create());						
+				RESULT = exp;
+				
+			:}						 	
+			| expresion:e1 MULT:op expresion:e2 {:		
+			
+				Expresion exp = new Expresion(); 
+            	ScopeIF scope = scopeManager.getCurrentScope();
+            	
+            	/*----- Análisis semántico -----*/
+            		 	
 			 	if(!(e1.getType() instanceof TypeSimpleEntero) || !(e2.getType() instanceof TypeSimpleEntero)){
 					semanticErrorManager.semanticFatalError("Error en linea " + op.getLine() + ": Incompatibilidad de tipos");
 				}				
-				RESULT = new Expresion(e1.getType());
-			:}
+				exp.setType(e1.getType());
+				
+				/*----- Código intermedio -----*/
+				
+				TemporalFactory tf = new TemporalFactory(scope);
+				IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+				TemporalIF temp1 = e1.getTemporal();
+				TemporalIF temp2 = e2.getTemporal();
+				TemporalIF temp = tf.create();
+				cb.addQuadruples (e1.getIntermediateCode());
+				cb.addQuadruples (e2.getIntermediateCode());
+				cb.addQuadruple ("MUL", temp, temp1, temp2);
+				
+				// anadir temporal y codigo intermedio a la expresion y propagar
+				exp.setTemporal(temp);
+				exp.setIntermediateCode(cb.create());						
+				RESULT = exp;	
+							
+			:}			
 		 	| expresion:e1 AUTO_INCREMENTO{:
 		 		RESULT = new Expresion(e1.getType());
 		 	:}
-		 	| NEGACION expresion:e1{:
-		 		RESULT = new Expresion(e1.getType());
-		 	:}
+		 	| NEGACION:op expresion:e1{:
+		 	
+		 		Expresion exp = new Expresion(); 
+            	ScopeIF scope = scopeManager.getCurrentScope();
+            	
+            	/*----- Análisis semántico -----*/
+            	
+            	if(!(e1.getType() instanceof TypeSimpleEntero)){
+					semanticErrorManager.semanticFatalError("Error en linea " + op.getLine() + ": Incompatibilidad de tipos");
+				}
+		 		exp.setType(e1.getType());
+		 		
+		 		/*----- Código intermedio -----*/
+		 		
+		 		TemporalFactory tf = new TemporalFactory(scope);
+				IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+				TemporalIF temp1 = e1.getTemporal();
+				TemporalIF temp = tf.create();
+				cb.addQuadruples (e1.getIntermediateCode ());
+				cb.addQuadruple ("NOT", temp, temp1);
+				
+				// anadir temporal y codigo intermedio a la expresion y propagar
+				exp.setTemporal(temp);
+				exp.setIntermediateCode(cb.create());						
+				RESULT = exp;
+				
+		 	:}		 	
 		 	| expresion:e1 LOWER_THAN:op expresion:e2{:			 	
 			 	if(!(e1.getType() instanceof TypeSimpleEntero) || !(e2.getType() instanceof TypeSimpleEntero)){
 					semanticErrorManager.semanticFatalError("Error en linea " + op.getLine() + ": Incompatibilidad de tipos");
