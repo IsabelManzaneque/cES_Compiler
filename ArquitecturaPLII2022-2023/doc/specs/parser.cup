@@ -164,7 +164,7 @@ program ::=
   {:   		
   		// No modificar esta estructura, aunque se pueden a√±adir m√°s acciones sem√°nticas
   		
-  		System.out.println("AQUI: " + ((Axiom2)ax).getIntermediateCode());
+  		System.out.println("axioma ci: " + ((Axiom2)ax).getIntermediateCode());
   		//List intermediateCode = ax.getIntermediateCode ();
   		//finalCodeFactory.create (intermediateCode);
 
@@ -192,6 +192,7 @@ axiom ::= {:
 			  axiom2:ax
 			
 			  {:			
+			  	System.out.println("axioma2 ci: " + ax.getIntermediateCode());
 				// Cerrar ambito global
 				ScopeIF scope = scopeManager.getCurrentScope();
 				scopeManager.closeScope();	
@@ -505,9 +506,11 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 			
 			   
 cuerpoFuncion ::= seccionTipos:sT listadoSentencias:lS{:
+     
 					RESULT = new CuerpoFuncion(sT,lS);
                 :}
                 | seccionTipos:sT seccionVariables:sV listadoSentencias:lS{:
+
                 	RESULT = new CuerpoFuncion(sT,sV,lS);
                 :};
                 
@@ -516,14 +519,41 @@ seccionParametros ::= declaracionParametros:decParam{:
 			        :} 
 			        | epsilon;
 
-declaracionParametros  ::= parametro:param COLON declaracionParametros:listaParam{:						   		
-						   		listaParam.add(param);
-						   		RESULT = listaParam;	 	
+declaracionParametros  ::= parametro:param COLON declaracionParametros:dC{:		
+								
+								dC.add(param);
+						   		
+						   		/*----- CÛdigo intermedio -----*/
+						   		
+						   		ScopeIF scope = scopeManager.getCurrentScope();
+						   		TemporalFactory tf = new TemporalFactory(scope);
+						   		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+						   		
+						   		TemporalIF temp = param.getTemporal();
+						   		cb.addQuadruples(dC.getIntermediateCode());    // anadir el codigo de los parametros ya generados
+						   		cb.addQuadruples(param.getIntermediateCode()); // anadir el codigo del nuevo parametro
+						   		cb.addQuadruple("PARAM",temp);                 // anadir el nuevo parametro
+						   		
+						   		dC.setIntermediateCode(cb.create());
+						   		RESULT = dC;	 	
 						 :}
                          | parametro:param {:
-                         		DeclaracionParametros listaParam = new DeclaracionParametros();
-                         		listaParam.add(param);
-                         		RESULT = listaParam;                         
+                         
+                         		DeclaracionParametros dC = new DeclaracionParametros();
+                         		dC.add(param);
+                         		
+                         		/*----- CÛdigo intermedio -----*/
+						   		
+						   		ScopeIF scope = scopeManager.getCurrentScope();
+						   		TemporalFactory tf = new TemporalFactory(scope);
+						   		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+						   		
+						   		TemporalIF temp = param.getTemporal();
+						   		cb.addQuadruples(param.getIntermediateCode()); // anadir el codigo del nuevo parametro
+						   		cb.addQuadruple("PARAM",temp);                 // anadir el nuevo parametro
+						   		
+						   		dC.setIntermediateCode(cb.create());
+                         		RESULT = dC;                         
                          :};
 
 parametro ::= ENTERO IDENTIFICADOR:id{:	
@@ -879,14 +909,40 @@ llamadaFuncion ::= IDENTIFICADOR:id OPEN_KEY parametros:param CLOSE_KEY{:
                  :};
 	
 	
-parametros ::= expresion:expr{:
-                    Parametros listaExpr = new Parametros();
-                    listaExpr.add(expr);
-                    RESULT = listaExpr;                         
+parametros ::= expresion:e{:
+
+                    Parametros params = new Parametros();
+                    params.add(e);
+                    
+                    /*----- CÛdigo intermedio -----*/
+                    ScopeIF scope = scopeManager.getCurrentScope();
+			   		TemporalFactory tf = new TemporalFactory(scope);
+			   		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+			   		
+			   		TemporalIF temp = e.getTemporal();
+			   		cb.addQuadruples(e.getIntermediateCode());       //anadir el codigo de la expresion para el nuevo param
+			   		cb.addQuadruple("PARAM",temp);                   //anadir el nuevo parametro
+                    
+                    params.setIntermediateCode(cb.create());
+                    RESULT = params;                         
              :}
-             | expresion:expr COLON parametros:listaExpr{:						   		
-			   		listaExpr.add(expr);
-				    RESULT = listaExpr;	 	
+             | expresion:e COLON parametros:params{:		
+             				   		
+			   		params.add(e);
+			   		
+			   		/*----- CÛdigo intermedio -----*/
+						   		
+			   		ScopeIF scope = scopeManager.getCurrentScope();
+			   		TemporalFactory tf = new TemporalFactory(scope);
+			   		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+			   		
+			   		TemporalIF temp = e.getTemporal();
+			   		cb.addQuadruples(params.getIntermediateCode());  //anadir el codigo de los parametros ya generados
+			   		cb.addQuadruples(e.getIntermediateCode());       //anadir el codigo de la expresion para el nuevo param
+			   		cb.addQuadruple("PARAM",temp);                   //anadir el nuevo parametro
+			   		
+			   		params.setIntermediateCode(cb.create());			   		
+				    RESULT = params;	 	
 			 :};
 
 
@@ -918,18 +974,36 @@ cuerpoBloque ::= listadoSentencias:lS{:
 
 listadoSentencias ::= listadoSentencias:listaSent sentencia:sent {:
 						
+						/*----- An·lisis sem·ntico -----*/
+						
 						if(sent instanceof SentenciaDevuelve){
 							SentenciaDevuelve sentDevuelve = (SentenciaDevuelve)sent;
 							if(sentDevuelve.getExpresion() != null){
 								listaSent.setDevuelve(true);
 								listaSent.setTipoDevuelto(sentDevuelve.getExpresion().getType());
 							}
-						}						
-						listaSent.add(sent);
+						}
+						listaSent.add(sent);			
+						
+						/*----- CÛdigo intermedio -----*/
+						
+	                    ScopeIF scope = scopeManager.getCurrentScope();
+				   		TemporalFactory tf = new TemporalFactory(scope);
+				   		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+				   		
+				   		TemporalIF temp = sent.getTemporal();
+				   		cb.addQuadruples(listaSent.getIntermediateCode());  //anadir el codigo de los parametros ya generados
+				   		cb.addQuadruples(sent.getIntermediateCode());       //anadir el codigo de la expresion para el nuevo param
+				   		cb.addQuadruple("SENT",temp);                       //anadir el nuevo parametro
+									
+						listaSent.setIntermediateCode(cb.create());	
 						RESULT = listaSent;
 					:}
                     | sentencia:sent{:
+                    
                     	ListadoSentencias listaSent = new ListadoSentencias();
+                    	
+                    	/*----- An·lisis sem·ntico -----*/
                     	
                     	if(sent instanceof SentenciaDevuelve){
 							SentenciaDevuelve sentDevuelve = (SentenciaDevuelve)sent;
@@ -939,6 +1013,18 @@ listadoSentencias ::= listadoSentencias:listaSent sentencia:sent {:
 							}
 						}												
                     	listaSent.add(sent);
+                    	
+                    	/*----- CÛdigo intermedio -----*/
+						
+	                    ScopeIF scope = scopeManager.getCurrentScope();
+				   		TemporalFactory tf = new TemporalFactory(scope);
+				   		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+				   		
+				   		TemporalIF temp = sent.getTemporal();
+				   		cb.addQuadruples(sent.getIntermediateCode());       //anadir el codigo de la sentencia para el nuevo param
+				   		cb.addQuadruple("SENT",temp);                       //anadir el nuevo parametro
+									
+						listaSent.setIntermediateCode(cb.create());					   		
                     	RESULT = listaSent;
                     :};
                     
@@ -957,29 +1043,55 @@ sentencia ::= sentenciaDevuelve: sentDevl {: RESULT = sentDevl; :}
 sentenciaDevuelve ::= DEVUELVE SEMI_COLON{:						 
 						 RESULT = new SentenciaDevuelve();					  
 					:}
-	                | DEVUELVE expresion:expr SEMI_COLON{:						 
-						 RESULT = new SentenciaDevuelve(expr);					  
+	                | DEVUELVE expresion:e SEMI_COLON{:		
+	                	  
+	                	 SentenciaDevuelve sentDvl = new SentenciaDevuelve(e);
+	                	 
+	                	 /*----- CÛdigo intermedio -----*/	
+	                	 
+	                	 ScopeIF scope = scopeManager.getCurrentScope();
+						 TemporalFactoryIF tf = new TemporalFactory(scope);
+						 LabelFactory lf = new LabelFactory();
+						 IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+						 
+						 TemporalIF temp = e.getTemporal();
+	                	 LabelIF l1 = lf.create(scope.getName());
+	                	 cb.addQuadruples(e.getIntermediateCode());
+	                	 cb.addQuadruple("RETURN",l1,temp);
+	                	 
+	                	 sentDvl.setIntermediateCode(cb.create());
+						 RESULT = sentDvl;					  
 					:};
 
 sentenciaIncremento ::= IDENTIFICADOR:id AUTO_INCREMENTO SEMI_COLON{:
+
+							/*----- An·lisis sem·ntico -----*/
+							
 							// comprobar identificador ref existe 
 							if(!scopeManager.containsSymbol(id.getLexema())){
 								semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": El simbolo '" + id.getLexema() + "' no ha sido declarado");							
-							}
-							
-							// comprobar que identificadpr es de un tipo que se puede autoincrementar
+							}				
 							SymbolIF symbol = scopeManager.searchSymbol(id.getLexema());			
+							// comprobar que identificadpr es de un tipo que se puede autoincrementar										
 							if(symbol instanceof SymbolConstant || symbol instanceof SymbolFunction || symbol.getType() instanceof TypeArray){
 								semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": No es posible incrementar '" + id.getLexema() + "'");
-							}							
-														
+							}													
 							SentenciaIncremento sentIncrm = new SentenciaIncremento(id.getLexema());
+							
+							/*----- CÛdigo intermedio -----*/
+							
+							ScopeIF scope = scopeManager.getCurrentScope();
+							TemporalFactoryIF tf = new TemporalFactory(scope);
+							IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+							TemporalIF temp = tf.create();
+							Variable var = new Variable(id.getLexema(), symbol.getScope());
+							cb.addQuadruple("MVA",temp,var);
+							
+							sentIncrm.setIntermediateCode(cb.create());
 							RESULT = sentIncrm;
 					  :};
 
 sentenciaAsignacion ::= ref:r ASSIGN:a expresion:exp SEMI_COLON{:							
-							
-							ScopeIF scope = scopeManager.getCurrentScope();
 							
 							/*----- An·lisis sem·ntico -----*/
 							
@@ -990,6 +1102,8 @@ sentenciaAsignacion ::= ref:r ASSIGN:a expresion:exp SEMI_COLON{:
 							SentenciaAsignacion sentAsign = new SentenciaAsignacion(r,exp);
 							
 							/*----- CÛdigo intermedio -----*/
+							
+							ScopeIF scope = scopeManager.getCurrentScope();
 							TemporalFactoryIF tf = new TemporalFactory(scope);
 							IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 							TemporalIF temp = tf.create();
@@ -997,7 +1111,7 @@ sentenciaAsignacion ::= ref:r ASSIGN:a expresion:exp SEMI_COLON{:
 							
 							if(r.getId() != null){
 								SymbolIF symbolVariable = scopeManager.searchSymbol(r.getId());
-								Variable var = new Variable(r.getId(), symbolVariable.getScope());
+								Variable var = new Variable(r.getId(), symbolVariable.getScope());       // esto ya se esta creando en ref?
 								cb.addQuadruple("MVA",temp,var);
 								cb.addQuadruple("STP",temp,tempExp);
 								sentAsign.setIntermediateCode(cb.create());
@@ -1009,12 +1123,30 @@ sentenciaAsignacion ::= ref:r ASSIGN:a expresion:exp SEMI_COLON{:
                       
 sentenciaAsignacionSuma ::= ref:r ASSIGN_SUMA:as expresion:exp SEMI_COLON{:															
 								
+								/*----- An·lisis sem·ntico -----*/
+								
 								// El lado derecho de la asignacion debe ser de tipo entero  
 								if(!(exp.getType() instanceof TypeSimpleEntero)){
 									semanticErrorManager.semanticFatalError("Error en linea " + as.getLine() + ": Incompatibilidad de tipos");
-								}	
-								
+								}									
 								SentenciaAsignacionSuma sentAsignSum = new SentenciaAsignacionSuma(r,exp);
+								
+								/*----- CÛdigo intermedio -----*/
+								
+								ScopeIF scope = scopeManager.getCurrentScope();
+								TemporalFactoryIF tf = new TemporalFactory(scope);
+								IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+								TemporalIF temp = tf.create();
+								TemporalIF tempExp = exp.getTemporal();
+								
+								if(r.getId() != null){
+									SymbolIF symbolVariable = scopeManager.searchSymbol(r.getId());
+									Variable var = new Variable(r.getId(), symbolVariable.getScope());  // esto ya se esta creando en ref?
+									cb.addQuadruple("MVA",temp,var);
+									cb.addQuadruple("STP",temp,tempExp);
+									sentAsignSum.setIntermediateCode(cb.create());
+								}
+								
 								RESULT = sentAsignSum;					
 	                      :};
 

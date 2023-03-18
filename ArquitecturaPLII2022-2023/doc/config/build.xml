@@ -8,7 +8,7 @@
 		se quiera compilar
 	-->
 	
-	<property name="test-file-name" value="miTest.ces"/>
+	<property name="test-file-name" value="programaCompleto.ces"/>
 	
 	<property name="lib" location="lib"/>
 	<property name="test" location="doc/test"/>
