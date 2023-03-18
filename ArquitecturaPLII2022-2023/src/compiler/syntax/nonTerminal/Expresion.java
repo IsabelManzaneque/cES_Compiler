@@ -19,6 +19,7 @@ public class Expresion extends NonTerminal {
 	
 	public Expresion(Expresion e1) {
 		this.type = e1.type;
+		this.value = e1.value;
 	}
 	
 	public Expresion(Expresion e1, Expresion e2) {

@@ -139,14 +139,14 @@ non terminal CuerpoFuncion cuerpoFuncion;
 non terminal CuerpoBloque cuerpoBloque;
 
 // Declaracion de relaciones de precedencia
-precedence left 	OPEN_KEY, CLOSE_KEY;
-precedence right	OPEN_BRACKET, CLOSE_BRACKET;
-precedence left		AUTO_INCREMENTO, NEGACION;
-precedence left		MULT;
-precedence left		PLUS;
-precedence left		LOWER_THAN;
-precedence left		EQUAL;
 precedence left     AND_LOGICA;
+precedence left		EQUAL;
+precedence left		LOWER_THAN;
+precedence left		PLUS;
+precedence left		MULT;
+precedence left		AUTO_INCREMENTO, NEGACION;
+precedence right	OPEN_BRACKET, CLOSE_BRACKET;
+precedence left 	OPEN_KEY, CLOSE_KEY;
 precedence nonassoc SINO;
 precedence nonassoc SI;
             
@@ -793,7 +793,7 @@ expresion ::= NUMERO:num{:
 
 accesoVector ::= IDENTIFICADOR:id OPEN_BRACKET expresion:e CLOSE_BRACKET{:
                  	
-                 	Expresion exp = new Expresion(); 
+                 	Expresion exp = new Expresion(e); 
             		ScopeIF scope = scopeManager.getCurrentScope();
             		
                  	/*----- Análisis semántico -----*/
@@ -816,9 +816,25 @@ accesoVector ::= IDENTIFICADOR:id OPEN_BRACKET expresion:e CLOSE_BRACKET{:
                  	
                  	/*----- Código intermedio -----*/
                  	
+                 	TemporalFactory tf = new TemporalFactory(scope);
+					IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+					
+                 	// anadir codigo intermedio a las cuadruplas de las expresiones
+                 	cb.addQuadruples(e.getIntermediateCode());
+                 	TemporalIF temp = tf.create();
+                 	TemporalIF temp1 = tf.create();
+                 	TemporalIF temp2 = tf.create();
+                 	TemporalIF temp3 = tf.create();
+                 	TemporalIF tempPosicion = e.getTemporal();
+                 	Variable var = new Variable(id.getLexema(), symbol.getScope());
+                 	cb.addQuadruple("MVA",temp1,var);         //direccion base de la variable
+                 	cb.addQuadruple("MV",temp2,tempPosicion); //desplazamiento
+                 	cb.addQuadruple("SUB",temp3,temp1,temp2);
+                 	cb.addQuadruple("MVP",temp,temp3);
                  	
-                 	
-                 	RESULT = new AccesoVector(id.getLexema(), e);
+                 	exp.setTemporal(temp);
+                 	exp.setIntermediateCode(cb.create());
+                 	RESULT = new AccesoVector(id.getLexema(), exp);
                :};
 
 llamadaFuncion ::= IDENTIFICADOR:id OPEN_KEY parametros:param CLOSE_KEY{:					
@@ -959,13 +975,31 @@ sentenciaIncremento ::= IDENTIFICADOR:id AUTO_INCREMENTO SEMI_COLON{:
 					  :};
 
 sentenciaAsignacion ::= ref:r ASSIGN:a expresion:exp SEMI_COLON{:							
-														
+							
+							ScopeIF scope = scopeManager.getCurrentScope();
+							
+							/*----- Análisis semántico -----*/
+							
 							// El lado derecho de la asignacion debe ser de tipo entero  
 							if(!(exp.getType() instanceof TypeSimpleEntero)){
 								semanticErrorManager.semanticFatalError("Error en linea " + a.getLine() + ": Asignación de tipos incompatibles");
+							}							
+							SentenciaAsignacion sentAsign = new SentenciaAsignacion(r,exp);
+							
+							/*----- Código intermedio -----*/
+							TemporalFactoryIF tf = new TemporalFactory(scope);
+							IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+							TemporalIF temp = tf.create();
+							TemporalIF tempExp = exp.getTemporal();
+							
+							if(r.getId() != null){
+								SymbolIF symbolVariable = scopeManager.searchSymbol(r.getId());
+								Variable var = new Variable(r.getId(), symbolVariable.getScope());
+								cb.addQuadruple("MVA",temp,var);
+								cb.addQuadruple("STP",temp,tempExp);
+								sentAsign.setIntermediateCode(cb.create());
 							}
 							
-							SentenciaAsignacion sentAsign = new SentenciaAsignacion(r,exp);
 							RESULT = sentAsign;						
 													
                       :};
@@ -983,13 +1017,19 @@ sentenciaAsignacionSuma ::= ref:r ASSIGN_SUMA:as expresion:exp SEMI_COLON{:
 
 
 ref ::= IDENTIFICADOR:id {:
+
+			Ref ref = new Ref(id.getLexema());
+			ScopeIF scope = scopeManager.getCurrentScope();
+			
+			/*----- Análisis semántico -----*/
+			
 			// comprobar si ref existe 
 			if(!scopeManager.containsSymbol(id.getLexema())){
 				semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": El simbolo '" + id.getLexema() + "' no ha sido declarado");							
 			}
+			SymbolIF symbol = scopeManager.searchSymbol(id.getLexema());
 			
-			// comprobar que ref es de un tipo asignable
-			SymbolIF symbol = scopeManager.searchSymbol(id.getLexema());			
+			// comprobar que ref es de un tipo asignable					
 			if(symbol instanceof SymbolConstant){
 				semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": No es posible modificar una constante");
 			}							
@@ -1000,7 +1040,18 @@ ref ::= IDENTIFICADOR:id {:
 				semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": No es posible hacer asignacion directa a vector");
 			}	
 			
-			RESULT = new Ref(id.getLexema());
+			/*----- Código intermedio -----*/
+			
+			TemporalFactory tf = new TemporalFactory(scope);
+			IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+			TemporalIF temp = tf.create();
+			Variable var = new Variable(id.getLexema(), symbol.getScope());
+			cb.addQuadruple ("MVA", temp, var);
+			
+			// anadir temporal y codigo intermedio a la expresion y propagar
+			ref.setTemporal(temp);
+			ref.setIntermediateCode(cb.create());			
+			RESULT = ref;
 	  :}
       | accesoVector:aV{:
       		RESULT = new Ref(aV);
@@ -1012,11 +1063,15 @@ ref ::= IDENTIFICADOR:id {:
 
 sentenciaSi ::= SI OPEN_KEY expresion:expr CLOSE_KEY sentencia:sSi SINO sentencia:sSino{:
 					
+					
+					/*----- Análisis semántico -----*/
 					//Se evalua como falsa si expresion = 0, verdadera en caso contrario
+					
+					/*----- Código intermedio -----*/
 					
 					SentenciaSi sentSi = new SentenciaSi(expr, sSi, sSino);
 					RESULT = sentSi;			
-						
+					
 			  :}
 	          | SI OPEN_KEY expresion:expr CLOSE_KEY sentencia:sSi{:
 	          		
