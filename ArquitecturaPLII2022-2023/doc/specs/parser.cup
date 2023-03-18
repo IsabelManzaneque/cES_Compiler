@@ -131,8 +131,8 @@ non terminal SentenciaMientras		 sentenciaMientras;
 non terminal SentenciaLlamadaFuncion sentenciaLlamadaFuncion;
 non terminal Parametros			     parametros;
 non terminal SentenciaSalida         sentenciaSalida;
-non terminal         opcionesEscribe;
-non terminal 		 opcionesEscribeEnt;
+non terminal OpcionesEscribe         opcionesEscribe;
+non terminal OpcionesEscribeEnt		 opcionesEscribeEnt;
 non terminal SentenciaDevuelve		 sentenciaDevuelve;
 
 non terminal CuerpoFuncion cuerpoFuncion;
@@ -510,7 +510,7 @@ cuerpoFuncion ::= seccionTipos:sT listadoSentencias:lS{:
 					RESULT = new CuerpoFuncion(sT,lS);
                 :}
                 | seccionTipos:sT seccionVariables:sV listadoSentencias:lS{:
-
+					//System.out.println("intermedio lS: " + lS.getIntermediateCode());
                 	RESULT = new CuerpoFuncion(sT,sV,lS);
                 :};
                 
@@ -991,10 +991,10 @@ listadoSentencias ::= listadoSentencias:listaSent sentencia:sent {:
 				   		TemporalFactory tf = new TemporalFactory(scope);
 				   		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 				   		
-				   		TemporalIF temp = sent.getTemporal();
+				   		//TemporalIF temp = sent.getTemporal();
 				   		cb.addQuadruples(listaSent.getIntermediateCode());  //anadir el codigo de los parametros ya generados
 				   		cb.addQuadruples(sent.getIntermediateCode());       //anadir el codigo de la expresion para el nuevo param
-				   		cb.addQuadruple("SENT",temp);                       //anadir el nuevo parametro
+				   		//cb.addQuadruple("SENT",temp);                       //anadir el nuevo parametro
 									
 						listaSent.setIntermediateCode(cb.create());	
 						RESULT = listaSent;
@@ -1020,9 +1020,9 @@ listadoSentencias ::= listadoSentencias:listaSent sentencia:sent {:
 				   		TemporalFactory tf = new TemporalFactory(scope);
 				   		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 				   		
-				   		TemporalIF temp = sent.getTemporal();
+				   		//TemporalIF temp = sent.getTemporal();
 				   		cb.addQuadruples(sent.getIntermediateCode());       //anadir el codigo de la sentencia para el nuevo param
-				   		cb.addQuadruple("SENT",temp);                       //anadir el nuevo parametro
+				   		//cb.addQuadruple("SENT",temp);                       //anadir el nuevo parametro
 									
 						listaSent.setIntermediateCode(cb.create());					   		
                     	RESULT = listaSent;
@@ -1041,7 +1041,17 @@ sentencia ::= sentenciaDevuelve: sentDevl {: RESULT = sentDevl; :}
 	        | bloque:blq {: RESULT = blq; :};
 
 sentenciaDevuelve ::= DEVUELVE SEMI_COLON{:						 
-						 RESULT = new SentenciaDevuelve();					  
+						 
+						 SentenciaDevuelve sentDvl = new SentenciaDevuelve();
+						 
+						 /*----- Código intermedio -----*/	
+	                	 
+	                	 ScopeIF scope = scopeManager.getCurrentScope();
+						 TemporalFactoryIF tf = new TemporalFactory(scope);
+						 LabelFactory lf = new LabelFactory();
+						 IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);	
+						 
+						 RESULT = sentDvl;			  
 					:}
 	                | DEVUELVE expresion:e SEMI_COLON{:		
 	                	  
@@ -1326,22 +1336,83 @@ sentenciaLlamadaFuncion ::= llamadaFuncion:fun SEMI_COLON:sc{:
 
 sentenciaSalida ::= ESCRIBE OPEN_KEY opcionesEscribe:opEsc CLOSE_KEY SEMI_COLON{:
 							
-							SentenciaSalida sentSld = new SentenciaSalida();	
+							SentenciaSalida sentSld = new SentenciaSalida();
+							
+							/*----- Análisis semántico -----*/
+								
 							if(opEsc != null){
-								sentSld.setOpcionEscribe((String)opEsc);								
+								sentSld.setOpcionEscribe(opEsc.getOpciones());								
 							}
+							
+							/*----- Código intermedio -----*/
+							
+							ScopeIF scope = scopeManager.getCurrentScope();
+							TemporalFactoryIF tf = new TemporalFactory(scope);
+							IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+							
+							cb.addQuadruples(opEsc.getIntermediateCode());	
+							cb.addQuadruple("ESCRIBE", opEsc.getOpciones());
+							
+							sentSld.setIntermediateCode(cb.create());	
 							RESULT = sentSld;
 						
                   :}
 	              | ESCRIBE_ENT OPEN_KEY opcionesEscribeEnt:opEscEnt CLOSE_KEY SEMI_COLON{:
 	              			
 	              			SentenciaSalida sentSld = new SentenciaSalida();
+	              			
+	              			/*----- Análisis semántico -----*/
+	              			
 	              			if(opEscEnt != null){
-								sentSld.setOpcionEscribeEntero((Expresion)opEscEnt);								
+								sentSld.setOpcionEscribeEntero(opEscEnt.getOpciones());								
 							}
+							
+							/*----- Código intermedio -----*/
+							
+							ScopeIF scope = scopeManager.getCurrentScope();
+							TemporalFactoryIF tf = new TemporalFactory(scope);
+							IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+							
+							cb.addQuadruples(opEscEnt.getIntermediateCode());
+							cb.addQuadruple("ESCRIBE", opEscEnt.getOpciones());							
+							
+							sentSld.setIntermediateCode(cb.create());						
 							RESULT = sentSld;
                   :};
 	
 	
-opcionesEscribe ::= epsilon | STRING:str {: RESULT = str.getLexema(); :};
-opcionesEscribeEnt ::= epsilon | expresion:expr {: RESULT = expr; :};
+opcionesEscribe ::= epsilon 
+                  | STRING:str {: 
+                  
+                  		OpcionesEscribe opEsc = new OpcionesEscribe(str.getLexema());
+                    	
+                    	/*----- Código intermedio -----*/
+                           
+                        ScopeIF scope = scopeManager.getCurrentScope();
+                        TemporalFactory tf = new TemporalFactory(scope);
+						IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);						   
+						cb.addQuadruple("OPCION",str.getLexema());
+						   
+						opEsc.setIntermediateCode(cb.create());	
+                    	RESULT = opEsc; 
+                  :};
+                  
+opcionesEscribeEnt ::= epsilon 
+                     | expresion:e {: 
+                           
+                           OpcionesEscribeEnt opEscEnt = new OpcionesEscribeEnt(e); 
+                           
+                           /*----- Código intermedio -----*/
+                           
+                           ScopeIF scope = scopeManager.getCurrentScope();
+                           TemporalFactory tf = new TemporalFactory(scope);
+						   IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+						   
+						   TemporalIF temp = e.getTemporal();
+						   cb.addQuadruples(e.getIntermediateCode());
+						   cb.addQuadruple("OPCION",temp);
+						   
+						   opEscEnt.setIntermediateCode(cb.create());						   
+						   RESULT = opEscEnt;
+						   
+                     :};

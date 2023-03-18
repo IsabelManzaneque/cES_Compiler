@@ -18,7 +18,7 @@ vacio principal () {
 	entero i;
 	suma = funSuma (a, b);
 	mayorDiez = ! (suma < 10);
-	si (mayorDiez == VERDADERO) { escribe ("mayor"); }
+	si (mayorDiez == VERDADERO) { escribe ("mayor"); escribeEnt(2); }
 	sino {escribe ("menor");}
 	devuelve;
 }
