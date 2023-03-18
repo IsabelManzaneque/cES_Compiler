@@ -1061,23 +1061,63 @@ ref ::= IDENTIFICADOR:id {:
 // puede contener una sentencia que puede ser un bloque con llaves
 // si no hay llaves, es una sola sentencia y no se abre ambito
 
-sentenciaSi ::= SI OPEN_KEY expresion:expr CLOSE_KEY sentencia:sSi SINO sentencia:sSino{:
+sentenciaSi ::= SI:si OPEN_KEY expresion:e CLOSE_KEY sentencia:sSi SINO sentencia:sSino{:
 					
 					
 					/*----- Análisis semántico -----*/
-					//Se evalua como falsa si expresion = 0, verdadera en caso contrario
+					
+					if(!(e.getType() instanceof TypeSimpleEntero)){
+						semanticErrorManager.semanticFatalError("Error en linea " + si.getLine() + ": Expresion no válida");
+					}
+					SentenciaSi sentSi = new SentenciaSi(e, sSi, sSino);
 					
 					/*----- Código intermedio -----*/
 					
-					SentenciaSi sentSi = new SentenciaSi(expr, sSi, sSino);
+					ScopeIF scope = scopeManager.getCurrentScope();
+					IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);					
+					LabelFactory lf = new LabelFactory();
+					
+					LabelIF labelFinSi = lf.create();       	   //etiqueta para fin de las sentencias si
+					LabelIF labelSino = lf.create();        	   //etiqueta para el sino
+					TemporalIF tempExp = e.getTemporal();
+					
+					cb.addQuadruples(e.getIntermediateCode());     //anadir codigo de la expresion
+					cb.addQuadruple("BRF",tempExp,labelSino);      //si no se cumple la condicion, saltar a etiqueta sino
+					cb.addQuadruples(sSi.getIntermediateCode());   //anadir codigo sentencias parte si					
+					cb.addQuadruple("BR",labelFinSi);              //salto a etiqueta finSi
+					cb.addQuadruple("INL",labelSino);              //etiqueta sino
+					cb.addQuadruples(sSino.getIntermediateCode()); //anadir codigo sentencias parte sino
+					cb.addQuadruple("INL",labelFinSi);			   //etiqueta fin si
+					
+					sentSi.setIntermediateCode(cb.create());					
 					RESULT = sentSi;			
 					
 			  :}
-	          | SI OPEN_KEY expresion:expr CLOSE_KEY sentencia:sSi{:
+	          | SI:si OPEN_KEY expresion:e CLOSE_KEY sentencia:sSi{:
 	          		
-	          		//Se evalua como falsa si expresion = 0, verdadera en caso contrario
+	          		/*----- Análisis semántico -----*/
 					
-					SentenciaSi sentSi = new SentenciaSi(expr, sSi, null);
+					if(!(e.getType() instanceof TypeSimpleEntero)){
+						semanticErrorManager.semanticFatalError("Error en linea " + si.getLine() + ": Expresion no válida");
+					}
+					SentenciaSi sentSi = new SentenciaSi(e, sSi, null);
+					
+					/*----- Código intermedio -----*/
+					
+					ScopeIF scope = scopeManager.getCurrentScope();
+					IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);					
+					LabelFactory lf = new LabelFactory();
+					
+					LabelIF labelFinSi = lf.create();       	   //etiqueta para fin de las sentencias si
+					TemporalIF tempExp = e.getTemporal();
+					
+					cb.addQuadruples(e.getIntermediateCode());     //anadir codigo de la expresion
+					cb.addQuadruple("BRF",tempExp,labelFinSi);     //si no se cumple la condicion, saltar a etiqueta finSi
+					cb.addQuadruples(sSi.getIntermediateCode());   //anadir codigo sentencias parte si	
+					cb.addQuadruple("BR",labelFinSi);              //salto a etiqueta finSi
+					cb.addQuadruple("INL",labelFinSi);			   //etiqueta fin si
+					
+					sentSi.setIntermediateCode(cb.create());					
 					RESULT = sentSi;
 	          
 	          :};
