@@ -5,7 +5,9 @@ import compiler.semantic.symbol.SymbolVariable;
 public class DeclaracionVariable extends NonTerminal {
 	
 	private SymbolVariable symbolVariable;
-
+	
+	public DeclaracionVariable() {}
+	
 	public DeclaracionVariable(SymbolVariable symbolVariable) {
 		super();
 		this.symbolVariable = symbolVariable;

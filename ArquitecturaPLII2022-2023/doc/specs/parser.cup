@@ -162,9 +162,16 @@ program ::=
    :}
   axiom:ax
   {:   		
+  		String cuadruplas = "";
+		List<QuadrupleIF> intermediateCode = ((Axiom2)ax).getIntermediateCode();
+
+		for(QuadrupleIF q : intermediateCode){
+			cuadruplas += q.toString() + "\n";
+		}
+		semanticErrorManager.semanticDebug ("***** CUADRUPLAS *****: \n" + cuadruplas);
+		
   		// No modificar esta estructura, aunque se pueden aÃ±adir mÃ¡s acciones semÃ¡nticas
   		
-  		System.out.println("axioma ci: " + ((Axiom2)ax).getIntermediateCode());
   		//List intermediateCode = ax.getIntermediateCode ();
   		//finalCodeFactory.create (intermediateCode);
 
@@ -199,6 +206,7 @@ axiom ::= {:
 		      :};
 
 //sT.getListaTipos().forEach((n) -> System.out.println(n));
+
 axiom2 ::= seccionConstantes:sC seccionTipos:sT seccionVariables:sV seccionFunciones:sF{:
 		     
 		     Axiom2 axiom2 = new Axiom2(sC,sT,sV,sF);
@@ -208,6 +216,7 @@ axiom2 ::= seccionConstantes:sC seccionTipos:sT seccionVariables:sV seccionFunci
 		   	 ScopeIF scope = scopeManager.getCurrentScope();
 			 IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 			
+			 cb.addQuadruples(sV.getIntermediateCode());
 			 cb.addQuadruples(sF.getIntermediateCode());
 		     
 		     axiom2.setIntermediateCode(cb.create());
@@ -314,24 +323,51 @@ tamTipo ::= NUMERO:num {:
 
 //  VARIABLES
 
-seccionVariables ::= seccionVariables:secVar declaracionVariable:decVar{:
-						secVar.add(decVar);
-						RESULT = secVar;
+seccionVariables ::= seccionVariables:sV declaracionVariable:dec{:
+
+						sV.add(dec);
+						
+						/*----- Código intermedio -----*/
+						
+						ScopeIF scope = scopeManager.getCurrentScope();
+				   		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+				   		
+				   		cb.addQuadruples(sV.getIntermediateCode());  //anadir el codigo de las variables ya generadas
+				   		cb.addQuadruples(dec.getIntermediateCode());       //anadir el codigo de la nueva variable
+				   		
+				   		sV.setIntermediateCode(cb.create());
+						RESULT = sV;
 				   :}
-	               | declaracionVariable:decVar{:
-	               		SeccionVariables secVar = new SeccionVariables();
-	               		secVar.add(decVar);
-	               		RESULT = secVar;
+	               | declaracionVariable:dec{:
+	               		
+	               		SeccionVariables sV = new SeccionVariables();
+	               		sV.add(dec);
+	               		
+	               		/*----- Código intermedio -----*/
+	               		
+	               		ScopeIF scope = scopeManager.getCurrentScope();
+				   		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+	               		
+	               		cb.addQuadruples(dec.getIntermediateCode());
+	               
+	               		sV.setIntermediateCode(cb.create());
+						RESULT = sV;
 				   :};
+				   
 		
-declaracionVariable ::= ENTERO listadoIDs:listaId SEMI_COLON:sc{:  
-							
-							// Obtener ambito actual y tabla de simbolos
+declaracionVariable ::= ENTERO listadoIDs:lIDs SEMI_COLON:sc{:  							
+														
 							ScopeIF scope = scopeManager.getCurrentScope();
 							SymbolTableIF tablaSimbolos = scope.getSymbolTable();
+							TemporalFactory tf = new TemporalFactory(scope);
+							IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);														
 							
 							// Anadir cada identificador a tabla de simbolos							
-							for(Id id : listaId.getListaIds()){								
+							for(Id id : lIDs.getListaIds()){								
+								
+								DeclaracionVariable dV = new DeclaracionVariable();
+								
+								/*----- Análisis semántico -----*/
 												
 								if(tablaSimbolos.containsSymbol(id.getName())){
 									semanticErrorManager.semanticFatalError("Error en linea " + sc.getLine() + ": variable '" + id.getName() + "' ya declarada");								
@@ -341,20 +377,35 @@ declaracionVariable ::= ENTERO listadoIDs:listaId SEMI_COLON:sc{:
 								SymbolVariable symbolVariable = new SymbolVariable(scope, id.getName(), tipo);
 								symbolVariable.setValue(id.getValue()); 
 								tablaSimbolos.addSymbol(symbolVariable);
+								dV.setSymbolVariable(symbolVariable);								
 								
-								RESULT = new DeclaracionVariable(symbolVariable);								
+								/*----- Código intermedio -----*/
+								
+								TemporalIF temp = tf.create();
+								Variable var = new Variable(id.getName(), scope);
+								
+								cb.addQuadruple("MVP",temp,var);								
+							
+								dV.setTemporal(temp);
+								dV.setIntermediateCode(cb.create());
+								RESULT = dV;								
 							}					
 					   :}
 					   
- 	                  | IDENTIFICADOR:iden listadoIDs:listaId SEMI_COLON:sc{:
+ 	                  | IDENTIFICADOR:iden listadoIDs:lIDs SEMI_COLON:sc{:
 							
-							// Obtener ambito actual y tabla de simbolos 
 							ScopeIF scope = scopeManager.getCurrentScope();
-							SymbolTableIF tablaSimbolos = scope.getSymbolTable();				
+							SymbolTableIF tablaSimbolos = scope.getSymbolTable();
+							TemporalFactory tf = new TemporalFactory(scope);
+							IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);				
 							
 							// Anadir cada identificador a tabla de simbolos
-							for(Id id : listaId.getListaIds()){
-																								
+							for(Id id : lIDs.getListaIds()){
+								
+								DeclaracionVariable dV = new DeclaracionVariable();
+								
+								/*----- Análisis semántico -----*/
+														
 								if(tablaSimbolos.containsSymbol(id.getName())){
 									semanticErrorManager.semanticFatalError("Error en linea " + sc.getLine() + ": variable '" + id.getName() + "' ya declarada");								
 								}																	
@@ -365,8 +416,18 @@ declaracionVariable ::= ENTERO listadoIDs:listaId SEMI_COLON:sc{:
 								TypeIF tipo = scopeManager.searchType(iden.getLexema());  
 								SymbolVariable symbolVariable = new SymbolVariable(scope, id.getName(), tipo);							
 								tablaSimbolos.addSymbol(symbolVariable);
+								dV.setSymbolVariable(symbolVariable);
 								
-								RESULT = new DeclaracionVariable(symbolVariable);
+								/*----- Código intermedio -----*/
+								
+								TemporalIF temp = tf.create();
+								Variable var = new Variable(id.getName(), scope);
+								
+								cb.addQuadruple("MVP",temp,var);								
+							
+								dV.setTemporal(temp);
+								dV.setIntermediateCode(cb.create());
+								RESULT = dV;	
 							}					
 					   :};
 
@@ -450,6 +511,8 @@ funcionPrincipal ::= VACIO principal OPEN_KEY CLOSE_KEY OPEN_PARENTHESIS{:
 				  	 
 				  	 cuerpoFuncion:cFun CLOSE_PARENTHESIS {:		
 				  	 	
+				  	 	/*----- Análisis semántico -----*/
+				  	 	
 				  	 	if(cFun.getListadoSentencias().getDevuelve()){
 							semanticErrorManager.semanticFatalError("Error: La funcion principal no debe devolver una expresión");
 						}	
@@ -501,6 +564,8 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 			:} 
 			 
 			cuerpoFuncion:cFun CLOSE_PARENTHESIS {:	
+				
+				/*----- Análisis semántico -----*/
 				
 				if(!cFun.getListadoSentencias().getDevuelve() ||
 				   !(cFun.getListadoSentencias().getTipoDevuelto() instanceof TypeSimpleEntero)){
@@ -555,6 +620,8 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 			 
 			cuerpoFuncion:cFun CLOSE_PARENTHESIS {:			
 				
+				/*----- Análisis semántico -----*/
+				
 				if(cFun.getListadoSentencias().getDevuelve()){
 					semanticErrorManager.semanticFatalError("Error: La funcion de tipo vacio '" +id.getLexema()+"' no debe devolver una expresión");
 				}
@@ -603,7 +670,7 @@ cuerpoFuncion ::= seccionTipos:sT listadoSentencias:lS{:
 					IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 					
 				//	cb.addQuadruples(sT.getIntermediateCode());
-				//	cb.addQuadruples(sV.getIntermediateCode());
+					cb.addQuadruples(sV.getIntermediateCode());
 					cb.addQuadruples(lS.getIntermediateCode());
 					
 					cP.setIntermediateCode(cb.create());
