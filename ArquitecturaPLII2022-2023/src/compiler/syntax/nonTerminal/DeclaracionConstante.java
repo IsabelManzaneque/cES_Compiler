@@ -5,7 +5,9 @@ import compiler.semantic.symbol.SymbolConstant;
 public class DeclaracionConstante extends NonTerminal {
 	
 	private SymbolConstant symbolConstant;
-
+	
+	public DeclaracionConstante() {}
+	
 	public DeclaracionConstante(SymbolConstant symbolConstant) {
 		super();
 		this.symbolConstant = symbolConstant;

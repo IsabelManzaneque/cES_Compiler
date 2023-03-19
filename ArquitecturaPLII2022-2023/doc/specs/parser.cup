@@ -94,7 +94,7 @@ terminal Token STRING;
 // Declaracion de no terminales
 
 non terminal Program                 program;
-non terminal 		             axiom;
+non terminal 		                 axiom;
 non terminal Axiom2                  axiom2;
 non terminal FuncionPrincipal        funcionPrincipal;
 non terminal Epsilon   			     epsilon;
@@ -215,7 +215,8 @@ axiom2 ::= seccionConstantes:sC seccionTipos:sT seccionVariables:sV seccionFunci
 						   		
 		   	 ScopeIF scope = scopeManager.getCurrentScope();
 			 IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
-			
+			 
+			 cb.addQuadruples(sC.getIntermediateCode());
 			 cb.addQuadruples(sV.getIntermediateCode());
 			 cb.addQuadruples(sF.getIntermediateCode());
 		     
@@ -230,7 +231,8 @@ axiom2 ::= seccionConstantes:sC seccionTipos:sT seccionVariables:sV seccionFunci
 						   		
 		   	 ScopeIF scope = scopeManager.getCurrentScope();
 			 IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
-			
+			 
+			 cb.addQuadruples(sC.getIntermediateCode());
 			 cb.addQuadruples(sF.getIntermediateCode());
 	       	 
 	       	 axiom2.setIntermediateCode(cb.create());
@@ -239,21 +241,36 @@ axiom2 ::= seccionConstantes:sC seccionTipos:sT seccionVariables:sV seccionFunci
  
                  
 //  CONSTANTES
+    
 
-seccionConstantes ::= declaracionConstante:decConst seccionConstantes:secConst{:
-						  if(secConst == null){							    			     
-						  	secConst = new SeccionConstantes();		
+seccionConstantes ::= declaracionConstante:dec seccionConstantes:sC{:
+
+						  if(sC == null){							    			     
+						  	sC = new SeccionConstantes();		
 						  }
-						  secConst.add(decConst);				  
-						  RESULT = secConst;
+						  sC.add(dec);	
+						  
+						  /*----- Código intermedio -----*/
+						  			  
+						  ScopeIF scope = scopeManager.getCurrentScope();
+				   		  IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);			 
+				   		  
+				   		  cb.addQuadruples(sC.getIntermediateCode());  //anadir el codigo de las constantes ya generadas
+				   		  cb.addQuadruples(dec.getIntermediateCode());       //anadir el codigo de la nueva constante
+				   		  
+				   		  sC.setIntermediateCode(cb.create()); 
+						  RESULT = sC;
                     :}
                     | epsilon;
 epsilon ::= ;
 
 declaracionConstante ::= CONSTANTE IDENTIFICADOR:id NUMERO:value SEMI_COLON{:  	      		 	
 							
-							// Obtener ambito actual y tablas de simbolos y tipos 
 							ScopeIF scope = scopeManager.getCurrentScope();
+							DeclaracionConstante dC = new DeclaracionConstante();
+							
+							/*----- Análisis semántico -----*/
+							
 							SymbolTableIF tablaSimbolos = scope.getSymbolTable();
 							TypeTableIF tablaTipos = scope.getTypeTable();
 														
@@ -262,13 +279,24 @@ declaracionConstante ::= CONSTANTE IDENTIFICADOR:id NUMERO:value SEMI_COLON{:
 								semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": constante '" + id.getLexema() + "' ya declarada");								
 							}	
 																				
-							// Introduce constante en tabla de simbolos	
 							TypeIF tipo = scopeManager.searchType("ENTERO");  
 							SymbolConstant symbolConstant = new SymbolConstant(scope, id.getLexema(), tipo);
 							symbolConstant.setValue(Integer.parseInt(value.getLexema())); 
 							tablaSimbolos.addSymbol(symbolConstant);	
+							dC.setSymbolConstant(symbolConstant);
+														
+							/*----- Código intermedio -----*/
 							
-							RESULT = new DeclaracionConstante(symbolConstant);							
+							TemporalFactory tf = new TemporalFactory(scope);
+							IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+							TemporalIF temp = tf.create();
+							
+							Value val = new Value(symbolConstant.getValue());
+							cb.addQuadruple("MV",temp,val);
+							
+							dC.setTemporal(temp);
+							dC.setIntermediateCode(cb.create());														
+							RESULT = dC;							
 					   :};
 
 //  TIPOS 
@@ -567,9 +595,8 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 				
 				/*----- Análisis semántico -----*/
 				
-				if(!cFun.getListadoSentencias().getDevuelve() ||
-				   !(cFun.getListadoSentencias().getTipoDevuelto() instanceof TypeSimpleEntero)){
-					semanticErrorManager.semanticFatalError("Error: La funcion de tipo entero '" +id.getLexema()+"' debe devolver una expresión de tipo entero");
+				if(!cFun.getListadoSentencias().getDevuelve()){
+					semanticErrorManager.semanticFatalError("Error: La funcion '" +id.getLexema()+"' debe devolver una expresión de tipo entero");
 				}
 				
 				TypeIF tipo = scopeManager.searchType("ENTERO");
@@ -623,7 +650,7 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 				/*----- Análisis semántico -----*/
 				
 				if(cFun.getListadoSentencias().getDevuelve()){
-					semanticErrorManager.semanticFatalError("Error: La funcion de tipo vacio '" +id.getLexema()+"' no debe devolver una expresión");
+					semanticErrorManager.semanticFatalError("Error: La funcion '" +id.getLexema()+"' no debe devolver una expresión");
 				}
 				
 				TypeIF tipo = scopeManager.searchType("VACIO");
@@ -1180,12 +1207,8 @@ listadoSentencias ::= listadoSentencias:lS sentencia:sent {:
 						
 						/*----- Análisis semántico -----*/
 						
-						if(sent instanceof SentenciaDevuelve){
-							SentenciaDevuelve sentDevuelve = (SentenciaDevuelve)sent;
-							if(sentDevuelve.getExpresion() != null){
-								lS.setDevuelve(true);
-								lS.setTipoDevuelto(sentDevuelve.getExpresion().getType());
-							}
+						if(sent instanceof SentenciaDevuelve  &&  ((SentenciaDevuelve)sent).getExpresion() != null){						
+							lS.setDevuelve(true);									
 						}
 						lS.add(sent);			
 						
@@ -1206,12 +1229,8 @@ listadoSentencias ::= listadoSentencias:lS sentencia:sent {:
                     	
                     	/*----- Análisis semántico -----*/
                     	
-                    	if(sent instanceof SentenciaDevuelve){
-							SentenciaDevuelve sentDevuelve = (SentenciaDevuelve)sent;
-							if(sentDevuelve.getExpresion() != null){
-								lS.setDevuelve(true);
-								lS.setTipoDevuelto(sentDevuelve.getExpresion().getType());
-							}
+                    	if(sent instanceof SentenciaDevuelve  &&  ((SentenciaDevuelve)sent).getExpresion() != null){						
+							lS.setDevuelve(true);									
 						}												
                     	lS.add(sent);
                     	
@@ -1251,10 +1270,14 @@ sentenciaDevuelve ::= DEVUELVE SEMI_COLON{:
 						 
 						 RESULT = sentDvl;			  
 					:}
-	                | DEVUELVE expresion:e SEMI_COLON{:		
+	                | DEVUELVE:d expresion:e SEMI_COLON{:		
 	                	  
 	                	 SentenciaDevuelve sentDvl = new SentenciaDevuelve(e);
 	                	 
+	                	 if(!(e.getType() instanceof TypeSimpleEntero)){
+							semanticErrorManager.semanticFatalError("Error en linea " + d.getLine() + ": La expresion devuelta debe ser de tipo entero");
+						 }
+				
 	                	 /*----- Código intermedio -----*/	
 	                	 
 	                	 ScopeIF scope = scopeManager.getCurrentScope();

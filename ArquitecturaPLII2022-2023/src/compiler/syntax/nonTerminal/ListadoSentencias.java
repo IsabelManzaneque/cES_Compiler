@@ -8,13 +8,11 @@ public class ListadoSentencias extends NonTerminal {
 	
 	private ArrayList<Sentencia> listaSentencias;
 	private Boolean devuelve;
-	private TypeIF tipoDevuelto;
 	
 	public ListadoSentencias() {
 		super();
 		this.listaSentencias = new ArrayList<>();
 		this.devuelve = false;
-		this.tipoDevuelto = null;
 		
 	}
 
@@ -35,14 +33,6 @@ public class ListadoSentencias extends NonTerminal {
 	}
 	
 	
-	public TypeIF getTipoDevuelto() {
-		return tipoDevuelto;
-	}
-
-	public void setTipoDevuelto(TypeIF tipoDevuelto) {
-		this.tipoDevuelto = tipoDevuelto;
-	}
-
 	public void add(Sentencia sentencia) {
 		listaSentencias.add(sentencia);
 	}
