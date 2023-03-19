@@ -192,21 +192,43 @@ axiom ::= {:
 			  axiom2:ax
 			
 			  {:			
-			  	System.out.println("axioma2 ci: " + ax.getIntermediateCode());
 				// Cerrar ambito global
 				ScopeIF scope = scopeManager.getCurrentScope();
 				scopeManager.closeScope();	
 				RESULT = ax;			
 		      :};
 
+//sT.getListaTipos().forEach((n) -> System.out.println(n));
 axiom2 ::= seccionConstantes:sC seccionTipos:sT seccionVariables:sV seccionFunciones:sF{:
-		     RESULT = new Axiom2(sC,sT,sV,sF);
+		     
+		     Axiom2 axiom2 = new Axiom2(sC,sT,sV,sF);
+		     
+		     /*----- Código intermedio -----*/
+						   		
+		   	 ScopeIF scope = scopeManager.getCurrentScope();
+			 IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+			
+			 cb.addQuadruples(sF.getIntermediateCode());
+		     
+		     axiom2.setIntermediateCode(cb.create());
+		     RESULT = axiom2;
 		 :}
 	     | seccionConstantes:sC seccionTipos:sT seccionFunciones:sF{:
-	       	 //sT.getListaTipos().forEach((n) -> System.out.println(n));
-	       	 RESULT = new Axiom2(sC,sT,sF);
+	       	 
+	       	 Axiom2 axiom2 = new Axiom2(sC,sT,sF);
+	       	 
+	       	 /*----- Código intermedio -----*/
+						   		
+		   	 ScopeIF scope = scopeManager.getCurrentScope();
+			 IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+			
+			 cb.addQuadruples(sF.getIntermediateCode());
+	       	 
+	       	 axiom2.setIntermediateCode(cb.create());
+		     RESULT = axiom2;
 		 :};
  
+                 
 //  CONSTANTES
 
 seccionConstantes ::= declaracionConstante:decConst seccionConstantes:secConst{:
@@ -375,12 +397,36 @@ id ::= IDENTIFICADOR:id{:
 // Se han modificado las producciones de la funcion principal y las funciones para que
 // ambas uilicen el no terminal "cuerpoFuncion" y asi evitar conflictos
 
-seccionFunciones ::= funcion:fun seccionFunciones:secFun{:
-                        secFun.addFuncion(fun);
-                        RESULT = secFun;						
+      
+seccionFunciones ::= funcion:fun seccionFunciones:sF{:
+
+                        sF.addFuncion(fun);
+                        
+                        /*----- Código intermedio -----*/
+						
+	                    ScopeIF scope = scopeManager.getCurrentScope();
+				   		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);	
+				   		
+				   		cb.addQuadruples(sF.getIntermediateCode());  //anadir el codigo de las funciones ya generadas
+				   		cb.addQuadruples(fun.getIntermediateCode());       //anadir el codigo de la nueva funcion
+				   		
+				   		sF.setIntermediateCode(cb.create());
+                        RESULT = sF;	
+                        					
                    :}
                    | funcionPrincipal:funP{:
-                   		RESULT = new SeccionFunciones(funP);                  
+                   		
+                   		SeccionFunciones sF = new SeccionFunciones(funP); 
+                   		
+                   		/*----- Código intermedio -----*/
+						
+	                    ScopeIF scope = scopeManager.getCurrentScope();
+				   		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);   
+				   		
+				   		cb.addQuadruples(funP.getIntermediateCode());
+                   		
+                   		sF.setIntermediateCode(cb.create());
+                   		RESULT = sF;              
                    :};
 
 funcionPrincipal ::= VACIO principal OPEN_KEY CLOSE_KEY OPEN_PARENTHESIS{:	
@@ -402,19 +448,28 @@ funcionPrincipal ::= VACIO principal OPEN_KEY CLOSE_KEY OPEN_PARENTHESIS{:
 						TypeTableIF tablaTipos = scope.getTypeTable();																								
 				  	 :} 
 				  	 
-				  	 cuerpoFuncion:cFunc CLOSE_PARENTHESIS {:		
+				  	 cuerpoFuncion:cFun CLOSE_PARENTHESIS {:		
 				  	 	
-				  	 	if(cFunc.getListadoSentencias().getDevuelve()){
+				  	 	if(cFun.getListadoSentencias().getDevuelve()){
 							semanticErrorManager.semanticFatalError("Error: La funcion principal no debe devolver una expresión");
 						}	
 						
-						//cerrar ambito 
-						ScopeIF scope = scopeManager.getCurrentScope();
-						scopeManager.closeScope();	
-						
 						TypeIF tipo = scopeManager.searchType("VACIO");
-						FuncionPrincipal funP = new FuncionPrincipal(tipo,"principal",cFunc);
-						RESULT = funP;			
+						FuncionPrincipal funP = new FuncionPrincipal(tipo,"principal",cFun);
+						
+						/*----- Código intermedio -----*/
+				
+						ScopeIF scope = scopeManager.getCurrentScope();
+						IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+				
+						cb.addQuadruples(cFun.getIntermediateCode());
+						
+						funP.setIntermediateCode(cb.create());
+						RESULT = funP;
+										
+						//cerrar ambito 						
+						scopeManager.closeScope();	
+		
 					 :};
 
 funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN_PARENTHESIS
@@ -445,20 +500,29 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 				}													
 			:} 
 			 
-			cuerpoFuncion:cFunc CLOSE_PARENTHESIS {:	
+			cuerpoFuncion:cFun CLOSE_PARENTHESIS {:	
 				
-				if(!cFunc.getListadoSentencias().getDevuelve() ||
-				   !(cFunc.getListadoSentencias().getTipoDevuelto() instanceof TypeSimpleEntero)){
+				if(!cFun.getListadoSentencias().getDevuelve() ||
+				   !(cFun.getListadoSentencias().getTipoDevuelto() instanceof TypeSimpleEntero)){
 					semanticErrorManager.semanticFatalError("Error: La funcion de tipo entero '" +id.getLexema()+"' debe devolver una expresión de tipo entero");
 				}
 				
-				//cerrar ambito 
-				ScopeIF scope = scopeManager.getCurrentScope();
-				scopeManager.closeScope();	
-				
 				TypeIF tipo = scopeManager.searchType("ENTERO");
-				Funcion fun = new Funcion(tipo,id.getLexema(),sP,cFunc);
-			    RESULT = fun;			
+				Funcion fun = new Funcion(tipo,id.getLexema(),sP,cFun);
+				
+				/*----- Código intermedio -----*/
+				
+				ScopeIF scope = scopeManager.getCurrentScope();
+				IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+				
+				cb.addQuadruples(cFun.getIntermediateCode());
+				
+				fun.setIntermediateCode(cb.create());
+				RESULT = fun;
+				
+				//cerrar ambito 				
+				scopeManager.closeScope();	
+		
 			:}
 			 
 	      | VACIO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN_PARENTHESIS {:
@@ -489,71 +553,112 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 				}											
 			:} 
 			 
-			cuerpoFuncion:cFunc CLOSE_PARENTHESIS {:			
+			cuerpoFuncion:cFun CLOSE_PARENTHESIS {:			
 				
-				if(cFunc.getListadoSentencias().getDevuelve()){
+				if(cFun.getListadoSentencias().getDevuelve()){
 					semanticErrorManager.semanticFatalError("Error: La funcion de tipo vacio '" +id.getLexema()+"' no debe devolver una expresión");
 				}
 				
-				//cerrar ambito 
-				ScopeIF scope = scopeManager.getCurrentScope();
-				scopeManager.closeScope();		
-				
 				TypeIF tipo = scopeManager.searchType("VACIO");
-				Funcion fun = new Funcion(tipo,id.getLexema(),sP,cFunc);
-			    RESULT = fun;		
+				Funcion fun = new Funcion(tipo,id.getLexema(),sP,cFun);
+				
+				/*----- Código intermedio -----*/
+				
+				ScopeIF scope = scopeManager.getCurrentScope();
+				IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+				
+				cb.addQuadruples(cFun.getIntermediateCode());
+				
+				fun.setIntermediateCode(cb.create());
+				RESULT = fun;
+				
+				//cerrar ambito 				
+				scopeManager.closeScope();		
+		
 			:};
 			
-			   
+			
 cuerpoFuncion ::= seccionTipos:sT listadoSentencias:lS{:
      
-					RESULT = new CuerpoFuncion(sT,lS);
+					CuerpoFuncion cP = new CuerpoFuncion(sT,lS);
+					
+					/*----- Código intermedio -----*/
+						   		
+					ScopeIF scope = scopeManager.getCurrentScope();
+					IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+					
+				//	cb.addQuadruples(sT.getIntermediateCode());
+					cb.addQuadruples(lS.getIntermediateCode());
+					
+					cP.setIntermediateCode(cb.create());
+					RESULT = cP;
                 :}
                 | seccionTipos:sT seccionVariables:sV listadoSentencias:lS{:
-					//System.out.println("intermedio lS: " + lS.getIntermediateCode());
-                	RESULT = new CuerpoFuncion(sT,sV,lS);
+					
+                	CuerpoFuncion cP = new CuerpoFuncion(sT,sV,lS);
+                	
+                	/*----- Código intermedio -----*/
+						   		
+					ScopeIF scope = scopeManager.getCurrentScope();
+					IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+					
+				//	cb.addQuadruples(sT.getIntermediateCode());
+				//	cb.addQuadruples(sV.getIntermediateCode());
+					cb.addQuadruples(lS.getIntermediateCode());
+					
+					cP.setIntermediateCode(cb.create());
+					RESULT = cP;
                 :};
                 
-seccionParametros ::= declaracionParametros:decParam{:						
-						RESULT = new SeccionParametros(decParam);						
+seccionParametros ::= declaracionParametros:dP{:		
+				
+						SeccionParametros sP = new SeccionParametros(dP);	
+						
+						/*----- Código intermedio -----*/
+						   		
+						ScopeIF scope = scopeManager.getCurrentScope();
+						IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+						
+						cb.addQuadruples(dP.getIntermediateCode());
+						
+						sP.setIntermediateCode(cb.create());
+						RESULT = sP;					
 			        :} 
 			        | epsilon;
 
-declaracionParametros  ::= parametro:param COLON declaracionParametros:dC{:		
+declaracionParametros  ::= parametro:param COLON declaracionParametros:dP{:		
 								
-								dC.add(param);
+								dP.add(param);
 						   		
 						   		/*----- Código intermedio -----*/
 						   		
 						   		ScopeIF scope = scopeManager.getCurrentScope();
-						   		TemporalFactory tf = new TemporalFactory(scope);
 						   		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 						   		
-						   		TemporalIF temp = param.getTemporal();
-						   		cb.addQuadruples(dC.getIntermediateCode());    // anadir el codigo de los parametros ya generados
+				//		   		TemporalIF temp = param.getTemporal();
+						   		cb.addQuadruples(dP.getIntermediateCode());    // anadir el codigo de los parametros ya generados
 						   		cb.addQuadruples(param.getIntermediateCode()); // anadir el codigo del nuevo parametro
-						   		cb.addQuadruple("PARAM",temp);                 // anadir el nuevo parametro
+				//		   		cb.addQuadruple("PARAM",temp);                 // anadir el nuevo parametro
 						   		
-						   		dC.setIntermediateCode(cb.create());
-						   		RESULT = dC;	 	
+						   		dP.setIntermediateCode(cb.create());
+						   		RESULT = dP;	 	
 						 :}
                          | parametro:param {:
                          
-                         		DeclaracionParametros dC = new DeclaracionParametros();
-                         		dC.add(param);
+                         		DeclaracionParametros dP = new DeclaracionParametros();
+                         		dP.add(param);
                          		
                          		/*----- Código intermedio -----*/
 						   		
 						   		ScopeIF scope = scopeManager.getCurrentScope();
-						   		TemporalFactory tf = new TemporalFactory(scope);
 						   		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 						   		
-						   		TemporalIF temp = param.getTemporal();
+				//		   		TemporalIF temp = param.getTemporal();
 						   		cb.addQuadruples(param.getIntermediateCode()); // anadir el codigo del nuevo parametro
-						   		cb.addQuadruple("PARAM",temp);                 // anadir el nuevo parametro
+				//		   		cb.addQuadruple("PARAM",temp);                 // anadir el nuevo parametro
 						   		
-						   		dC.setIntermediateCode(cb.create());
-                         		RESULT = dC;                         
+						   		dP.setIntermediateCode(cb.create());
+                         		RESULT = dP;                         
                          :};
 
 parametro ::= ENTERO IDENTIFICADOR:id{:	
@@ -586,9 +691,9 @@ expresion ::= NUMERO:num{:
 				TemporalFactory tf = new TemporalFactory(scope);
 				IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 				TemporalIF temp = tf.create();
+				
 				cb.addQuadruple ("MV", temp, Integer.parseInt(num.getLexema()));
 				
-				// anadir temporal y codigo intermedio a la expresion y propagar
 				exp.setTemporal(temp);
 				exp.setIntermediateCode(cb.create());						
 				RESULT = exp; 
@@ -624,7 +729,6 @@ expresion ::= NUMERO:num{:
 					exp.setValue(((SymbolVariable)symbol).getValue()); //para el acceso a vector
 				}
 				
-				// anadir temporal y codigo intermedio a la expresion y propagar
 				exp.setTemporal(temp);
 				exp.setIntermediateCode(cb.create());						
 				RESULT = exp; 		
@@ -653,11 +757,11 @@ expresion ::= NUMERO:num{:
 				TemporalIF temp1 = e1.getTemporal();
 				TemporalIF temp2 = e2.getTemporal();
 				TemporalIF temp = tf.create();
+				
 				cb.addQuadruples (e1.getIntermediateCode());
 				cb.addQuadruples (e2.getIntermediateCode());
 				cb.addQuadruple ("ADD", temp, temp1, temp2);
 				
-				// anadir temporal y codigo intermedio a la expresion y propagar
 				exp.setTemporal(temp);
 				exp.setIntermediateCode(cb.create());						
 				RESULT = exp;
@@ -682,11 +786,11 @@ expresion ::= NUMERO:num{:
 				TemporalIF temp1 = e1.getTemporal();
 				TemporalIF temp2 = e2.getTemporal();
 				TemporalIF temp = tf.create();
+				
 				cb.addQuadruples (e1.getIntermediateCode());
 				cb.addQuadruples (e2.getIntermediateCode());
 				cb.addQuadruple ("MUL", temp, temp1, temp2);
 				
-				// anadir temporal y codigo intermedio a la expresion y propagar
 				exp.setTemporal(temp);
 				exp.setIntermediateCode(cb.create());						
 				RESULT = exp;	
@@ -713,10 +817,10 @@ expresion ::= NUMERO:num{:
 				IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 				TemporalIF temp1 = e1.getTemporal();
 				TemporalIF temp = tf.create();
+				
 				cb.addQuadruples (e1.getIntermediateCode ());
 				cb.addQuadruple ("NOT", temp, temp1);
 				
-				// anadir temporal y codigo intermedio a la expresion y propagar
 				exp.setTemporal(temp);
 				exp.setIntermediateCode(cb.create());						
 				RESULT = exp;
@@ -741,11 +845,11 @@ expresion ::= NUMERO:num{:
 				TemporalIF temp1 = e1.getTemporal();
 				TemporalIF temp2 = e2.getTemporal();
 				TemporalIF temp = tf.create();
+				
 				cb.addQuadruples (e1.getIntermediateCode());
 				cb.addQuadruples (e2.getIntermediateCode());
 				cb.addQuadruple ("LS", temp, temp1, temp2);
 				
-				// anadir temporal y codigo intermedio a la expresion y propagar
 				exp.setTemporal(temp);
 				exp.setIntermediateCode(cb.create());						
 				RESULT = exp;
@@ -771,11 +875,11 @@ expresion ::= NUMERO:num{:
 				TemporalIF temp1 = e1.getTemporal();
 				TemporalIF temp2 = e2.getTemporal();
 				TemporalIF temp = tf.create();
+				
 				cb.addQuadruples (e1.getIntermediateCode());
 				cb.addQuadruples (e2.getIntermediateCode());
 				cb.addQuadruple ("EQ", temp, temp1, temp2);
 				
-				// anadir temporal y codigo intermedio a la expresion y propagar
 				exp.setTemporal(temp);
 				exp.setIntermediateCode(cb.create());						
 				RESULT = exp;
@@ -800,11 +904,11 @@ expresion ::= NUMERO:num{:
 				TemporalIF temp1 = e1.getTemporal();
 				TemporalIF temp2 = e2.getTemporal();
 				TemporalIF temp = tf.create();
+				
 				cb.addQuadruples (e1.getIntermediateCode());
 				cb.addQuadruples (e2.getIntermediateCode());
 				cb.addQuadruple ("AND", temp, temp1, temp2);
 				
-				// anadir temporal y codigo intermedio a la expresion y propagar
 				exp.setTemporal(temp);
 				exp.setIntermediateCode(cb.create());						
 				RESULT = exp;
@@ -867,7 +971,10 @@ accesoVector ::= IDENTIFICADOR:id OPEN_BRACKET expresion:e CLOSE_BRACKET{:
                  	
                  	exp.setTemporal(temp);
                  	exp.setIntermediateCode(cb.create());
-                 	RESULT = new AccesoVector(id.getLexema(), exp);
+                 	
+                 	AccesoVector aV = new AccesoVector(id.getLexema(), exp);
+                 	aV.setIntermediateCode(cb.create());
+                 	RESULT = aV;
                :};
 
 llamadaFuncion ::= IDENTIFICADOR:id OPEN_KEY parametros:param CLOSE_KEY{:					
@@ -916,12 +1023,11 @@ parametros ::= expresion:e{:
                     
                     /*----- Código intermedio -----*/
                     ScopeIF scope = scopeManager.getCurrentScope();
-			   		TemporalFactory tf = new TemporalFactory(scope);
 			   		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 			   		
-			   		TemporalIF temp = e.getTemporal();
+		//	   		TemporalIF temp = e.getTemporal();
 			   		cb.addQuadruples(e.getIntermediateCode());       //anadir el codigo de la expresion para el nuevo param
-			   		cb.addQuadruple("PARAM",temp);                   //anadir el nuevo parametro
+		//	   		cb.addQuadruple("PARAM",temp);                   //anadir el nuevo parametro
                     
                     params.setIntermediateCode(cb.create());
                     RESULT = params;                         
@@ -933,13 +1039,12 @@ parametros ::= expresion:e{:
 			   		/*----- Código intermedio -----*/
 						   		
 			   		ScopeIF scope = scopeManager.getCurrentScope();
-			   		TemporalFactory tf = new TemporalFactory(scope);
 			   		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 			   		
-			   		TemporalIF temp = e.getTemporal();
+		//	   		TemporalIF temp = e.getTemporal();
 			   		cb.addQuadruples(params.getIntermediateCode());  //anadir el codigo de los parametros ya generados
 			   		cb.addQuadruples(e.getIntermediateCode());       //anadir el codigo de la expresion para el nuevo param
-			   		cb.addQuadruple("PARAM",temp);                   //anadir el nuevo parametro
+		//	   		cb.addQuadruple("PARAM",temp);                   //anadir el nuevo parametro
 			   		
 			   		params.setIntermediateCode(cb.create());			   		
 				    RESULT = params;	 	
