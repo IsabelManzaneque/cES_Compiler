@@ -1545,13 +1545,24 @@ sentenciaMientras ::= MIENTRAS:m OPEN_KEY expresion:e CLOSE_KEY sentencia:sent{:
                     :};
 
 sentenciaLlamadaFuncion ::= llamadaFuncion:fun SEMI_COLON:sc{:
+								
+								/*----- Análisis semántico -----*/
+								
 								// Verificar que la funcion es de tipo vacio	
 								SymbolIF symbolFun = scopeManager.searchSymbol(fun.getName());
 								if(!(symbolFun.getType() instanceof TypeSimpleVacio)){
 									semanticErrorManager.semanticFatalError("Error en linea " + sc.getLine() + ": La funcion debe ser de tipo vacio");
-								}	
-								
+								}									
 								SentenciaLlamadaFuncion sentLlamFun = new SentenciaLlamadaFuncion(fun);
+								
+								/*----- Código intermedio -----*/
+								
+								ScopeIF scope = scopeManager.getCurrentScope();
+								IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+								
+								cb.addQuadruples(fun.getIntermediateCode());
+									
+								sentLlamFun.setIntermediateCode(cb.create());	
 								RESULT = sentLlamFun;
                           :};
 
