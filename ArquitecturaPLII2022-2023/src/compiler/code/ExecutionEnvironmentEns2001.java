@@ -3,11 +3,16 @@ package compiler.code;
 import java.util.Arrays;
 import java.util.List;
 
+import compiler.intermediate.Label;
+import compiler.intermediate.Temporal;
+import compiler.intermediate.Value;
+import compiler.intermediate.Variable;
 import compiler.semantic.type.TypeSimple;
 
 import es.uned.lsi.compiler.code.ExecutionEnvironmentIF;
 import es.uned.lsi.compiler.code.MemoryDescriptorIF;
 import es.uned.lsi.compiler.code.RegisterDescriptorIF;
+import es.uned.lsi.compiler.intermediate.OperandIF;
 import es.uned.lsi.compiler.intermediate.QuadrupleIF;
 
 /**
@@ -84,6 +89,23 @@ public class ExecutionEnvironmentEns2001
     {
         return memoryDescriptor;
     }
+    
+    private String operacion(OperandIF o) {
+    	
+    	if(o instanceof Variable) {
+    		return "#-" + ((Variable)o).getAddress() + "[.IX]";
+    	}
+    	if(o instanceof Value) {
+    		return "#" + ((Value)o).getValue();
+    	}
+    	if(o instanceof Temporal) {
+    		return "#-" + ((Temporal)o).getAddress() + "[.IX]";
+    	}
+    	if(o instanceof Label) {
+    		return ((Label)o).getName();
+    	}
+    	return null;
+    }
 
     /**
      * Translate a quadruple into a set of final code instructions. 
@@ -94,6 +116,51 @@ public class ExecutionEnvironmentEns2001
     public final String translate (QuadrupleIF quadruple)
     {      
         //TODO: Student work
+    	
+    	String op = quadruple.getOperation();    	
+    	String op1 = operacion(quadruple.getFirstOperand());
+    	String op2 = operacion(quadruple.getSecondOperand());
+    	String res = operacion(quadruple.getResult());
+    	StringBuffer b = new StringBuffer();
+    	b.append(";" + quadruple.toString() + "\n");
+    	
+    	switch(op){
+    		    	
+		    case "ADD":				
+		    	
+				b.append("ADD " + op1 + ", " + op2 + "\n");
+				b.append("MOVE " + ".A" + ", " + res + "\n");
+				return b.toString();
+		    
+		    case "MV":	
+		    	
+		    	b.append("MOVE " + op1 + ", " + res +"\n");
+				return b.toString();
+		    
+		    case "STARTGLOBAL":
+				
+		    	b.append("MOVE .SP, .IX\n");
+		    	b.append("PUSH #-1\n");
+		    	b.append("PUSH .IX\n");
+		    	b.append("PUSH .SR\n");
+		    	b.append("PUSH .IX\n");
+				return b.toString();
+			
+		    case "PUNTEROGLOBAL":
+				
+		    	b.append("SUB .IX, " + op1 + "\n");
+		    	b.append("MOVE .A, .SP\n");		    	
+				return b.toString();
+				
+		    case "VAR":
+				
+		    	b.append("PUSH " + op1 + "\n");		    	
+				return b.toString();
+		    
+		    default:
+				break;
+		}
+	
         return quadruple.toString(); 
     }
 }

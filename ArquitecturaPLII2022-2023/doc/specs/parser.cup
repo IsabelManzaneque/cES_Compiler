@@ -167,17 +167,18 @@ program ::=
   {:   	
   		// Muestra las cuadruplas que llegan al axioma
   		String cuadruplas = "";
-		List<QuadrupleIF> intermediateCode = ax.getIntermediateCode();
+		List<QuadrupleIF> ic = ax.getIntermediateCode();
 
-		for(QuadrupleIF q : intermediateCode){
+		for(QuadrupleIF q : ic){
 			cuadruplas += q.toString() + "\n";
 		}
 		semanticErrorManager.semanticDebug ("***** CUADRUPLAS *****: \n" + cuadruplas);
 		
   		// No modificar esta estructura, aunque se pueden aÃ±adir mÃ¡s acciones semÃ¡nticas
   		
-  		//List intermediateCode = ax.getIntermediateCode ();
-  		//finalCodeFactory.create (intermediateCode);
+  		List intermediateCode = ax.getIntermediateCode ();
+  		finalCodeFactory.setEnvironment(CompilerContext.getExecutionEnvironment());
+  		finalCodeFactory.create (intermediateCode);
 
   		// En caso de no comentarse las dos sentencias anteriores se puede generar una excepcion
   		// en las llamadas a cupTest si el compilador no estÃ¡ completo. Esto es debido a que 
@@ -201,22 +202,51 @@ axiom ::= {:
 		  	  :}
 			
 			  axiom2:ax2 {:
-			  	
-			  	ScopeIF scope = scopeManager.getCurrentScope();   
+			  	 
 			  	Axiom axiom = new Axiom();			  	
+			  	
+			  	// Asignacion de posiciones de memoria para variables globales y temporales
+			  	for(ScopeIF s : scopeManager.getAllScopes()){
+			  		
+			  		//int dirEstatica = 65535;
+			  		int dirRA = 4; // posiciones reservadas dentro del RA (valor de retorno + e. de control + estado maqina + e. acceso)
+			  							  		
+			  		for(SymbolIF sim : s.getSymbolTable().getSymbols()){			  			
+			  			if(sim instanceof SymbolVariable){
+			  				// guardamos la direccion en SymbolVariable.java y actualizamos dir
+			  				//((SymbolVariable)sim).setAddress(dirEstatica);
+			  				//dirEstatica -= sim.getType().getSize();
+			  				((SymbolVariable)sim).setAddress(dirRA);
+			  				dirRA += sim.getType().getSize();
+			  			}
+			  		}			  		
+			  		for(TemporalIF temp : s.getTemporalTable().getTemporals()){
+			  			if(temp instanceof Temporal){
+			  				// guardamos la direccion en Temporal.java y actualizamos dir
+			  				//((Temporal)temp).setAddress(dirEstatica);
+			  				//dirEstatica -= ((Temporal)temp).getSize();
+			  				((Temporal)temp).setAddress(dirRA);
+			  				dirRA += ((Temporal)temp).getSize();
+			  			}
+			  		}
+			  	}
 			  	
 			  	/*----- Código intermedio -----*/
 			  	
-			  	IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
-			  	
+			  	ScopeIF scope = scopeManager.getCurrentScope(); 
+			  	IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);	
+			  	TemporalFactory tf = new TemporalFactory(scope);
+			  	TemporalIF temp = tf.create();		  			
+			    int tamanoRA = scope.getSymbolTable().getSize() + scope.getTemporalTable().getSize() + 4;	
+			    			     					  
+			  	cb.addQuadruple("STARTGLOBAL"); // prepara el RA global
+			  	cb.addQuadruple("PUNTEROGLOBAL",temp,tamanoRA); // posiciona el SP segun el tamano del RA
 			  	cb.addQuadruples(ax2.getIntermediateCode());
 			  	
-			  	//anadir las cadenas al final del programa
-			  	if(scope.getLevel() == 0){
-			  		for(QuadrupleIF q : listaCadenas){
-			  			cb.addQuadruple(q);
-			  		}
-			  	}			  	
+			  	//anadir las cadenas al final del programa			  	
+			  	for(QuadrupleIF q : listaCadenas){
+			  		cb.addQuadruple(q);
+			  	}			  				  	
 			  	
 			  	axiom.setIntermediateCode(cb.create());
 			  	RESULT = axiom;	
@@ -237,7 +267,7 @@ axiom2 ::= seccionConstantes:sC seccionTipos:sT seccionVariables:sV seccionFunci
 		   	 ScopeIF scope = scopeManager.getCurrentScope();
 			 IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 			 
-			 cb.addQuadruples(sC.getIntermediateCode());
+			 if(sC != null){cb.addQuadruples(sC.getIntermediateCode());}
 			 cb.addQuadruples(sV.getIntermediateCode());
 			 cb.addQuadruples(sF.getIntermediateCode());
 		     
@@ -253,7 +283,7 @@ axiom2 ::= seccionConstantes:sC seccionTipos:sT seccionVariables:sV seccionFunci
 		   	 ScopeIF scope = scopeManager.getCurrentScope();
 			 IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 			 
-			 cb.addQuadruples(sC.getIntermediateCode());
+			 if(sC != null){cb.addQuadruples(sC.getIntermediateCode());}
 			 cb.addQuadruples(sF.getIntermediateCode());
 	       	 
 	       	 axiom2.setIntermediateCode(cb.create());
@@ -306,16 +336,13 @@ declaracionConstante ::= CONSTANTE IDENTIFICADOR:id NUMERO:value SEMI_COLON{:
 							tablaSimbolos.addSymbol(symbolConstant);	
 							dC.setSymbolConstant(symbolConstant);
 														
-							/*----- Código intermedio -----*/
+							/*----- Código intermedio -----*/							
 							
-							TemporalFactory tf = new TemporalFactory(scope);
-							IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
-							TemporalIF temp = tf.create();
+							IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);							
 							
 							Value val = new Value(symbolConstant.getValue());
-							cb.addQuadruple("MV",temp,val);
+							cb.addQuadruple("CONST",val);
 							
-							dC.setTemporal(temp);
 							dC.setIntermediateCode(cb.create());														
 							RESULT = dC;							
 					   :};
@@ -408,7 +435,6 @@ declaracionVariable ::= ENTERO listadoIDs:lIDs SEMI_COLON:sc{:
 														
 							ScopeIF scope = scopeManager.getCurrentScope();
 							SymbolTableIF tablaSimbolos = scope.getSymbolTable();
-							TemporalFactory tf = new TemporalFactory(scope);
 							IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);														
 							
 							// Anadir cada identificador a tabla de simbolos							
@@ -428,14 +454,11 @@ declaracionVariable ::= ENTERO listadoIDs:lIDs SEMI_COLON:sc{:
 								tablaSimbolos.addSymbol(symbolVariable);
 								dV.setSymbolVariable(symbolVariable);								
 								
-								/*----- Código intermedio -----*/
+								/*----- Código intermedio -----*/								
 								
-								TemporalIF temp = tf.create();
-								Variable var = new Variable(id.getName(), scope);
+								Variable var = new Variable(symbolVariable);								
+								cb.addQuadruple("VAR",var,symbolVariable.getValue());								
 								
-								cb.addQuadruple("MVP",temp,var);								
-							
-								dV.setTemporal(temp);
 								dV.setIntermediateCode(cb.create());
 								RESULT = dV;								
 							}					
@@ -445,7 +468,6 @@ declaracionVariable ::= ENTERO listadoIDs:lIDs SEMI_COLON:sc{:
 							
 							ScopeIF scope = scopeManager.getCurrentScope();
 							SymbolTableIF tablaSimbolos = scope.getSymbolTable();
-							TemporalFactory tf = new TemporalFactory(scope);
 							IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);				
 							
 							// Anadir cada identificador a tabla de simbolos
@@ -467,14 +489,11 @@ declaracionVariable ::= ENTERO listadoIDs:lIDs SEMI_COLON:sc{:
 								tablaSimbolos.addSymbol(symbolVariable);
 								dV.setSymbolVariable(symbolVariable);
 								
-								/*----- Código intermedio -----*/
+								/*----- Código intermedio -----*/								
 								
-								TemporalIF temp = tf.create();
-								Variable var = new Variable(id.getName(), scope);
-								
-								cb.addQuadruple("MVP",temp,var);								
+								Variable var = new Variable(symbolVariable);								
+								cb.addQuadruple("VAR",var);								
 							
-								dV.setTemporal(temp);
 								dV.setIntermediateCode(cb.create());
 								RESULT = dV;	
 							}					
@@ -839,7 +858,7 @@ expresion ::= NUMERO:num{:
 					cb.addQuadruple("MV",temp,value);
 					exp.setValue(((SymbolConstant)symbol).getValue()); //para el acceso a vector
 				}else if(symbol instanceof SymbolVariable){
-					Variable var = new Variable(id.getLexema(), symbol.getScope());
+					Variable var = new Variable((SymbolVariable)symbol);
 					cb.addQuadruple("MV",temp,var);
 					exp.setValue(((SymbolVariable)symbol).getValue()); //para el acceso a vector
 				}
@@ -1078,7 +1097,7 @@ accesoVector ::= IDENTIFICADOR:id OPEN_BRACKET expresion:e CLOSE_BRACKET{:
                  	TemporalIF temp2 = tf.create();
                  	TemporalIF temp3 = tf.create();
                  	TemporalIF tempPosicion = e.getTemporal();
-                 	Variable var = new Variable(id.getLexema(), symbol.getScope());
+                 	Variable var = new Variable((SymbolVariable)symbol);
                  	cb.addQuadruple("MVA",temp1,var);         //direccion base de la variable
                  	cb.addQuadruple("MV",temp2,tempPosicion); //desplazamiento
                  	cb.addQuadruple("SUB",temp3,temp1,temp2);
@@ -1337,7 +1356,7 @@ sentenciaIncremento ::= IDENTIFICADOR:id AUTO_INCREMENTO SEMI_COLON{:
 							IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 							
 							TemporalIF temp = tf.create();
-							Variable var = new Variable(id.getLexema(), symbol.getScope());
+							Variable var = new Variable((SymbolVariable)symbol);
 							cb.addQuadruple("MVA",temp,var);
 							
 							sentIncrm.setIntermediateCode(cb.create());
@@ -1432,7 +1451,7 @@ ref ::= IDENTIFICADOR:id {:     //checked
 			IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 			
 			TemporalIF temp = tf.create();			
-			Variable var = new Variable(id.getLexema(), symbol.getScope());
+			Variable var = new Variable((SymbolVariable)symbol);
 			cb.addQuadruple ("MVA", temp, var);
 			
 			// anadir temporal y codigo intermedio a la expresion y propagar

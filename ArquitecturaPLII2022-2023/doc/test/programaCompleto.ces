@@ -3,7 +3,7 @@
 #constante TAM 7;
 
 tipo entero vector [TAM];
-entero suma;
+entero suma = 3;
 entero mayorDiez;
 
 entero funSuma (entero x, entero y) {

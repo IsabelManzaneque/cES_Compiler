@@ -1,0 +1,14 @@
+#constante TRUE 1;
+
+vacio principal () {
+
+entero a = 1;
+entero b = 2;
+entero c;
+
+c = TRUE;
+c = a+b;
+
+devuelve;
+
+}

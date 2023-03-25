@@ -13,6 +13,7 @@ public class Temporal
     private String  name    = null;
     private ScopeIF scope   = null;
     private int     address = 0;
+    private int size = 1;
            
     /**
      * Constructor for Temporal.
@@ -127,4 +128,12 @@ public class Temporal
     {        
         return name;
     }
+
+
+	public int getSize() {
+		return size;
+	}
+
+
+	
 }

@@ -1,0 +1,38 @@
+;Quadruple - [STARTGLOBAL null, null, null]
+MOVE .SP, .IX
+PUSH #-1
+PUSH .IX
+PUSH .SR
+PUSH .IX
+
+;Quadruple - [PUNTEROGLOBAL T_0, 7, null]
+SUB .IX, #7
+MOVE .A, .SP
+
+Quadruple - [CONST 1, null, null]
+;Quadruple - [VAR a, 1, null]
+PUSH #1
+
+;Quadruple - [VAR b, 2, null]
+PUSH #2
+
+;Quadruple - [VAR c, 0, null]
+PUSH #0
+
+;Quadruple - [MV T_1, 1, null]
+MOVE #1, #-8[.IX]
+
+Quadruple - [MVA T_0, c, null]
+Quadruple - [STP T_0, T_1, null]
+;Quadruple - [MV T_4, a, null]
+MOVE #-4[.IX], #-11[.IX]
+
+;Quadruple - [MV T_5, b, null]
+MOVE #-5[.IX], #-12[.IX]
+
+;Quadruple - [ADD T_6, T_4, T_5]
+ADD #-11[.IX], #-12[.IX]
+MOVE .A, #-13[.IX]
+
+Quadruple - [MVA T_3, c, null]
+Quadruple - [STP T_3, T_6, null]
