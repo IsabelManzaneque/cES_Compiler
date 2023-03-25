@@ -136,6 +136,22 @@ public class ExecutionEnvironmentEns2001
 		    	
 		    	b.append("MOVE " + op1 + ", " + res +"\n");
 				return b.toString();
+			
+		    case "BRF":	 // ??
+		    	   	
+		    	b.append("CMP #1, " + op2 + "\n");
+		    	b.append("BNZ /" + op1 + "\n");
+				return b.toString();
+				
+		    case "BR":	 // ??
+	    	   			   
+		    	b.append("BR /" + op1 + "\n");
+				return b.toString();
+				
+		    case "MVA":	 // ??
+	   			   
+		    	b.append("BR /" + op1 + "\n");
+				return b.toString();
 		    
 		    case "STARTGLOBAL":
 				
@@ -155,6 +171,16 @@ public class ExecutionEnvironmentEns2001
 		    case "VAR":
 				
 		    	b.append("PUSH " + op1 + "\n");		    	
+				return b.toString();
+		    
+		    case "ESCRIBE":
+				
+		    	b.append("ESCRIBE /" + op1 + "\n");		    	
+				return b.toString();
+			
+		    case "CADENA":
+				
+		    	b.append(op1 + ": DATA " + res + "\n");		    	
 				return b.toString();
 		    
 		    default:

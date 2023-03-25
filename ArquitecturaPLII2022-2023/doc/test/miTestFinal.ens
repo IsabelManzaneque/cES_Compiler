@@ -22,7 +22,9 @@ PUSH #0
 ;Quadruple - [MV T_1, 1, null]
 MOVE #1, #-8[.IX]
 
-Quadruple - [MVA T_0, c, null]
+;Quadruple - [MVA T_0, c, null]
+BR /#-6[.IX]
+
 Quadruple - [STP T_0, T_1, null]
 ;Quadruple - [MV T_4, a, null]
 MOVE #-4[.IX], #-11[.IX]
@@ -34,5 +36,19 @@ MOVE #-5[.IX], #-12[.IX]
 ADD #-11[.IX], #-12[.IX]
 MOVE .A, #-13[.IX]
 
-Quadruple - [MVA T_3, c, null]
+;Quadruple - [MVA T_3, c, null]
+BR /#-6[.IX]
+
 Quadruple - [STP T_3, T_6, null]
+;Quadruple - [ESCRIBE T_8, L_0, null]
+ESCRIBE /L_0
+
+;Quadruple - [ESCRIBE T_10, L_1, null]
+ESCRIBE /L_1
+
+;Quadruple - [CADENA "c es 10", L_0, null]
+L_0: DATA "c es 10"
+
+;Quadruple - [CADENA T_9, L_1, null]
+L_1: DATA T_9
+

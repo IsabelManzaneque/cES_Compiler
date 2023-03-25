@@ -9,6 +9,9 @@ entero c;
 c = TRUE;
 c = a+b;
 
+escribe("c es 10");
+escribeEnt(c);
+
 devuelve;
 
 }
