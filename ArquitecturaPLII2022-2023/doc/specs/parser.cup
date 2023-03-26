@@ -172,7 +172,7 @@ program ::=
 		for(QuadrupleIF q : ic){
 			cuadruplas += q.toString() + "\n";
 		}
-		semanticErrorManager.semanticDebug ("***** CUADRUPLAS *****: \n" + cuadruplas);
+		//semanticErrorManager.semanticDebug ("***** CUADRUPLAS *****: \n" + cuadruplas);
 		
   		// No modificar esta estructura, aunque se pueden a√±adir m√°s acciones sem√°nticas
   		
@@ -258,7 +258,7 @@ axiom2 ::= seccionConstantes:sC seccionTipos:sT seccionVariables:sV seccionFunci
 		   	 ScopeIF scope = scopeManager.getCurrentScope();
 			 IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 			 
-			 if(sC != null){cb.addQuadruples(sC.getIntermediateCode());}
+		//	 if(sC != null){cb.addQuadruples(sC.getIntermediateCode());}
 			 cb.addQuadruples(sV.getIntermediateCode());
 			 cb.addQuadruples(sF.getIntermediateCode());
 		     
@@ -274,7 +274,7 @@ axiom2 ::= seccionConstantes:sC seccionTipos:sT seccionVariables:sV seccionFunci
 		   	 ScopeIF scope = scopeManager.getCurrentScope();
 			 IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 			 
-			 if(sC != null){cb.addQuadruples(sC.getIntermediateCode());}
+			// if(sC != null){cb.addQuadruples(sC.getIntermediateCode());}
 			 cb.addQuadruples(sF.getIntermediateCode());
 	       	 
 	       	 axiom2.setIntermediateCode(cb.create());
@@ -294,13 +294,13 @@ seccionConstantes ::= declaracionConstante:dec seccionConstantes:sC{:
 						  
 						  /*----- CÛdigo intermedio -----*/
 						  			  
-						  ScopeIF scope = scopeManager.getCurrentScope();
-				   		  IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);			 
+					//	  ScopeIF scope = scopeManager.getCurrentScope();
+				   	//	  IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);			 
 				   		  
-				   		  cb.addQuadruples(sC.getIntermediateCode());  //anadir el codigo de las constantes ya generadas
-				   		  cb.addQuadruples(dec.getIntermediateCode());       //anadir el codigo de la nueva constante
+				   	//	  cb.addQuadruples(sC.getIntermediateCode());  //anadir el codigo de las constantes ya generadas
+				   	//	  cb.addQuadruples(dec.getIntermediateCode());       //anadir el codigo de la nueva constante
 				   		  
-				   		  sC.setIntermediateCode(cb.create()); 
+				   	//	  sC.setIntermediateCode(cb.create()); 
 						  RESULT = sC;
                     :}
                     | epsilon;
@@ -329,12 +329,12 @@ declaracionConstante ::= CONSTANTE IDENTIFICADOR:id NUMERO:value SEMI_COLON{:
 														
 							/*----- CÛdigo intermedio -----*/							
 							
-							IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);							
+							//IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);							
 							
-							Value val = new Value(symbolConstant.getValue());
-							cb.addQuadruple("CONST",val);
+							//Value val = new Value(symbolConstant.getValue());
+							//cb.addQuadruple("CONST",val);
 							
-							dC.setIntermediateCode(cb.create());														
+							//dC.setIntermediateCode(cb.create());														
 							RESULT = dC;							
 					   :};
 
@@ -915,8 +915,30 @@ expresion ::= NUMERO:num{:
 				RESULT = exp;	
 							
 			:}			
-		 	| expresion:e1 AUTO_INCREMENTO{:
-		 		RESULT = new Expresion(e1.getType());
+		 	| expresion:e1 AUTO_INCREMENTO:op{:
+		 		
+		 		Expresion exp = new Expresion(); 
+            	ScopeIF scope = scopeManager.getCurrentScope();
+            	
+            	/*----- An·lisis sem·ntico -----*/
+						 	
+			 	if(!(e1.getType() instanceof TypeSimpleEntero)){
+					semanticErrorManager.semanticFatalError("Error en linea " + op.getLine() + ": Incompatibilidad de tipos");
+				}				
+				exp.setType(e1.getType());
+				
+		 		/*----- CÛdigo intermedio -----*/
+				
+				IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+				TemporalIF temp = e1.getTemporal();
+								
+				cb.addQuadruples (e1.getIntermediateCode());
+				cb.addQuadruple ("INC", temp);
+				
+				exp.setTemporal(temp);
+				exp.setIntermediateCode(cb.create());						
+				RESULT = exp;				
+		 		
 		 	:}
 		 	| NEGACION:op expresion:e1{:
 		 	
@@ -1324,6 +1346,7 @@ sentenciaIncremento ::= IDENTIFICADOR:id AUTO_INCREMENTO SEMI_COLON{:
 								semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": El simbolo '" + id.getLexema() + "' no ha sido declarado");							
 							}				
 							SymbolIF symbol = scopeManager.searchSymbol(id.getLexema());			
+							
 							// comprobar que identificadpr es de un tipo que se puede autoincrementar										
 							if(symbol instanceof SymbolConstant || symbol instanceof SymbolFunction || symbol.getType() instanceof TypeArray){
 								semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": No es posible incrementar '" + id.getLexema() + "'");
@@ -1333,15 +1356,14 @@ sentenciaIncremento ::= IDENTIFICADOR:id AUTO_INCREMENTO SEMI_COLON{:
 							/*----- CÛdigo intermedio -----*/
 							
 							ScopeIF scope = scopeManager.getCurrentScope();
-							TemporalFactoryIF tf = new TemporalFactory(scope);
-							IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
-							
-							TemporalIF temp = tf.create();
-							Variable var = new Variable((SymbolVariable)symbol);
-							cb.addQuadruple("MVA",temp,var);
+							IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);	
+											
+							Variable var = new Variable((SymbolVariable)symbol);													
+							cb.addQuadruple("INC",var);
 							
 							sentIncrm.setIntermediateCode(cb.create());
-							RESULT = sentIncrm;
+							RESULT = sentIncrm;							
+						
 					  :};
 
 sentenciaAsignacion ::= ref:r ASSIGN:a expresion:e SEMI_COLON{:							
@@ -1361,11 +1383,10 @@ sentenciaAsignacion ::= ref:r ASSIGN:a expresion:e SEMI_COLON{:
 							IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);														
 						    
 							TemporalIF tempExp = e.getTemporal();
-							TemporalIF tempRef = r.getTemporal();					
-							TemporalIF temp = tf.create();							
+							TemporalIF tempRef = r.getTemporal();										
 							
 							cb.addQuadruples(e.getIntermediateCode());
-							cb.addQuadruples(r.getIntermediateCode());							
+							cb.addQuadruples(r.getIntermediateCode());														
 							cb.addQuadruple("STP",tempRef,tempExp);
 			
 							sentAsign.setIntermediateCode(cb.create());							
@@ -1393,16 +1414,19 @@ sentenciaAsignacionSuma ::= ref:r ASSIGN_SUMA:as expresion:e SEMI_COLON{:
 								TemporalIF tempRef = r.getTemporal();					
 								TemporalIF temp = tf.create();							
 								
-								cb.addQuadruples(e.getIntermediateCode());
-								cb.addQuadruples(r.getIntermediateCode());							
-								cb.addQuadruple("STP",tempRef,tempExp);
+								cb.addQuadruples(r.getIntermediateCode());
+								cb.addQuadruples(e.getIntermediateCode());								
+								
+								cb.addQuadruple ("ADD", temp, tempRef, tempExp);														
+								cb.addQuadruple("STP",tempRef,temp);
 				
 								sentAsignSum.setIntermediateCode(cb.create());							
-								RESULT = sentAsignSum;					
+								RESULT = sentAsignSum;								
+							
 	                      :};
 
 
-ref ::= IDENTIFICADOR:id {:     //checked
+ref ::= IDENTIFICADOR:id {:     
 
 			Ref ref = new Ref(id.getLexema());
 						

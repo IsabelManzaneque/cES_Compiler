@@ -100,4 +100,3 @@ L_1: DATA "c es 10"
 ;Quadruple - [STR "c es 11", L_2, null]
 L_2: DATA "c es 11"
 
-

@@ -106,6 +106,26 @@ public class ExecutionEnvironmentEns2001
     	}
     	return null;
     }
+    
+    
+    
+ /* SVA (Set Value Address): se utiliza para establecer el valor de una temporal como una dirección de memoria dada. 
+    La instrucción toma una dirección de memoria como operando y la copia en una temporal que se le pasa como destino.
+    
+    STP (Store in Place): se utiliza para almacenar el valor de una temporal en su lugar actual de memoria.
+    La instrucción toma una temporal como operando y la almacena en la dirección de memoria que corresponde a esa temporal.
+
+    MVA (Move Address): se utiliza para copiar la dirección de memoria de una temporal a otra temporal. 
+    La instrucción toma una temporal como operando y la copia en otra temporal que se le pasa como destino.
+
+    MVP (Move Pointer): se utiliza para copiar el valor de una temporal en otra temporal. 
+    La instrucción toma una temporal como operando y copia el valor almacenado en esa dirección de memoria en otra temporal que 
+    se le pasa como destino.
+    
+    En resumen, STP se utiliza para almacenar el valor de una temporal en su dirección de memoria actual, MVA y MVP se utilizan 
+    para copiar la dirección de memoria y el valor de una temporal a otra temporal, respectivamente, y SVA se utiliza para establecer 
+    el valor de una temporal como una dirección de memoria */    
+    
 
     /**
      * Translate a quadruple into a set of final code instructions. 
@@ -139,12 +159,17 @@ public class ExecutionEnvironmentEns2001
 			
 		    case "MVA":	
 		    	
-		     	b.append("MOVE " + op1 + ", " + res + "\n");
+		     	b.append("MOVE #" + ((Variable)quadruple.getFirstOperand()).getAddress() + ", " + res + "\n");
 				return b.toString();
 			
 		    case "MVP":	
 		    	
 		     	b.append("MOVE " + op1 + ", " + res + "\n");
+				return b.toString();
+			
+		    case "INC":	
+		    	
+		     	b.append("INC " + res + "\n");
 				return b.toString();
 				
 		    case "STP":	 

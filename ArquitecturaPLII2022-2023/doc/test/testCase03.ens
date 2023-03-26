@@ -1,0 +1,27 @@
+;Quadruple - [WRSTR T_0, L_0, null]
+WRSTR /L_0
+
+;Quadruple - [MV T_1, 1, null]
+MOVE #1, /65534
+
+;Quadruple - [WRINT T_1, null, null]
+WRINT /65534
+
+;Quadruple - [WRSTR T_2, L_1, null]
+WRSTR /L_1
+
+;Quadruple - [MV T_3, 33, null]
+MOVE #33, /65532
+
+;Quadruple - [WRINT T_3, null, null]
+WRINT /65532
+
+;Quadruple - [HALT null, null, null]
+HALT
+
+;Quadruple - [STR "verdadero", L_0, null]
+L_0: DATA "verdadero"
+
+;Quadruple - [STR "falso", L_1, null]
+L_1: DATA "falso"
+

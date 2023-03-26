@@ -11,7 +11,7 @@ y = 3;
 
 suma = x+y;
 
-escribe("suma =");
+escribe("suma = ");
 escribeEnt(suma);
 
 devuelve;
