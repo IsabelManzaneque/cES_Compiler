@@ -208,25 +208,20 @@ axiom ::= {:
 			  	// Asignacion de posiciones de memoria para variables globales y temporales
 			  	for(ScopeIF s : scopeManager.getAllScopes()){
 			  		
-			  		//int dirEstatica = 65535;
-			  		int dirRA = 4; // posiciones reservadas dentro del RA (valor de retorno + e. de control + estado maqina + e. acceso)
-			  							  		
+			  		int dirEstatica = 65535;
+			  					  							  		
 			  		for(SymbolIF sim : s.getSymbolTable().getSymbols()){			  			
 			  			if(sim instanceof SymbolVariable){
 			  				// guardamos la direccion en SymbolVariable.java y actualizamos dir
-			  				//((SymbolVariable)sim).setAddress(dirEstatica);
-			  				//dirEstatica -= sim.getType().getSize();
-			  				((SymbolVariable)sim).setAddress(dirRA);
-			  				dirRA += sim.getType().getSize();
+			  				((SymbolVariable)sim).setAddress(dirEstatica);
+			  				dirEstatica -= sim.getType().getSize();			  				
 			  			}
 			  		}			  		
 			  		for(TemporalIF temp : s.getTemporalTable().getTemporals()){
 			  			if(temp instanceof Temporal){
 			  				// guardamos la direccion en Temporal.java y actualizamos dir
-			  				//((Temporal)temp).setAddress(dirEstatica);
-			  				//dirEstatica -= ((Temporal)temp).getSize();
-			  				((Temporal)temp).setAddress(dirRA);
-			  				dirRA += ((Temporal)temp).getSize();
+			  				((Temporal)temp).setAddress(dirEstatica);
+			  				dirEstatica -= ((Temporal)temp).getSize();
 			  			}
 			  		}
 			  	}
@@ -234,15 +229,11 @@ axiom ::= {:
 			  	/*----- Código intermedio -----*/
 			  	
 			  	ScopeIF scope = scopeManager.getCurrentScope(); 
-			  	IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);	
-			  	TemporalFactory tf = new TemporalFactory(scope);
-			  	TemporalIF temp = tf.create();		  			
-			    int tamanoRA = scope.getSymbolTable().getSize() + scope.getTemporalTable().getSize() + 4;	
-			    			     					  
-			  	cb.addQuadruple("STARTGLOBAL"); // prepara el RA global
-			  	cb.addQuadruple("PUNTEROGLOBAL",temp,tamanoRA); // posiciona el SP segun el tamano del RA
+			  	IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);				  	 
 			  	cb.addQuadruples(ax2.getIntermediateCode());
 			  	
+			  	//finalizacion del programa
+			  	cb.addQuadruple("HALT");
 			  	//anadir las cadenas al final del programa			  	
 			  	for(QuadrupleIF q : listaCadenas){
 			  		cb.addQuadruple(q);
@@ -721,7 +712,6 @@ cuerpoFuncion ::= seccionTipos:sT listadoSentencias:lS{:
 					ScopeIF scope = scopeManager.getCurrentScope();
 					IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 					
-				//	cb.addQuadruples(sT.getIntermediateCode());
 					cb.addQuadruples(lS.getIntermediateCode());
 					
 					cP.setIntermediateCode(cb.create());
@@ -736,7 +726,6 @@ cuerpoFuncion ::= seccionTipos:sT listadoSentencias:lS{:
 					ScopeIF scope = scopeManager.getCurrentScope();
 					IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 					
-				//	cb.addQuadruples(sT.getIntermediateCode());
 					cb.addQuadruples(sV.getIntermediateCode());
 					cb.addQuadruples(lS.getIntermediateCode());
 					
@@ -769,10 +758,8 @@ declaracionParametros  ::= parametro:param COLON declaracionParametros:dP{:
 						   		ScopeIF scope = scopeManager.getCurrentScope();
 						   		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 						   		
-				//		   		TemporalIF temp = param.getTemporal();
 						   		cb.addQuadruples(dP.getIntermediateCode());    // anadir el codigo de los parametros ya generados
 						   		cb.addQuadruples(param.getIntermediateCode()); // anadir el codigo del nuevo parametro
-				//		   		cb.addQuadruple("PARAM",temp);                 // anadir el nuevo parametro
 						   		
 						   		dP.setIntermediateCode(cb.create());
 						   		RESULT = dP;	 	
@@ -787,9 +774,7 @@ declaracionParametros  ::= parametro:param COLON declaracionParametros:dP{:
 						   		ScopeIF scope = scopeManager.getCurrentScope();
 						   		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 						   		
-				//		   		TemporalIF temp = param.getTemporal();
 						   		cb.addQuadruples(param.getIntermediateCode()); // anadir el codigo del nuevo parametro
-				//		   		cb.addQuadruple("PARAM",temp);                 // anadir el nuevo parametro
 						   		
 						   		dP.setIntermediateCode(cb.create());
                          		RESULT = dP;                         
@@ -859,7 +844,7 @@ expresion ::= NUMERO:num{:
 					exp.setValue(((SymbolConstant)symbol).getValue()); //para el acceso a vector
 				}else if(symbol instanceof SymbolVariable){
 					Variable var = new Variable((SymbolVariable)symbol);
-					cb.addQuadruple("MV",temp,var);
+					cb.addQuadruple("MVP",temp,var);
 					exp.setValue(((SymbolVariable)symbol).getValue()); //para el acceso a vector
 				}
 				
@@ -1159,9 +1144,7 @@ parametros ::= expresion:e{:
                     ScopeIF scope = scopeManager.getCurrentScope();
 			   		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 			   		
-		//	   		TemporalIF temp = e.getTemporal();
-			   		cb.addQuadruples(e.getIntermediateCode());       //anadir el codigo de la expresion para el nuevo param
-		//	   		cb.addQuadruple("PARAM",temp);                   //anadir el nuevo parametro
+			   		cb.addQuadruples(e.getIntermediateCode());       
                     
                     params.setIntermediateCode(cb.create());
                     RESULT = params;                         
@@ -1175,10 +1158,8 @@ parametros ::= expresion:e{:
 			   		ScopeIF scope = scopeManager.getCurrentScope();
 			   		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 			   		
-		//	   		TemporalIF temp = e.getTemporal();
-			   		cb.addQuadruples(params.getIntermediateCode());  //anadir el codigo de los parametros ya generados
-			   		cb.addQuadruples(e.getIntermediateCode());       //anadir el codigo de la expresion para el nuevo param
-		//	   		cb.addQuadruple("PARAM",temp);                   //anadir el nuevo parametro
+			   		cb.addQuadruples(params.getIntermediateCode());  
+			   		cb.addQuadruples(e.getIntermediateCode());       
 			   		
 			   		params.setIntermediateCode(cb.create());			   		
 				    RESULT = params;	 	
@@ -1627,10 +1608,10 @@ sentenciaSalida ::= ESCRIBE OPEN_KEY opcionesEscribe:opEsc CLOSE_KEY SEMI_COLON{
 							LabelIF lb = lf.create();
 							TemporalIF temp = tf.create();
 							
-							cb.addQuadruple("ESCRIBE",temp,lb);
+							cb.addQuadruple("WRSTR",temp,lb);
 														
 							// Guardamos la cadena en la lista para recuperarla al final del programa
-							listaCadenas.add(new Quadruple("CADENA",new Label(str),lb));							
+							listaCadenas.add(new Quadruple("STR",new Label(str),lb));							
 														
 							sentSld.setIntermediateCode(cb.create());	
 							RESULT = sentSld;
@@ -1649,18 +1630,12 @@ sentenciaSalida ::= ESCRIBE OPEN_KEY opcionesEscribe:opEsc CLOSE_KEY SEMI_COLON{
 							
 							/*----- Código intermedio -----*/
 							
-							TemporalFactory tf = new TemporalFactory(scope);
-							IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
-							LabelFactory lf = new LabelFactory();
 							
-							String str = String.valueOf(opEscEnt.getOpciones().getTemporal());
-							LabelIF lb = lf.create();
-							TemporalIF temp = tf.create();
+							IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);																					
+							TemporalIF temp = opEscEnt.getOpciones().getTemporal();
 							
-							cb.addQuadruple("ESCRIBE",temp,lb);
-							
-							// Guardamos la cadena en la lista para recuperarla al final del programa
-							listaCadenas.add(new Quadruple("CADENA",new Label(str),lb));
+							cb.addQuadruples(opEscEnt.getOpciones().getIntermediateCode());
+							cb.addQuadruple("WRINT",temp);
 							
 							sentSld.setIntermediateCode(cb.create());	
 							RESULT = sentSld;							

@@ -1,16 +1,18 @@
-#constante TRUE 1;
+
 
 vacio principal () {
 
-entero a = 1;
-entero b = 2;
-entero c;
+entero suma;
+entero x;
+entero y;
 
-c = TRUE;
-c = a+b;
+x = 2;
+y = 3;
 
-escribe("c es 10");
-escribeEnt(c);
+suma = x+y;
+
+escribe("suma =");
+escribeEnt(suma);
 
 devuelve;
 

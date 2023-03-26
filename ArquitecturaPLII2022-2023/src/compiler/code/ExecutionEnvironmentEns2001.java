@@ -93,13 +93,13 @@ public class ExecutionEnvironmentEns2001
     private String operacion(OperandIF o) {
     	
     	if(o instanceof Variable) {
-    		return "#-" + ((Variable)o).getAddress() + "[.IX]";
+    		return "/" + ((Variable)o).getAddress();
     	}
     	if(o instanceof Value) {
     		return "#" + ((Value)o).getValue();
     	}
     	if(o instanceof Temporal) {
-    		return "#-" + ((Temporal)o).getAddress() + "[.IX]";
+    		return "/" + ((Temporal)o).getAddress();
     	}
     	if(o instanceof Label) {
     		return ((Label)o).getName();
@@ -137,6 +137,42 @@ public class ExecutionEnvironmentEns2001
 		    	b.append("MOVE " + op1 + ", " + res +"\n");
 				return b.toString();
 			
+		    case "MVA":	
+		    	
+		     	b.append("MOVE " + op1 + ", " + res + "\n");
+				return b.toString();
+			
+		    case "MVP":	
+		    	
+		     	b.append("MOVE " + op1 + ", " + res + "\n");
+				return b.toString();
+				
+		    case "STP":	 
+		    	
+		     	b.append("MOVE " + res + ", .R1\n");   //mover al registro R1
+		     	b.append("MOVE " + op1 + ", [.R1]\n"); //mover a la posicion de memoria que contiene R1
+				return b.toString();
+				
+		    case "VAR":
+				
+		    	b.append("MOVE " + op1 + ", " + res +"\n");		    	
+				return b.toString();
+			
+		    case "WRSTR":
+				
+		    	b.append("WRSTR /" + op1 + "\n");		    	
+				return b.toString();
+		    
+		    case "WRINT":
+				
+		    	b.append("WRINT " + res + "\n");		    	
+				return b.toString();
+			
+		    case "HALT":
+				
+		    	b.append("HALT\n");		    	
+				return b.toString();
+			
 		    case "BRF":	 // ??
 		    	   	
 		    	b.append("CMP #1, " + op2 + "\n");
@@ -146,39 +182,10 @@ public class ExecutionEnvironmentEns2001
 		    case "BR":	 // ??
 	    	   			   
 		    	b.append("BR /" + op1 + "\n");
-				return b.toString();
-				
-		    case "MVA":	 // ??
-	   			   
-		    	b.append("BR /" + op1 + "\n");
-				return b.toString();
-		    
-		    case "STARTGLOBAL":
-				
-		    	b.append("MOVE .SP, .IX\n");
-		    	b.append("PUSH #-1\n");
-		    	b.append("PUSH .IX\n");
-		    	b.append("PUSH .SR\n");
-		    	b.append("PUSH .IX\n");
-				return b.toString();
+				return b.toString();		    
+		   
 			
-		    case "PUNTEROGLOBAL":
-				
-		    	b.append("SUB .IX, " + op1 + "\n");
-		    	b.append("MOVE .A, .SP\n");		    	
-				return b.toString();
-				
-		    case "VAR":
-				
-		    	b.append("PUSH " + op1 + "\n");		    	
-				return b.toString();
-		    
-		    case "ESCRIBE":
-				
-		    	b.append("ESCRIBE /" + op1 + "\n");		    	
-				return b.toString();
-			
-		    case "CADENA":
+		    case "STR":
 				
 		    	b.append(op1 + ": DATA " + res + "\n");		    	
 				return b.toString();
