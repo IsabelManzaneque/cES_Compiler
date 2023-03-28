@@ -6,26 +6,28 @@ public class Expresion extends NonTerminal {
 	
 	private TypeIF type;
 	private int value;
+	private boolean isFunction;
 	
 	/** 
 	 * @param tipo
 	 */
-	public Expresion() {};
+	public Expresion() {
+		this.isFunction = false;
+	};
 	
 	public Expresion(TypeIF type) {
 		this();
 		this.type = type;
+		this.isFunction = false;
 	}
 	
 	public Expresion(Expresion e1) {
 		this.type = e1.type;
 		this.value = e1.value;
+		this.isFunction = false;
 	}
 	
-	public Expresion(Expresion e1, Expresion e2) {
-		this();
-	}
-	
+		
 	public void setType(TypeIF type) {
 		this.type = type;
 	}
@@ -42,7 +44,15 @@ public class Expresion extends NonTerminal {
 		this.value = value;
 	} 
 	
-	
+		
+	public boolean isFunction() {
+		return isFunction;
+	}
+
+	public void setFunction(boolean isFunction) {
+		this.isFunction = isFunction;
+	}
+
 	@Override
 	public String toString() {		
 		return "Type: " + type + ", value: " + value;

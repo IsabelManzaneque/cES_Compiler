@@ -122,9 +122,7 @@ public class ExecutionEnvironmentEns2001
     La instrucción toma una temporal como operando y copia el valor almacenado en esa dirección de memoria en otra temporal que 
     se le pasa como destino.
     
-    En resumen, STP se utiliza para almacenar el valor de una temporal en su dirección de memoria actual, MVA y MVP se utilizan 
-    para copiar la dirección de memoria y el valor de una temporal a otra temporal, respectivamente, y SVA se utiliza para establecer 
-    el valor de una temporal como una dirección de memoria */    
+    */    
     
 
     /**
@@ -152,6 +150,12 @@ public class ExecutionEnvironmentEns2001
 				b.append("MOVE " + ".A" + ", " + res + "\n");
 				return b.toString();
 		    
+		    case "MUL":				
+		    	
+				b.append("MUL " + op1 + ", " + op2 + "\n");
+				b.append("MOVE " + ".A" + ", " + res + "\n");
+				return b.toString();
+				
 		    case "MV":	
 		    	
 		    	b.append("MOVE " + op1 + ", " + res +"\n");

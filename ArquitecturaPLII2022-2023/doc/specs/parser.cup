@@ -524,13 +524,13 @@ seccionFunciones ::= funcion:fun seccionFunciones:sF{:
                         
                         /*----- Código intermedio -----*/
 						
-	                    ScopeIF scope = scopeManager.getCurrentScope();
-				   		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);	
+	                    //ScopeIF scope = scopeManager.getCurrentScope();
+				   		//IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);	
 				   		
-				   		cb.addQuadruples(sF.getIntermediateCode());  //anadir el codigo de las funciones ya generadas
-				   		cb.addQuadruples(fun.getIntermediateCode());       //anadir el codigo de la nueva funcion
+				   		//cb.addQuadruples(sF.getIntermediateCode());  //anadir el codigo de las funciones ya generadas
+				   		//cb.addQuadruples(fun.getIntermediateCode());       //anadir el codigo de la nueva funcion
 				   		
-				   		sF.setIntermediateCode(cb.create());
+				   		//sF.setIntermediateCode(cb.create());
                         RESULT = sF;	
                         					
                    :}
@@ -758,8 +758,8 @@ declaracionParametros  ::= parametro:param COLON declaracionParametros:dP{:
 						   		ScopeIF scope = scopeManager.getCurrentScope();
 						   		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 						   		
-						   		cb.addQuadruples(dP.getIntermediateCode());    // anadir el codigo de los parametros ya generados
-						   		cb.addQuadruples(param.getIntermediateCode()); // anadir el codigo del nuevo parametro
+						   		cb.addQuadruples(dP.getIntermediateCode());    
+						   		cb.addQuadruples(param.getIntermediateCode()); 
 						   		
 						   		dP.setIntermediateCode(cb.create());
 						   		RESULT = dP;	 	
@@ -1063,9 +1063,11 @@ expresion ::= NUMERO:num{:
 				SymbolIF symbolFun = scopeManager.searchSymbol(fun.getName());
 				if(!(symbolFun.getType() instanceof TypeSimpleEntero)){
 					semanticErrorManager.semanticFatalError("Error: La funcion '" + fun.getName() + "' no devuelve un valor");
-				}	
-												
-				RESULT = new Expresion(symbolFun.getType());	
+				}
+				
+				Expresion exp = new Expresion(symbolFun.getType());
+				exp.setFunction(true);								
+				RESULT = exp;	
 			:};
 
 
@@ -1379,19 +1381,24 @@ sentenciaAsignacion ::= ref:r ASSIGN:a expresion:e SEMI_COLON{:
 							
 							/*----- Código intermedio -----*/
 							
-							ScopeIF scope = scopeManager.getCurrentScope();
-							TemporalFactoryIF tf = new TemporalFactory(scope);
-							IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);														
-						    
-							TemporalIF tempExp = e.getTemporal();
-							TemporalIF tempRef = r.getTemporal();
-							TemporalIF temp = tf.create();										
-							
-							cb.addQuadruples(e.getIntermediateCode());
-							cb.addQuadruples(r.getIntermediateCode());																						
-							cb.addQuadruple("STP",tempRef,tempExp);
-			
-							sentAsign.setIntermediateCode(cb.create());							
+							// solo generamos codigo intermedio si la 
+							// expresion no es una llamada a funcion		
+												
+							if(!e.isFunction()){
+								ScopeIF scope = scopeManager.getCurrentScope();
+								TemporalFactoryIF tf = new TemporalFactory(scope);
+								IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);														
+							    
+								TemporalIF tempExp = e.getTemporal();
+								TemporalIF tempRef = r.getTemporal();
+								TemporalIF temp = tf.create();										
+								
+								cb.addQuadruples(e.getIntermediateCode());
+								cb.addQuadruples(r.getIntermediateCode());																						
+								cb.addQuadruple("STP",tempRef,tempExp);
+				
+								sentAsign.setIntermediateCode(cb.create());	
+							}						
 							RESULT = sentAsign;						
 													
                       :};
@@ -1407,33 +1414,37 @@ sentenciaAsignacionSuma ::= ref:r ASSIGN_SUMA:as expresion:e SEMI_COLON{:
 								SentenciaAsignacionSuma sentAsignSum = new SentenciaAsignacionSuma(r,e);
 								
 								/*----- Código intermedio -----*/
-							
-								ScopeIF scope = scopeManager.getCurrentScope();
-								TemporalFactoryIF tf = new TemporalFactory(scope);
-								IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);									
-								SymbolIF symbol = scopeManager.searchSymbol(r.getId());			
-							    
-								TemporalIF tempExp = e.getTemporal();
-								TemporalIF tempRef = r.getTemporal();					
-								TemporalIF temp = tf.create();		
-								TemporalIF temp2 = tf.create();
 								
-								cb.addQuadruples(r.getIntermediateCode());
-								cb.addQuadruples(e.getIntermediateCode());								
-								
-								if(symbol instanceof SymbolConstant){
-									Value value = new Value(((SymbolConstant)symbol).getValue());
-									cb.addQuadruple("MV",temp2,value);									
-								}else if(symbol instanceof SymbolVariable){
-									Variable var = new Variable((SymbolVariable)symbol);
-									cb.addQuadruple("MVP",temp2,var);									
-								}								
-								cb.addQuadruple ("ADD", temp, temp2, tempExp);												
-								cb.addQuadruple("STP",tempRef,temp);                
-				
-								sentAsignSum.setIntermediateCode(cb.create());							
-								RESULT = sentAsignSum;								
-							
+								// solo generamos codigo intermedio si la 
+								// expresion no es una llamada a funcion		
+													
+								if(!e.isFunction()){
+									ScopeIF scope = scopeManager.getCurrentScope();
+									TemporalFactoryIF tf = new TemporalFactory(scope);
+									IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);									
+									SymbolIF symbol = scopeManager.searchSymbol(r.getId());			
+								    
+									TemporalIF tempExp = e.getTemporal();
+									TemporalIF tempRef = r.getTemporal();					
+									TemporalIF temp = tf.create();		
+									TemporalIF temp2 = tf.create();
+									
+									cb.addQuadruples(r.getIntermediateCode());
+									cb.addQuadruples(e.getIntermediateCode());								
+									
+									if(symbol instanceof SymbolConstant){
+										Value value = new Value(((SymbolConstant)symbol).getValue());
+										cb.addQuadruple("MV",temp2,value);									
+									}else if(symbol instanceof SymbolVariable){
+										Variable var = new Variable((SymbolVariable)symbol);
+										cb.addQuadruple("MVP",temp2,var);									
+									}								
+									cb.addQuadruple ("ADD", temp, temp2, tempExp);												
+									cb.addQuadruple("STP",tempRef,temp);                
+					
+									sentAsignSum.setIntermediateCode(cb.create());	
+								}						
+								RESULT = sentAsignSum;						
 	                      :};
 
 
@@ -1466,9 +1477,15 @@ ref ::= IDENTIFICADOR:id {:
 			TemporalFactory tf = new TemporalFactory(scope);
 			IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 			
-			TemporalIF temp = tf.create();			
-			Variable var = new Variable((SymbolVariable)symbol);
-			cb.addQuadruple ("MVA", temp, var);
+			TemporalIF temp = tf.create();		
+			
+			if(symbol instanceof SymbolVariable){	
+				Variable var = new Variable((SymbolVariable)symbol);
+				cb.addQuadruple ("MVA", temp, var);
+			}else if(symbol instanceof SymbolParameter){
+				Variable var = new Variable((SymbolParameter)symbol);
+				cb.addQuadruple ("MVA", temp, var);
+			}
 			
 			ref.setTemporal(temp);
 			ref.setIntermediateCode(cb.create());			

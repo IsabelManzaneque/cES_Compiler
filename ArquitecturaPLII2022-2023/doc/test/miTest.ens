@@ -1,0 +1,352 @@
+;Quadruple - [VAR b, 0, null]
+MOVE #0, /65533
+
+;Quadruple - [VAR a, 0, null]
+MOVE #0, /65534
+
+;Quadruple - [VAR x, 0, null]
+MOVE #0, /65527
+
+;Quadruple - [VAR suma, 0, null]
+MOVE #0, /65535
+
+;Quadruple - [VAR mayorDiez, 0, null]
+MOVE #0, /65526
+
+;Quadruple - [VAR uno, 1, null]
+MOVE #1, /65528
+
+;Quadruple - [VAR tres, 3, null]
+MOVE #3, /65525
+
+;Quadruple - [VAR ocho, 8, null]
+MOVE #8, /65532
+
+;Quadruple - [VAR v0, null, null]
+MOVE null, /65524
+
+;Quadruple - [VAR v, null, null]
+MOVE null, /65531
+
+;Quadruple - [VAR v2, null, null]
+MOVE null, /65511
+
+;Quadruple - [VAR v1, null, null]
+MOVE null, /65521
+
+;Quadruple - [VAR b, 0, null]
+MOVE #0, /65534
+
+;Quadruple - [VAR a, 0, null]
+MOVE #0, /65535
+
+;Quadruple - [VAR i, 0, null]
+MOVE #0, /65533
+
+;Quadruple - [VAR dia, 1, null]
+MOVE #1, /65532
+
+;Quadruple - [MV T_5, 1, null]
+MOVE #1, /65526
+
+;Quadruple - [MV T_6, 10, null]
+MOVE #10, /65525
+
+;Quadruple - [ADD T_7, T_5, T_6]
+ADD /65526, /65525
+MOVE .A, /65524
+
+;Quadruple - [MVP T_0, i, null]
+MOVE /65533, /65531
+
+;Quadruple - [MVA T_2, v, null]
+MOVE #65531, /65529
+
+;Quadruple - [MV T_3, T_0, null]
+MOVE /65531, /65528
+
+Quadruple - [SUB T_4, T_2, T_3]
+;Quadruple - [MVP T_1, T_4, null]
+MOVE /65527, /65530
+
+;Quadruple - [STP T_1, T_7, null]
+MOVE /65530, .R1
+MOVE /65524, [.R1]
+
+;Quadruple - [MVP T_10, a, null]
+MOVE /65535, /65521
+
+;Quadruple - [MVA T_12, v, null]
+MOVE #65531, /65519
+
+;Quadruple - [MV T_13, T_10, null]
+MOVE /65521, /65518
+
+Quadruple - [SUB T_14, T_12, T_13]
+;Quadruple - [MVP T_11, T_14, null]
+MOVE /65517, /65520
+
+;Quadruple - [MVA T_9, b, null]
+MOVE #65534, /65522
+
+;Quadruple - [STP T_9, T_11, null]
+MOVE /65522, .R1
+MOVE /65520, [.R1]
+
+;Quadruple - [MVP T_17, a, null]
+MOVE /65535, /65514
+
+;Quadruple - [INC T_17, null, null]
+INC /65514
+
+;Quadruple - [MVA T_19, v, null]
+MOVE #65531, /65512
+
+;Quadruple - [MV T_20, T_17, null]
+MOVE /65514, /65511
+
+Quadruple - [SUB T_21, T_19, T_20]
+;Quadruple - [MVP T_18, T_21, null]
+MOVE /65510, /65513
+
+;Quadruple - [MVA T_16, b, null]
+MOVE #65534, /65515
+
+;Quadruple - [STP T_16, T_18, null]
+MOVE /65515, .R1
+MOVE /65513, [.R1]
+
+;Quadruple - [MV T_24, 2, null]
+MOVE #2, /65507
+
+;Quadruple - [MUL T_27, T_24, null]
+MUL /65507, null
+MOVE .A, /65504
+
+;Quadruple - [MVA T_23, a, null]
+MOVE #65535, /65508
+
+;Quadruple - [STP T_23, T_27, null]
+MOVE /65508, .R1
+MOVE /65504, [.R1]
+
+;Quadruple - [MVP T_33, suma, null]
+MOVE /65535, /65498
+
+;Quadruple - [MV T_34, 10, null]
+MOVE #10, /65497
+
+Quadruple - [LS T_35, T_33, T_34]
+Quadruple - [NOT T_36, T_35, null]
+;Quadruple - [MVA T_32, mayorDiez, null]
+MOVE #65526, /65499
+
+;Quadruple - [STP T_32, T_36, null]
+MOVE /65499, .R1
+MOVE /65495, [.R1]
+
+;Quadruple - [MVA T_38, a, null]
+MOVE #65535, /65493
+
+;Quadruple - [MV T_39, 2, null]
+MOVE #2, /65492
+
+;Quadruple - [MVP T_41, a, null]
+MOVE /65535, /65490
+
+;Quadruple - [ADD T_40, T_41, T_39]
+ADD /65490, /65492
+MOVE .A, /65491
+
+;Quadruple - [STP T_38, T_40, null]
+MOVE /65493, .R1
+MOVE /65491, [.R1]
+
+;Quadruple - [INC a, null, null]
+INC /65535
+
+;Quadruple - [MVP T_44, mayorDiez, null]
+MOVE /65526, /65487
+
+;Quadruple - [MV T_45, 1, null]
+MOVE #1, /65486
+
+Quadruple - [EQ T_46, T_44, T_45]
+;Quadruple - [BRF T_46, L_6, null]
+CMP #1, null
+BNZ /L_6
+
+;Quadruple - [WRSTR T_0, L_3, null]
+WRSTR /L_3
+
+;Quadruple - [BR L_5, null, null]
+BR /null
+
+Quadruple - [INL L_6, null, null]
+;Quadruple - [WRSTR T_0, L_4, null]
+WRSTR /L_4
+
+Quadruple - [INL L_5, null, null]
+;Quadruple - [MVP T_47, a, null]
+MOVE /65535, /65484
+
+;Quadruple - [MV T_48, 0, null]
+MOVE #0, /65483
+
+Quadruple - [EQ T_49, T_47, T_48]
+;Quadruple - [BRF T_49, L_12, null]
+CMP #1, null
+BNZ /L_12
+
+;Quadruple - [VAR a, 0, null]
+MOVE #0, /65535
+
+;Quadruple - [WRSTR T_0, L_7, null]
+WRSTR /L_7
+
+;Quadruple - [WRSTR T_1, L_8, null]
+WRSTR /L_8
+
+;Quadruple - [BR L_11, null, null]
+BR /null
+
+Quadruple - [INL L_12, null, null]
+;Quadruple - [VAR varSino, 66, null]
+MOVE #66, /65535
+
+;Quadruple - [WRSTR T_0, L_9, null]
+WRSTR /L_9
+
+;Quadruple - [WRSTR T_1, L_10, null]
+WRSTR /L_10
+
+Quadruple - [INL L_11, null, null]
+;Quadruple - [MVP T_50, a, null]
+MOVE /65535, /65481
+
+;Quadruple - [MVP T_51, b, null]
+MOVE /65534, /65480
+
+Quadruple - [EQ T_52, T_50, T_51]
+;Quadruple - [BRF T_52, L_14, null]
+CMP #1, null
+BNZ /L_14
+
+;Quadruple - [WRSTR T_53, L_13, null]
+WRSTR /L_13
+
+;Quadruple - [BR L_14, null, null]
+BR /null
+
+Quadruple - [INL L_14, null, null]
+Quadruple - [INL L_19, null, null]
+;Quadruple - [MVP T_55, a, null]
+MOVE /65535, /65476
+
+;Quadruple - [MV T_56, 5, null]
+MOVE #5, /65475
+
+Quadruple - [LS T_57, T_55, T_56]
+;Quadruple - [BRF T_57, L_20, null]
+CMP #1, null
+BNZ /L_20
+
+;Quadruple - [MVP T_1, a, null]
+MOVE /65535, /65534
+
+;Quadruple - [MV T_2, 1, null]
+MOVE #1, /65533
+
+;Quadruple - [ADD T_3, T_1, T_2]
+ADD /65534, /65533
+MOVE .A, /65532
+
+;Quadruple - [MVA T_0, a, null]
+MOVE #65535, /65535
+
+;Quadruple - [STP T_0, T_3, null]
+MOVE /65535, .R1
+MOVE /65532, [.R1]
+
+;Quadruple - [MVP T_5, a, null]
+MOVE /65535, /65530
+
+;Quadruple - [WRINT T_5, null, null]
+WRINT /65530
+
+;Quadruple - [BR L_19, null, null]
+BR /null
+
+Quadruple - [INL L_20, null, null]
+Quadruple - [INL L_21, null, null]
+;Quadruple - [MVP T_58, a, null]
+MOVE /65535, /65473
+
+;Quadruple - [MV T_59, 5, null]
+MOVE #5, /65472
+
+Quadruple - [LS T_60, T_58, T_59]
+;Quadruple - [BRF T_60, L_22, null]
+CMP #1, null
+BNZ /L_22
+
+;Quadruple - [MVP T_62, a, null]
+MOVE /65535, /65469
+
+;Quadruple - [MV T_63, 1, null]
+MOVE #1, /65468
+
+;Quadruple - [ADD T_64, T_62, T_63]
+ADD /65469, /65468
+MOVE .A, /65467
+
+;Quadruple - [MVA T_61, a, null]
+MOVE #65535, /65470
+
+;Quadruple - [STP T_61, T_64, null]
+MOVE /65470, .R1
+MOVE /65467, [.R1]
+
+;Quadruple - [BR L_21, null, null]
+BR /null
+
+Quadruple - [INL L_22, null, null]
+;Quadruple - [HALT null, null, null]
+HALT
+
+;Quadruple - [STR "Hola mundo", L_2, null]
+L_2: DATA "Hola mundo"
+
+;Quadruple - [STR "mayor", L_3, null]
+L_3: DATA "mayor"
+
+;Quadruple - [STR "menor", L_4, null]
+L_4: DATA "menor"
+
+;Quadruple - [STR "es", L_7, null]
+L_7: DATA "es"
+
+;Quadruple - [STR "falso", L_8, null]
+L_8: DATA "falso"
+
+;Quadruple - [STR "es", L_9, null]
+L_9: DATA "es"
+
+;Quadruple - [STR "verdadero", L_10, null]
+L_10: DATA "verdadero"
+
+;Quadruple - [STR "iguales", L_13, null]
+L_13: DATA "iguales"
+
+;Quadruple - [STR "lunes", L_15, null]
+L_15: DATA "lunes"
+
+;Quadruple - [STR "es ", L_16, null]
+L_16: DATA "es "
+
+;Quadruple - [STR "martes", L_17, null]
+L_17: DATA "martes"
+
+;Quadruple - [STR "no es lunes ni martes", L_18, null]
+L_18: DATA "no es lunes ni martes"
+

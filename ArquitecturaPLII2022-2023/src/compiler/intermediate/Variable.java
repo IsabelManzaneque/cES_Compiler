@@ -1,5 +1,6 @@
 package compiler.intermediate;
 
+import compiler.semantic.symbol.SymbolParameter;
 import compiler.semantic.symbol.SymbolVariable;
 import es.uned.lsi.compiler.intermediate.VariableIF;
 import es.uned.lsi.compiler.semantic.ScopeIF;
@@ -13,6 +14,7 @@ public class Variable implements VariableIF{
     private String  name     = null;
     private ScopeIF scope    = null;
     private SymbolVariable sV = null;
+    private SymbolParameter sP = null;
         
     /**
      * Constructor for Variable.
@@ -33,6 +35,16 @@ public class Variable implements VariableIF{
         this.scope = sV.getScope();
         this.sV = sV;
     }
+    
+    public Variable (SymbolParameter sP)
+    {
+        super ();
+        this.name = sP.getName();
+        this.scope = sP.getScope();
+        this.sP = sP;
+    }
+    
+    
 
     /**
      * Returns the name.
@@ -62,7 +74,10 @@ public class Variable implements VariableIF{
     public final int getAddress ()
     {
         // TODO : Student Work
-        return this.sV.getAddress();
+    	if(sV != null) {
+    		return this.sV.getAddress();
+    	}
+    	return this.sP.getAddress();
     }
 
     /**
@@ -129,5 +144,15 @@ public class Variable implements VariableIF{
 	public void setsV(SymbolVariable sV) {
 		this.sV = sV;
 	}
+
+	public SymbolParameter getsP() {
+		return sP;
+	}
+
+	public void setsP(SymbolParameter sP) {
+		this.sP = sP;
+	}
+	
+	
     
 }

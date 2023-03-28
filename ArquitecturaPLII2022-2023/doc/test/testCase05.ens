@@ -1,0 +1,111 @@
+;Quadruple - [VAR a, 0, null]
+MOVE #0, /65535
+
+;Quadruple - [VAR b, 0, null]
+MOVE #0, /65534
+
+;Quadruple - [MV T_1, 19, null]
+MOVE #19, /65532
+
+;Quadruple - [MVA T_0, b, null]
+MOVE #65534, /65533
+
+;Quadruple - [STP T_0, T_1, null]
+MOVE /65533, .R1
+MOVE /65532, [.R1]
+
+;Quadruple - [MVP T_4, b, null]
+MOVE /65534, /65529
+
+;Quadruple - [INC T_4, null, null]
+INC /65529
+
+;Quadruple - [MVA T_3, a, null]
+MOVE #65535, /65530
+
+;Quadruple - [STP T_3, T_4, null]
+MOVE /65530, .R1
+MOVE /65529, [.R1]
+
+;Quadruple - [MVP T_7, a, null]
+MOVE /65535, /65526
+
+;Quadruple - [MV T_8, 1, null]
+MOVE #1, /65525
+
+;Quadruple - [ADD T_9, T_7, T_8]
+ADD /65526, /65525
+MOVE .A, /65524
+
+;Quadruple - [MV T_10, 6, null]
+MOVE #6, /65523
+
+;Quadruple - [MV T_11, 2, null]
+MOVE #2, /65522
+
+;Quadruple - [MUL T_12, T_10, T_11]
+MUL /65523, /65522
+MOVE .A, /65521
+
+;Quadruple - [ADD T_13, T_9, T_12]
+ADD /65524, /65521
+MOVE .A, /65520
+
+;Quadruple - [MVA T_6, a, null]
+MOVE #65535, /65527
+
+;Quadruple - [STP T_6, T_13, null]
+MOVE /65527, .R1
+MOVE /65520, [.R1]
+
+;Quadruple - [WRSTR T_15, L_0, null]
+WRSTR /L_0
+
+;Quadruple - [MVP T_16, a, null]
+MOVE /65535, /65517
+
+;Quadruple - [WRINT T_16, null, null]
+WRINT /65517
+
+;Quadruple - [MV T_18, 3, null]
+MOVE #3, /65515
+
+;Quadruple - [MV T_19, 3, null]
+MOVE #3, /65514
+
+;Quadruple - [ADD T_20, T_18, T_19]
+ADD /65515, /65514
+MOVE .A, /65513
+
+;Quadruple - [MV T_21, 2, null]
+MOVE #2, /65512
+
+;Quadruple - [MUL T_22, T_20, T_21]
+MUL /65513, /65512
+MOVE .A, /65511
+
+;Quadruple - [MVA T_17, a, null]
+MOVE #65535, /65516
+
+;Quadruple - [STP T_17, T_22, null]
+MOVE /65516, .R1
+MOVE /65511, [.R1]
+
+;Quadruple - [WRSTR T_24, L_1, null]
+WRSTR /L_1
+
+;Quadruple - [MVP T_25, a, null]
+MOVE /65535, /65508
+
+;Quadruple - [WRINT T_25, null, null]
+WRINT /65508
+
+;Quadruple - [HALT null, null, null]
+HALT
+
+;Quadruple - [STR "a", L_0, null]
+L_0: DATA "a"
+
+;Quadruple - [STR "asociacion parentesis", L_1, null]
+L_1: DATA "asociacion parentesis"
+
