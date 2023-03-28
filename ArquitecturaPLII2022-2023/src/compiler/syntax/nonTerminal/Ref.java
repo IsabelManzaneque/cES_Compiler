@@ -1,5 +1,6 @@
 package compiler.syntax.nonTerminal;
 
+
 public class Ref extends NonTerminal {
 	
 	private String id;
@@ -30,9 +31,6 @@ public class Ref extends NonTerminal {
 	public void setAccesoVector(AccesoVector accesoVector) {
 		this.accesoVector = accesoVector;
 	}
-	
-	
-	
-	
+
 
 }

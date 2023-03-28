@@ -121,4 +121,13 @@ public class Variable implements VariableIF{
     {    
         return name;
     }
+
+	public SymbolVariable getsV() {
+		return sV;
+	}
+
+	public void setsV(SymbolVariable sV) {
+		this.sV = sV;
+	}
+    
 }

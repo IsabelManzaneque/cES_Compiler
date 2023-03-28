@@ -17,76 +17,79 @@ MOVE #65535, /65532
 MOVE /65532, .R1
 MOVE /65531, [.R1]
 
-;Quadruple - [MV T_3, 3, null]
-MOVE #3, /65529
+;Quadruple - [MV T_4, 3, null]
+MOVE #3, /65528
 
-;Quadruple - [MVA T_2, b, null]
-MOVE #65534, /65530
+;Quadruple - [MVA T_3, b, null]
+MOVE #65534, /65529
 
-;Quadruple - [STP T_2, T_3, null]
-MOVE /65530, .R1
-MOVE /65529, [.R1]
+;Quadruple - [STP T_3, T_4, null]
+MOVE /65529, .R1
+MOVE /65528, [.R1]
 
-;Quadruple - [MVP T_5, a, null]
-MOVE /65535, /65527
+;Quadruple - [MVP T_7, a, null]
+MOVE /65535, /65525
 
-;Quadruple - [MVP T_6, b, null]
-MOVE /65534, /65526
+;Quadruple - [MVP T_8, b, null]
+MOVE /65534, /65524
 
-;Quadruple - [ADD T_7, T_5, T_6]
-ADD /65527, /65526
-MOVE .A, /65525
+;Quadruple - [ADD T_9, T_7, T_8]
+ADD /65525, /65524
+MOVE .A, /65523
 
-;Quadruple - [MVA T_4, c, null]
-MOVE #65533, /65528
+;Quadruple - [MVA T_6, c, null]
+MOVE #65533, /65526
 
-;Quadruple - [STP T_4, T_7, null]
-MOVE /65528, .R1
-MOVE /65525, [.R1]
+;Quadruple - [STP T_6, T_9, null]
+MOVE /65526, .R1
+MOVE /65523, [.R1]
 
-;Quadruple - [WRSTR T_8, L_0, null]
+;Quadruple - [WRSTR T_11, L_0, null]
 WRSTR /L_0
 
-;Quadruple - [MVP T_9, c, null]
-MOVE /65533, /65523
+;Quadruple - [MVP T_12, c, null]
+MOVE /65533, /65520
 
-;Quadruple - [WRINT T_9, null, null]
-WRINT /65523
+;Quadruple - [WRINT T_12, null, null]
+WRINT /65520
 
 ;Quadruple - [INC c, null, null]
 INC /65533
 
-;Quadruple - [WRSTR T_10, L_1, null]
+;Quadruple - [WRSTR T_13, L_1, null]
 WRSTR /L_1
 
-;Quadruple - [MVP T_11, c, null]
-MOVE /65533, /65521
+;Quadruple - [MVP T_14, c, null]
+MOVE /65533, /65518
 
-;Quadruple - [WRINT T_11, null, null]
-WRINT /65521
+;Quadruple - [WRINT T_14, null, null]
+WRINT /65518
 
-;Quadruple - [MVA T_12, c, null]
-MOVE #65533, /65520
+;Quadruple - [MVA T_15, c, null]
+MOVE #65533, /65517
 
-;Quadruple - [MV T_13, 1, null]
-MOVE #1, /65519
+;Quadruple - [MV T_16, 1, null]
+MOVE #1, /65516
 
-;Quadruple - [ADD T_14, T_12, T_13]
-ADD /65520, /65519
-MOVE .A, /65518
+;Quadruple - [MVP T_18, c, null]
+MOVE /65533, /65514
 
-;Quadruple - [STP T_12, T_14, null]
-MOVE /65520, .R1
-MOVE /65518, [.R1]
+;Quadruple - [ADD T_17, T_18, T_16]
+ADD /65514, /65516
+MOVE .A, /65515
 
-;Quadruple - [WRSTR T_15, L_2, null]
+;Quadruple - [STP T_15, T_17, null]
+MOVE /65517, .R1
+MOVE /65515, [.R1]
+
+;Quadruple - [WRSTR T_19, L_2, null]
 WRSTR /L_2
 
-;Quadruple - [MVP T_16, c, null]
-MOVE /65533, /65516
+;Quadruple - [MVP T_20, c, null]
+MOVE /65533, /65512
 
-;Quadruple - [WRINT T_16, null, null]
-WRINT /65516
+;Quadruple - [WRINT T_20, null, null]
+WRINT /65512
 
 ;Quadruple - [HALT null, null, null]
 HALT
