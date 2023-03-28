@@ -12,6 +12,8 @@ import compiler.semantic.type.TypeSimple;
 import es.uned.lsi.compiler.code.ExecutionEnvironmentIF;
 import es.uned.lsi.compiler.code.MemoryDescriptorIF;
 import es.uned.lsi.compiler.code.RegisterDescriptorIF;
+import es.uned.lsi.compiler.intermediate.LabelFactory;
+import es.uned.lsi.compiler.intermediate.LabelIF;
 import es.uned.lsi.compiler.intermediate.OperandIF;
 import es.uned.lsi.compiler.intermediate.QuadrupleIF;
 
@@ -154,6 +156,30 @@ public class ExecutionEnvironmentEns2001
 		    	
 				b.append("MUL " + op1 + ", " + op2 + "\n");
 				b.append("MOVE " + ".A" + ", " + res + "\n");
+				return b.toString();
+			
+		    case "EQ":				
+		    	
+		    	LabelFactory lF = new LabelFactory();
+				LabelIF l1 = lF.create();
+				LabelIF l2 = lF.create();
+	        	
+	        	// CMP realiza comparaciones. Realiza la resta entre 2 valores y 
+	        	// en base al resultado modifical los biestables. Tenemos Z para zero y
+	        	// S para signo. Si hacemos 5-5 se activa Z, si no se activa S.
+	        	// En base al resultado hace un salto si el resultado es distinto de 0 (BNZ)
+	        	// o cero (BZ)
+				
+					        	
+				b.append("CMP " + op1 + ", " + op2 + "\n");	  				
+	        	
+				b.append("BNZ /" + l2 + "\n");       // si resultado no es 0 (op1 != 0) salta a l2        	
+	        	b.append("MOVE #1, " + res + "\n");         	
+	        	b.append("BZ /" + l1 + "\n");        // si resultado es 0 (op1 == op2) salta a l1     	
+	        	b.append(l2 + ": \n");               // l2        	
+	        	b.append("MOVE #0, " + res + "\n");        	
+	        	b.append(l1 + ": \n");               // l1
+	        	
 				return b.toString();
 				
 		    case "MV":	

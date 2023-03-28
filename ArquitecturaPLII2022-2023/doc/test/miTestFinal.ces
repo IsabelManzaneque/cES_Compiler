@@ -2,17 +2,13 @@
 
 vacio principal () {
 
-entero suma;
+entero a=8;
+entero b=8;
 entero x;
-entero y;
 
-x = 2;
-y = 3;
 
-suma = x+y;
-
-escribe("suma = ");
-escribeEnt(suma);
+x = a==b;
+escribeEnt(x);
 
 devuelve;
 

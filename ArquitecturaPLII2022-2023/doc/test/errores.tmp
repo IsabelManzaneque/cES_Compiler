@@ -1,1 +1,5 @@
-Linea 21: ERROR[5] Operando 2 Incorrecto - null
+Linea 43: ERROR[17] Se esperaba segundo operando - <EOL>
+Linea 44: ERROR[7] Etiqueta No Definida - L_3
+Linea 50: ERROR[7] Etiqueta No Definida - null
+Linea 52: ERROR[8] Entrada Incorrecta - -
+Linea 56: ERROR[8] Entrada Incorrecta - -

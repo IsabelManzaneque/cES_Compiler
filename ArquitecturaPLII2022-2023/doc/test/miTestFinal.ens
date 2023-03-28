@@ -1,61 +1,40 @@
-;Quadruple - [VAR suma, 0, null]
-MOVE #0, /65535
+;Quadruple - [VAR a, 8, null]
+MOVE #8, /65535
+
+;Quadruple - [VAR b, 8, null]
+MOVE #8, /65534
 
 ;Quadruple - [VAR x, 0, null]
-MOVE #0, /65534
-
-;Quadruple - [VAR y, 0, null]
 MOVE #0, /65533
 
-;Quadruple - [MV T_1, 2, null]
-MOVE #2, /65531
+;Quadruple - [MVP T_1, a, null]
+MOVE /65535, /65531
+
+;Quadruple - [MVP T_2, b, null]
+MOVE /65534, /65530
+
+;Quadruple - [EQ T_3, T_1, T_2]
+CMP /65531, /65530
+BNZ /L_1
+MOVE #1, /65529
+BZ /L_0
+L_1: 
+MOVE #0, /65529
+L_0: 
 
 ;Quadruple - [MVA T_0, x, null]
-MOVE #65534, /65532
+MOVE #65533, /65532
 
-;Quadruple - [STP T_0, T_1, null]
+;Quadruple - [STP T_0, T_3, null]
 MOVE /65532, .R1
-MOVE /65531, [.R1]
+MOVE /65529, [.R1]
 
-;Quadruple - [MV T_4, 3, null]
-MOVE #3, /65528
+;Quadruple - [MVP T_5, x, null]
+MOVE /65533, /65527
 
-;Quadruple - [MVA T_3, y, null]
-MOVE #65533, /65529
-
-;Quadruple - [STP T_3, T_4, null]
-MOVE /65529, .R1
-MOVE /65528, [.R1]
-
-;Quadruple - [MVP T_7, x, null]
-MOVE /65534, /65525
-
-;Quadruple - [MVP T_8, y, null]
-MOVE /65533, /65524
-
-;Quadruple - [ADD T_9, T_7, T_8]
-ADD /65525, /65524
-MOVE .A, /65523
-
-;Quadruple - [MVA T_6, suma, null]
-MOVE #65535, /65526
-
-;Quadruple - [STP T_6, T_9, null]
-MOVE /65526, .R1
-MOVE /65523, [.R1]
-
-;Quadruple - [WRSTR T_11, L_0, null]
-WRSTR /L_0
-
-;Quadruple - [MVP T_12, suma, null]
-MOVE /65535, /65520
-
-;Quadruple - [WRINT T_12, null, null]
-WRINT /65520
+;Quadruple - [WRINT T_5, null, null]
+WRINT /65527
 
 ;Quadruple - [HALT null, null, null]
 HALT
-
-;Quadruple - [STR "mi cara bonita = ", L_0, null]
-L_0: DATA "mi cara bonita = "
 

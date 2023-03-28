@@ -1263,8 +1263,8 @@ listadoSentencias ::= listadoSentencias:lS sentencia:sent {:
 	                    ScopeIF scope = scopeManager.getCurrentScope();
 				   		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);				   		
 	
-				   		cb.addQuadruples(lS.getIntermediateCode());  //anadir el codigo de las sentencias ya generadas
-				   		cb.addQuadruples(sent.getIntermediateCode());       //anadir el codigo de la nueva sentencia
+				   		cb.addQuadruples(lS.getIntermediateCode()); 
+				   		cb.addQuadruples(sent.getIntermediateCode());       
 									
 						lS.setIntermediateCode(cb.create());	
 						RESULT = lS;
@@ -1275,7 +1275,7 @@ listadoSentencias ::= listadoSentencias:lS sentencia:sent {:
                     	
                     	/*----- Análisis semántico -----*/
                     	
-                    	if(sent instanceof SentenciaDevuelve  &&  ((SentenciaDevuelve)sent).getExpresion() != null){						
+                    	if(sent instanceof SentenciaDevuelve && ((SentenciaDevuelve)sent).getExpresion() != null){						
 							lS.setDevuelve(true);									
 						}												
                     	lS.add(sent);
