@@ -399,8 +399,8 @@ seccionVariables ::= seccionVariables:sV declaracionVariable:dec{:
 						ScopeIF scope = scopeManager.getCurrentScope();
 				   		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 				   		
-				   		cb.addQuadruples(sV.getIntermediateCode());  //anadir el codigo de las variables ya generadas
-				   		cb.addQuadruples(dec.getIntermediateCode());       //anadir el codigo de la nueva variable
+				   		cb.addQuadruples(sV.getIntermediateCode());  
+				   		cb.addQuadruples(dec.getIntermediateCode());       
 				   		
 				   		sV.setIntermediateCode(cb.create());
 						RESULT = sV;
@@ -1509,7 +1509,7 @@ ref ::= IDENTIFICADOR:id {:
 
 
 
-sentenciaSi ::= SI:si OPEN_KEY expresion:e CLOSE_KEY sentencia:sSi SINO sentencia:sSino{:   //checked
+sentenciaSi ::= SI:si OPEN_KEY expresion:e CLOSE_KEY sentencia:sSi SINO sentencia:sSino{:   
 					
 					
 					/*----- Análisis semántico -----*/
@@ -1570,33 +1570,154 @@ sentenciaSi ::= SI:si OPEN_KEY expresion:e CLOSE_KEY sentencia:sSi SINO sentenci
 	          
 	          :};
 	
-sentenciaAlternativas ::= ALTENATIVAS OPEN_KEY expresion:expr CLOSE_KEY OPEN_PARENTHESIS casosAlternativa:casosA porDefecto:porD CLOSE_PARENTHESIS{:
+sentenciaAlternativas ::= ALTENATIVAS:alt OPEN_KEY expresion:e CLOSE_KEY OPEN_PARENTHESIS casosAlternativa:cA porDefecto:pD CLOSE_PARENTHESIS{:
 								
-								SentenciaAlternativas sentAlt = new SentenciaAlternativas(expr, casosA, porD);
-								RESULT = sentAlt;
+								SentenciaAlternativas sA = new SentenciaAlternativas(e,cA,pD);
+								
+								/*----- Análisis semántico -----*/
+								
+								if(!(e.getType() instanceof TypeSimpleEntero)){
+									semanticErrorManager.semanticFatalError("Error en linea " + alt.getLine() + ": Expresion no válida");
+								}
+								
+						/*		// Comprobar que todos los casos tengan un tipo compatible con la expresion 
+							    for (CasoSwitch caso : cS.getCasos()) {
+							        if (!caso.getExpresion().getType().equals(e.getType())) {
+							            semanticErrorManager.semanticFatalError("Error en linea " + caso.getLine() + ": Caso no compatible con la expresion");
+							        }
+							    }
+							
+							    if (d != null && !d.getSentencias().isEmpty() && !d.getSentencias().get(0).getIntermediateCode().getLast().getTemporals().isEmpty()) {
+							        semanticErrorManager.semanticFatalError("Error en linea " + d.getLine() + ": Default no puede tener expresiones");
+							    }
+								*/
+								
+								/*----- Código intermedio -----*/
+					
+								ScopeIF scope = scopeManager.getCurrentScope();
+								IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);					
+								LabelFactory lf = new LabelFactory();
+								
+								//generar codigo intermedio de la expresion
+								cb.addQuadruples(e.getIntermediateCode());  
+								
+							   
+							    //---------------------------------------------------								
+								TemporalIF tempExp = e.getTemporal();
+								
+								for (CasoAlt caso : cA.getCasos()) {
+							        
+							        // Crear label para el caso
+							        LabelIF labelCaso = lf.create();							        
+							        							        
+							        // Generar cuadrupla para saltar a la label del caso si el numero del caso coincide con la expresion 
+							        cb.addQuadruple("BEQ", tempExp, caso.getTemporal(), labelCaso); 							        		        
+							        
+							        // Si no hay coincidencia, continuar con el siguiente caso
+							        cb.addQuadruple("BR", lf.create());
+							        
+							        // Generar codigo intermedio para el bloque del caso 
+							        cb.addQuadruple("INL", labelCaso);
+							        cb.addQuadruples(caso.getBloque().getIntermediateCode());
+							        
+							        // Al terminar, saltar al final de la sentencia S
+							        cb.addQuadruple("BR", lf.create());
+							    }
+							    
+							    // Si no hay coincidencia, se ejecuta la sentencia porDefecto (si existe) 
+							    if (pD != null) {
+							        LabelIF labelDefault = lf.create();
+							        cb.addQuadruple("INL", labelDefault);
+							        cb.addQuadruples(pD.getBloque().getIntermediateCode());
+							        cb.addQuadruple("BR", lf.create());
+							    }
+							    
+							    // Label para el final de la sentencia switch 
+							    cb.addQuadruple("INL", lf.create());
+							    
+							    //-----------------------------------------------------						    
+							    							
+								sA.setIntermediateCode(cb.create());
+								RESULT = sA;
 						:};
 
 
 
-casosAlternativa ::= casosAlternativa:casosA casoAlt:casoA{:						
-						casosA.add(casoA);
-						RESULT = casosA;
+casosAlternativa ::= casosAlternativa:cA casoAlt:caso{:				
+						
+						cA.add(caso);
+						
+						/*----- Código intermedio -----*/
+						
+						ScopeIF scope = scopeManager.getCurrentScope();
+				   		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+				   		
+				   		cb.addQuadruples(cA.getIntermediateCode());  
+				   		cb.addQuadruples(caso.getIntermediateCode());       
+						
+						cA.setIntermediateCode(cb.create());
+						RESULT = cA;
 				   :}
-                   | casoAlt:casoA{:
-                   		CasosAlternativa casosA = new CasosAlternativa();
-                   		casosA.add(casoA);
-                   		RESULT = casosA;
+                   | casoAlt:caso{:
+                   
+                   		CasosAlternativa cA = new CasosAlternativa();
+                   		cA.add(caso);
+                   		
+                   		/*----- Código intermedio -----*/
+                   		
+                   		ScopeIF scope = scopeManager.getCurrentScope();
+				   		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+				   		
+				   		cb.addQuadruples(caso.getIntermediateCode());
+                   		cA.setIntermediateCode(cb.create());
+                   		RESULT = cA;
                    :};
 
+
+
 casoAlt ::= CASO NUMERO:num TWO_POINTS bloque:blq CORTE SEMI_COLON{:					
+				
 				int numero = Integer.parseInt(num.getLexema());
-				RESULT = new CasoAlt(numero,blq);
+				CasoAlt cA = new CasoAlt(numero,blq);
+				
+				/*----- Código intermedio -----*/					
+								
+				ScopeIF scope = scopeManager.getCurrentScope();
+				IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+				
+				cb.addQuadruples(blq.getIntermediateCode());
+				
+				// esto se puede eliminar -------------------------------
+				
+				TemporalFactory tf = new TemporalFactory(scope);
+				TemporalIF temp = tf.create();
+				cb.addQuadruple ("MV", temp, Integer.parseInt(num.getLexema()));
+				cA.setTemporal(temp);
+				
+				// ------------------------------------------------------	
+				
+				
+				cA.setIntermediateCode(cb.create());
+				RESULT = cA;
           :};
 
 porDefecto ::= PORDEFECTO TWO_POINTS bloque:blq CORTE SEMI_COLON{:			   		
-			   		RESULT = new PorDefecto(blq);
+			   		
+			   		PorDefecto pD = new PorDefecto(blq);
+			   		
+			   		/*----- Código intermedio -----*/
+			   		
+			   		ScopeIF scope = scopeManager.getCurrentScope();
+					IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+					
+					cb.addQuadruples(blq.getIntermediateCode());
+					
+					pD.setIntermediateCode(cb.create());
+			   		RESULT = pD;
 			 :}
              | epsilon; 
+             
+  
 
 sentenciaMientras ::= MIENTRAS:m OPEN_KEY expresion:e CLOSE_KEY sentencia:sent{:	  			
 							
@@ -1717,3 +1838,4 @@ opcionesEscribeEnt ::= epsilon
 						   RESULT = opEscEnt;
 						   
                      :};
+                     

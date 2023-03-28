@@ -9,9 +9,7 @@ vacio principal () {
 	
 		caso 1: {escribe ("lunes");} corte;
 		caso 2: {escribe ("martes");} corte;	
-	}
-	
-	
+	}	
 	
 devuelve;
 
