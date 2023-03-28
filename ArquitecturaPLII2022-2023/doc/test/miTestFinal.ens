@@ -1,39 +1,56 @@
-;Quadruple - [VAR a, 8, null]
-MOVE #8, /65535
+;Quadruple - [VAR a, 2, null]
+MOVE #2, /65535
 
-;Quadruple - [VAR b, 8, null]
-MOVE #8, /65534
-
-;Quadruple - [VAR x, 0, null]
-MOVE #0, /65533
-
-;Quadruple - [MVP T_1, a, null]
-MOVE /65535, /65531
-
-;Quadruple - [MVP T_2, b, null]
-MOVE /65534, /65530
-
-;Quadruple - [EQ T_3, T_1, T_2]
-CMP /65531, /65530
-BNZ /L_1
-MOVE #1, /65529
-BZ /L_0
-L_1: 
-MOVE #0, /65529
+;Quadruple - [INL L_0, null, null]
 L_0: 
 
-;Quadruple - [MVA T_0, x, null]
-MOVE #65533, /65532
+;Quadruple - [MVP T_0, a, null]
+MOVE /65535, /65534
+
+;Quadruple - [MV T_1, 5, null]
+MOVE #5, /65533
+
+;Quadruple - [LS T_2, T_0, T_1]
+CMP /65534, /65533
+BN /L_11
+MOVE #0, /65532
+BR /L_10
+L_11: 
+MOVE #1, /65532
+L_10: 
+
+;Quadruple - [BRF T_2, L_1, null]
+CMP #1, /65532
+BNZ /L_1
+
+;Quadruple - [MVP T_1, a, null]
+MOVE /65535, /65534
+
+;Quadruple - [MV T_2, 1, null]
+MOVE #1, /65533
+
+;Quadruple - [ADD T_3, T_1, T_2]
+ADD /65534, /65533
+MOVE .A, /65532
+
+;Quadruple - [MVA T_0, a, null]
+MOVE #65535, /65535
 
 ;Quadruple - [STP T_0, T_3, null]
-MOVE /65532, .R1
-MOVE /65529, [.R1]
+MOVE /65535, .R1
+MOVE /65532, [.R1]
 
-;Quadruple - [MVP T_5, x, null]
-MOVE /65533, /65527
+;Quadruple - [MVP T_5, a, null]
+MOVE /65535, /65530
 
 ;Quadruple - [WRINT T_5, null, null]
-WRINT /65527
+WRINT /65530
+
+;Quadruple - [BR L_0, null, null]
+BR /L_0
+
+;Quadruple - [INL L_1, null, null]
+L_1: 
 
 ;Quadruple - [HALT null, null, null]
 HALT

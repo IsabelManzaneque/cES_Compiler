@@ -1529,7 +1529,7 @@ sentenciaSi ::= SI:si OPEN_KEY expresion:e CLOSE_KEY sentencia:sSi SINO sentenci
 					LabelIF labelSino = lf.create();        	   //etiqueta para el sino
 					TemporalIF tempExp = e.getTemporal();
 					
-					cb.addQuadruples(e.getIntermediateCode());     //anadir codigo de la expresion
+					cb.addQuadruples(e.getIntermediateCode());     
 					cb.addQuadruple("BRF",tempExp,labelSino);      //si no se cumple la condicion, saltar a etiqueta sino
 					cb.addQuadruples(sSi.getIntermediateCode());   //anadir codigo sentencias parte si					
 					cb.addQuadruple("BR",labelFinSi);              //salto a etiqueta finSi
@@ -1598,7 +1598,7 @@ porDefecto ::= PORDEFECTO TWO_POINTS bloque:blq CORTE SEMI_COLON{:
 			 :}
              | epsilon; 
 
-sentenciaMientras ::= MIENTRAS:m OPEN_KEY expresion:e CLOSE_KEY sentencia:sent{:	  //checked				
+sentenciaMientras ::= MIENTRAS:m OPEN_KEY expresion:e CLOSE_KEY sentencia:sent{:	  			
 							
 							/*----- Análisis semántico -----*/
 					
