@@ -2,13 +2,15 @@
 
 vacio principal () {
 
-	entero dia=2;
+	entero dia=300;
 		
 		
 	alternativas (dia) {
 	
 		caso 1: {escribe ("lunes");} corte;
-		caso 2: {escribe ("martes");} corte;	
+		caso 2: {escribe ("martes");} corte;
+		caso 3: {escribe ("miercoles");} corte;		
+		pordefecto: {escribe ("defecto");} corte;
 	}	
 	
 devuelve;

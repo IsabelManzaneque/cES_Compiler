@@ -1,15 +1,24 @@
-;Quadruple - [VAR dia, 2, null]
-MOVE #2, /65535
+;Quadruple - [VAR dia, 300, null]
+MOVE #300, /65535
 
 ;Quadruple - [MVP T_0, dia, null]
 MOVE /65535, /65534
 
-Quadruple - [BEQ T_0, T_1, L_2]
-;Quadruple - [BR L_3, null, null]
-BR /L_3
+;Quadruple - [MV T_1, 1, null]
+MOVE #1, /65533
 
-;Quadruple - [INL L_2, null, null]
-L_2: 
+;Quadruple - [EQ T_4, T_0, T_1]
+CMP /65534, /65533
+BNZ /L_15
+MOVE #1, /65530
+BZ /L_14
+L_15: 
+MOVE #0, /65530
+L_14: 
+
+;Quadruple - [BRF T_4, L_5, null]
+CMP #1, /65530
+BNZ /L_5
 
 ;Quadruple - [WRSTR T_0, L_0, null]
 WRSTR /L_0
@@ -17,21 +26,64 @@ WRSTR /L_0
 ;Quadruple - [BR L_4, null, null]
 BR /L_4
 
-Quadruple - [BEQ T_0, T_2, L_5]
-;Quadruple - [BR L_6, null, null]
-BR /L_6
-
 ;Quadruple - [INL L_5, null, null]
 L_5: 
+
+;Quadruple - [MV T_2, 2, null]
+MOVE #2, /65532
+
+;Quadruple - [EQ T_4, T_0, T_2]
+CMP /65534, /65532
+BNZ /L_27
+MOVE #1, /65530
+BZ /L_26
+L_27: 
+MOVE #0, /65530
+L_26: 
+
+;Quadruple - [BRF T_4, L_6, null]
+CMP #1, /65530
+BNZ /L_6
 
 ;Quadruple - [WRSTR T_0, L_1, null]
 WRSTR /L_1
 
-;Quadruple - [BR L_7, null, null]
-BR /L_7
+;Quadruple - [BR L_4, null, null]
+BR /L_4
 
-;Quadruple - [INL L_8, null, null]
-L_8: 
+;Quadruple - [INL L_6, null, null]
+L_6: 
+
+;Quadruple - [MV T_3, 3, null]
+MOVE #3, /65531
+
+;Quadruple - [EQ T_4, T_0, T_3]
+CMP /65534, /65531
+BNZ /L_39
+MOVE #1, /65530
+BZ /L_38
+L_39: 
+MOVE #0, /65530
+L_38: 
+
+;Quadruple - [BRF T_4, L_7, null]
+CMP #1, /65530
+BNZ /L_7
+
+;Quadruple - [WRSTR T_0, L_2, null]
+WRSTR /L_2
+
+;Quadruple - [BR L_4, null, null]
+BR /L_4
+
+;Quadruple - [INL L_7, null, null]
+L_7: 
+
+;Quadruple - [WRSTR T_0, L_3, null]
+WRSTR /L_3
+
+;Quadruple - [INL L_4, null, null]
+L_4: 
 
 ;Quadruple - [HALT null, null, null]
 HALT
@@ -41,4 +93,10 @@ L_0: DATA "lunes"
 
 ;Quadruple - [STR "martes", L_1, null]
 L_1: DATA "martes"
+
+;Quadruple - [STR "miercoles", L_2, null]
+L_2: DATA "miercoles"
+
+;Quadruple - [STR "defecto", L_3, null]
+L_3: DATA "defecto"
 
