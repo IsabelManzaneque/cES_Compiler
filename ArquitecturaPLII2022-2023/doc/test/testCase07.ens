@@ -1,0 +1,84 @@
+;Quadruple - [VAR a, 0, null]
+MOVE #0, /65535
+
+;Quadruple - [VAR b, 0, null]
+MOVE #0, /65534
+
+;Quadruple - [VAR dia, 0, null]
+MOVE #0, /65533
+
+;Quadruple - [MV T_1, 2, null]
+MOVE #2, /65531
+
+;Quadruple - [MVA T_0, dia, null]
+MOVE #65533, /65532
+
+;Quadruple - [STP T_0, T_1, null]
+MOVE /65532, .R1
+MOVE /65531, [.R1]
+
+;Quadruple - [MVP T_3, dia, null]
+MOVE /65533, /65529
+
+;Quadruple - [MV T_4, 1, null]
+MOVE #1, /65528
+
+;Quadruple - [EQ T_6, T_3, T_4]
+CMP /65529, /65528
+BNZ /L_22
+MOVE #1, /65526
+BZ /L_21
+L_22: 
+MOVE #0, /65526
+L_21: 
+
+;Quadruple - [BRF T_6, L_3, null]
+CMP #1, /65526
+BNZ /L_3
+
+;Quadruple - [WRSTR T_0, L_0, null]
+WRSTR /L_0
+
+;Quadruple - [BR L_2, null, null]
+BR /L_2
+
+;Quadruple - [INL L_3, null, null]
+L_3: 
+
+;Quadruple - [MV T_5, 2, null]
+MOVE #2, /65527
+
+;Quadruple - [EQ T_6, T_3, T_5]
+CMP /65529, /65527
+BNZ /L_34
+MOVE #1, /65526
+BZ /L_33
+L_34: 
+MOVE #0, /65526
+L_33: 
+
+;Quadruple - [BRF T_6, L_4, null]
+CMP #1, /65526
+BNZ /L_4
+
+;Quadruple - [WRSTR T_0, L_1, null]
+WRSTR /L_1
+
+;Quadruple - [BR L_2, null, null]
+BR /L_2
+
+;Quadruple - [INL L_4, null, null]
+L_4: 
+
+;Quadruple - [INL L_2, null, null]
+L_2: 
+
+;Quadruple - [HALT null, null, null]
+HALT
+
+;Quadruple - [STR "lunes", L_0, null]
+L_0: DATA "lunes"
+
+;Quadruple - [STR "martes", L_1, null]
+L_1: DATA "martes"
+

@@ -1587,10 +1587,11 @@ sentenciaAlternativas ::= ALTENATIVAS:alt OPEN_KEY expresion:e CLOSE_KEY OPEN_PA
 								TemporalFactory tf = new TemporalFactory(scope);				
 								LabelFactory lf = new LabelFactory();								
 								
-								LabelIF labelFinSwitch = lf.create();								
+								//LabelIF labelFinSwitch = lf.create();								
 								cb.addQuadruples(e.getIntermediateCode()); 										
 								TemporalIF tempExp = e.getTemporal();
 								TemporalIF tempEQ = tf.create();
+								TemporalIF tempAUX = tf.create();
 								
 								// Compara el numero de cada caso con la expresion. Si hay 
 								// coincidencia, genera el codigo intermedio del caso
@@ -1603,16 +1604,19 @@ sentenciaAlternativas ::= ALTENATIVAS:alt OPEN_KEY expresion:e CLOSE_KEY OPEN_PA
 							        LabelIF labelFinCaso = lf.create();
 							        cb.addQuadruple("BRF",tempEQ,labelFinCaso);               // si no se cumple la condicion, saltar a etiqueta de fin de caso
 							        cb.addQuadruples(caso.getBloque().getIntermediateCode()); // generar codigo intermedio para el bloque del caso							        
-							        cb.addQuadruple("BR",labelFinSwitch);                     // salto a etiqueta de fin de switch						        
+							        cb.addQuadruple("MV",tempAUX,1);                     // salto a etiqueta de fin de switch						        
 							       	cb.addQuadruple("INL",labelFinCaso);			          // etiqueta fin si									        
 							    }
 							    
 							    // Si no hay coincidencia y existe porDefecto, se ejecuta 
-							    if (pD != null) {							       
-							        cb.addQuadruples(pD.getBloque().getIntermediateCode());			
+							    if (pD != null) {		
+							    	LabelIF labelFinDefault = lf.create();        						
+        							cb.addQuadruple("HOL",tempAUX,labelFinDefault);	       
+							        cb.addQuadruples(pD.getBloque().getIntermediateCode());							        
+							        cb.addQuadruple("INL", labelFinDefault);		
 							    }						    
 							    
-							    cb.addQuadruple("INL", labelFinSwitch);      
+							    //cb.addQuadruple("INL", labelFinSwitch);      
 				    							
 								sA.setIntermediateCode(cb.create());
 								RESULT = sA;

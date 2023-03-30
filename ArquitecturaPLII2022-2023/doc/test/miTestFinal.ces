@@ -2,16 +2,76 @@
 
 vacio principal () {
 
-	entero dia=300;
+	entero uno = 1;
+	entero dos = 2;
+	entero tres = 3;
+	entero cuatro = 4;
+	entero def1 = 38297;
+	entero def2 = 27;
+	entero def3 = 235;
 		
 		
-	alternativas (dia) {
+	alternativas (uno) {
 	
-		caso 1: {escribe ("lunes");} corte;
-		caso 2: {escribe ("martes");} corte;
-		caso 3: {escribe ("miercoles");} corte;		
-		pordefecto: {escribe ("defecto");} corte;
+		caso 1: {escribe ("uno");} corte;
+		caso 2: {escribe ("dos");} corte;
+		caso 3: {escribe ("tres");} corte;		
+		caso 4: {escribe ("cuatro");} corte;
+		pordefecto: {escribe ("defect");} corte;
+	}
+	
+	alternativas (dos) {
+	
+		caso 1: {escribe ("uno");} corte;
+		caso 2: {escribe ("dos");} corte;
+		caso 3: {escribe ("tres");} corte;		
+		caso 4: {escribe ("cuatro");} corte;
+		
+	}
+	
+	alternativas (tres) {
+	
+		caso 1: {escribe ("uno");} corte;
+		caso 2: {escribe ("dos");} corte;
+		caso 3: {escribe ("tres");} corte;		
+		caso 4: {escribe ("cuatro");} corte;
+		pordefecto: {escribe ("defect");} corte;
 	}	
+	
+	alternativas (cuatro) {
+	
+		caso 1: {escribe ("uno");} corte;
+		caso 2: {escribe ("dos");} corte;
+		caso 3: {escribe ("tres");} corte;		
+		caso 4: {escribe ("cuatro");} corte;
+		
+	}
+	alternativas (def1) {
+	
+		caso 1: {escribe ("uno");} corte;
+		caso 2: {escribe ("dos");} corte;
+		caso 3: {escribe ("tres");} corte;		
+		caso 4: {escribe ("cuatro");} corte;
+		pordefecto: {escribe ("def1");} corte;
+		
+	}
+	alternativas (def2) {
+	
+		caso 1: {escribe ("uno");} corte;
+		caso 2: {escribe ("dos");} corte;
+		caso 3: {escribe ("tres");} corte;		
+		caso 4: {escribe ("cuatro");} corte;
+		
+	}
+	alternativas (def3) {
+	
+		caso 1: {escribe ("uno");} corte;
+		caso 2: {escribe ("dos");} corte;
+		caso 3: {escribe ("tres");} corte;		
+		caso 4: {escribe ("cuatro");} corte;
+		pordefecto: {escribe ("def3");} corte;
+		
+	}
 	
 devuelve;
 
