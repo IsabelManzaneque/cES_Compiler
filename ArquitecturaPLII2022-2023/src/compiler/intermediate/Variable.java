@@ -73,11 +73,18 @@ public class Variable implements VariableIF{
     @Override
     public final int getAddress ()
     {
-        // TODO : Student Work
-    	if(sV != null) {
-    		return this.sV.getAddress();
+//        // TODO : Student Work
+//    	if(sV != null) {
+//    		return this.sV.getAddress();
+//    	}
+//    	return this.sP.getAddress();
+    	int dir = 0;
+    	ScopeIF scope = getScope();
+    	
+    	if(scope.getSymbolTable().getSymbol(name) instanceof SymbolVariable) {
+        	dir=((SymbolVariable)scope.getSymbolTable().getSymbol(name)).getAddress();
     	}
-    	return this.sP.getAddress();
+    	return dir;
     }
 
     /**

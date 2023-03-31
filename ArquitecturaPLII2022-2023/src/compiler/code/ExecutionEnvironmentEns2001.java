@@ -229,12 +229,12 @@ public class ExecutionEnvironmentEns2001
 		    	b.append("MOVE " + op1 + ", " + res +"\n");		    	
 				return b.toString();
 			
-		    case "WRSTR":
-				
+		    case "WRITESTR":
+		    	
 		    	b.append("WRSTR /" + op1 + "\n");		    	
 				return b.toString();
 		    
-		    case "WRINT":
+		    case "WRITEINT":
 				
 		    	b.append("WRINT " + res + "\n");		    	
 				return b.toString();

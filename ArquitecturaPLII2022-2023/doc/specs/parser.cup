@@ -206,9 +206,10 @@ axiom ::= {:
 			  	Axiom axiom = new Axiom();			  	
 			  	
 			  	// Asignacion de posiciones de memoria para variables globales y temporales
-			  	for(ScopeIF s : scopeManager.getAllScopes()){
-			  		
-			  		int dirEstatica = 65535;
+			  	
+			  	int dirEstatica = 65535;
+			  	
+			  	for(ScopeIF s : scopeManager.getAllScopes()){  		
 			  					  							  		
 			  		for(SymbolIF sim : s.getSymbolTable().getSymbols()){			  			
 			  			if(sim instanceof SymbolVariable){
@@ -1604,7 +1605,7 @@ sentenciaAlternativas ::= ALTENATIVAS:alt OPEN_KEY expresion:e CLOSE_KEY OPEN_PA
 							        LabelIF labelFinCaso = lf.create();
 							        cb.addQuadruple("BRF",tempEQ,labelFinCaso);               // si no se cumple la condicion, saltar a etiqueta de fin de caso
 							        cb.addQuadruples(caso.getBloque().getIntermediateCode()); // generar codigo intermedio para el bloque del caso							        
-							        cb.addQuadruple("MV",tempAUX,1);                     // salto a etiqueta de fin de switch						        
+							        cb.addQuadruple("MV",tempAUX,1);                          						        
 							       	cb.addQuadruple("INL",labelFinCaso);			          // etiqueta fin si									        
 							    }
 							    
@@ -1616,9 +1617,7 @@ sentenciaAlternativas ::= ALTENATIVAS:alt OPEN_KEY expresion:e CLOSE_KEY OPEN_PA
 							        cb.addQuadruple("INL", labelFinDefault);		
 							    }						    
 							    
-							    //cb.addQuadruple("INL", labelFinSwitch);      
-				    							
-								sA.setIntermediateCode(cb.create());
+							   	sA.setIntermediateCode(cb.create());
 								RESULT = sA;
 						:};
 
@@ -1766,7 +1765,7 @@ sentenciaSalida ::= ESCRIBE OPEN_KEY opcionesEscribe:opEsc CLOSE_KEY SEMI_COLON{
 							LabelIF lb = lf.create();
 							TemporalIF temp = tf.create();
 							
-							cb.addQuadruple("WRSTR",temp,lb);
+							cb.addQuadruple("WRITESTR",temp,lb);
 														
 							// Guardamos la cadena en la lista para recuperarla al final del programa
 							listaCadenas.add(new Quadruple("STR",new Label(str),lb));							
@@ -1793,7 +1792,7 @@ sentenciaSalida ::= ESCRIBE OPEN_KEY opcionesEscribe:opEsc CLOSE_KEY SEMI_COLON{
 							TemporalIF temp = opEscEnt.getOpciones().getTemporal();
 							
 							cb.addQuadruples(opEscEnt.getOpciones().getIntermediateCode());
-							cb.addQuadruple("WRINT",temp);
+							cb.addQuadruple("WRITEINT",temp);
 							
 							sentSld.setIntermediateCode(cb.create());	
 							RESULT = sentSld;							

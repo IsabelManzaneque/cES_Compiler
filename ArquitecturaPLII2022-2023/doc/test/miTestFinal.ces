@@ -2,76 +2,30 @@
 
 vacio principal () {
 
-	entero uno = 1;
-	entero dos = 2;
-	entero tres = 3;
-	entero cuatro = 4;
-	entero def1 = 38297;
-	entero def2 = 27;
-	entero def3 = 235;
-		
-		
-	alternativas (uno) {
+	entero x = 1;
+	entero y = 0;
 	
-		caso 1: {escribe ("uno");} corte;
-		caso 2: {escribe ("dos");} corte;
-		caso 3: {escribe ("tres");} corte;		
-		caso 4: {escribe ("cuatro");} corte;
-		pordefecto: {escribe ("defect");} corte;
+		
+		
+	alternativas (x) {
+	
+		caso 1: {escribe ("x caso uno:"); y+=3;} corte;
+		caso 2: {escribe ("x caso dos:");escribeEnt(x);} corte;
+		caso 3: {escribe ("x caso tres:");escribeEnt(x);} corte;		
+		caso 4: {escribe ("x caso cuatro:");escribeEnt(x);} corte;
+		pordefecto: {escribe ("x caso defecto: ");escribeEnt(x);} corte;
 	}
 	
-	alternativas (dos) {
+	alternativas (y) {
 	
-		caso 1: {escribe ("uno");} corte;
-		caso 2: {escribe ("dos");} corte;
-		caso 3: {escribe ("tres");} corte;		
-		caso 4: {escribe ("cuatro");} corte;
+		caso 1: {escribe ("y caso uno:"); escribeEnt(y);} corte;
+		caso 2: {escribe ("y caso dos:");escribeEnt(y);} corte;
+		caso 3: {escribe ("y caso tres:");escribeEnt(y);} corte;		
+		caso 4: {escribe ("y caso cuatro:");escribeEnt(y);} corte;
 		
 	}
 	
-	alternativas (tres) {
 	
-		caso 1: {escribe ("uno");} corte;
-		caso 2: {escribe ("dos");} corte;
-		caso 3: {escribe ("tres");} corte;		
-		caso 4: {escribe ("cuatro");} corte;
-		pordefecto: {escribe ("defect");} corte;
-	}	
-	
-	alternativas (cuatro) {
-	
-		caso 1: {escribe ("uno");} corte;
-		caso 2: {escribe ("dos");} corte;
-		caso 3: {escribe ("tres");} corte;		
-		caso 4: {escribe ("cuatro");} corte;
-		
-	}
-	alternativas (def1) {
-	
-		caso 1: {escribe ("uno");} corte;
-		caso 2: {escribe ("dos");} corte;
-		caso 3: {escribe ("tres");} corte;		
-		caso 4: {escribe ("cuatro");} corte;
-		pordefecto: {escribe ("def1");} corte;
-		
-	}
-	alternativas (def2) {
-	
-		caso 1: {escribe ("uno");} corte;
-		caso 2: {escribe ("dos");} corte;
-		caso 3: {escribe ("tres");} corte;		
-		caso 4: {escribe ("cuatro");} corte;
-		
-	}
-	alternativas (def3) {
-	
-		caso 1: {escribe ("uno");} corte;
-		caso 2: {escribe ("dos");} corte;
-		caso 3: {escribe ("tres");} corte;		
-		caso 4: {escribe ("cuatro");} corte;
-		pordefecto: {escribe ("def3");} corte;
-		
-	}
 	
 devuelve;
 
