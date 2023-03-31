@@ -154,7 +154,13 @@ public class ExecutionEnvironmentEns2001
 		    case "ADD":				
 		    	
 				b.append("ADD " + op1 + ", " + op2 + "\n");
-				b.append("MOVE " + ".A" + ", " + res + "\n");
+				b.append("MOVE .A" + ", " + res + "\n");
+				return b.toString();
+				
+		    case "AND":				
+		    	
+		    	b.append("AND " + op1 + ", " + op2 + "\n");
+		    	b.append("MOVE .A" + ", " + res + "\n");	        	
 				return b.toString();
 		    
 		    case "MUL":				
