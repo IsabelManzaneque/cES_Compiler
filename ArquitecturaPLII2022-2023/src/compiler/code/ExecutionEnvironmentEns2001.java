@@ -162,6 +162,18 @@ public class ExecutionEnvironmentEns2001
 				b.append("MUL " + op1 + ", " + op2 + "\n");
 				b.append("MOVE " + ".A" + ", " + res + "\n");
 				return b.toString();
+				
+		    case "NOT":				
+		    	
+		    	b.append("SUB"+ op1 + ", " + "#1\n");
+	        	b.append("BZ /" + l1 + "\n");
+	        	b.append("MOVE #1, " + res + "\n");
+	        	b.append("BR /" + l2 + "\n");
+	        	b.append(l1 + ":\n");
+	        	b.append("MOVE #0, " + res + "\n");
+	        	b.append(l2 + ":\n");
+	        	
+				return b.toString();
 			
 		    case "EQ":	    	
 		    	        	
@@ -249,7 +261,8 @@ public class ExecutionEnvironmentEns2001
 		    	b.append("CMP #1, " + res + "\n");
 		    	b.append("BNZ /" + op1 + "\n");
 				return b.toString();
-		    case "HOL":	 
+		    
+		    case "BRF0":	 
 	    	   	
 		    	b.append("CMP #0, " + res + "\n");
 		    	b.append("BNZ /" + op1 + "\n");

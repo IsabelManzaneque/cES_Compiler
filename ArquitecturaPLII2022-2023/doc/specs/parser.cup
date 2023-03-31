@@ -1612,7 +1612,7 @@ sentenciaAlternativas ::= ALTENATIVAS:alt OPEN_KEY expresion:e CLOSE_KEY OPEN_PA
 							    // Si no hay coincidencia y existe porDefecto, se ejecuta 
 							    if (pD != null) {		
 							    	LabelIF labelFinDefault = lf.create();        						
-        							cb.addQuadruple("HOL",tempAUX,labelFinDefault);	       
+        							cb.addQuadruple("BRF0",tempAUX,labelFinDefault);	       
 							        cb.addQuadruples(pD.getBloque().getIntermediateCode());							        
 							        cb.addQuadruple("INL", labelFinDefault);		
 							    }						    

@@ -2,7 +2,7 @@
 
 vacio principal () {
 
-	entero x = 1;
+	entero x = 100;
 	entero y = 0;
 	
 		
@@ -13,7 +13,7 @@ vacio principal () {
 		caso 2: {escribe ("x caso dos:");escribeEnt(x);} corte;
 		caso 3: {escribe ("x caso tres:");escribeEnt(x);} corte;		
 		caso 4: {escribe ("x caso cuatro:");escribeEnt(x);} corte;
-		pordefecto: {escribe ("x caso defecto: ");escribeEnt(x);} corte;
+		pordefecto: {escribe ("x caso defecto: ");escribeEnt(x); y+=2;} corte;
 	}
 	
 	alternativas (y) {
