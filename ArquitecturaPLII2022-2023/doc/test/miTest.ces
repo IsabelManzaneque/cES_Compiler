@@ -22,7 +22,7 @@ vector1 v1, v2;
 
 /* FUNCIONES */
 
-entero funSuma (entero x, entero y) {
+entero funSuma (entero y, entero x) {
 	
 	/*tipos*/
 	tipo entero vectorFunSuma[15];
@@ -88,7 +88,7 @@ vacio principal () {
 	/* Sentencias */	
 	
 	a++;
-	
+	saluda();
 	escribeEntero(funResta(a,b));	
 
 	si (mayorDiez == VERDADERO) { escribe ("mayor"); }

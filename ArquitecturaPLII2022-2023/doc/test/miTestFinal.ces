@@ -1,32 +1,20 @@
 
 
+vacio saluda () {
+ 	escribe ("Hola mundo");
+}
+
 vacio principal () {
 
-	entero x = 100;
-	entero y = 0;
-	
-		
-		
-	alternativas (x) {
-	
-		caso 1: {escribe ("x caso uno:"); y+=3;} corte;
-		caso 2: {escribe ("x caso dos:");escribeEnt(x);} corte;
-		caso 3: {escribe ("x caso tres:");escribeEnt(x);} corte;		
-		caso 4: {escribe ("x caso cuatro:");escribeEnt(x);} corte;
-		pordefecto: {escribe ("x caso defecto: ");escribeEnt(x); y+=2;} corte;
-	}
-	
-	alternativas (y) {
-	
-		caso 1: {escribe ("y caso uno:"); escribeEnt(y);} corte;
-		caso 2: {escribe ("y caso dos:");escribeEnt(y);} corte;
-		caso 3: {escribe ("y caso tres:");escribeEnt(y);} corte;		
-		caso 4: {escribe ("y caso cuatro:");escribeEnt(y);} corte;
-		
-	}
 	
 	
 	
+	saluda();
+	
+	
+
+
+
 devuelve;
 
 }

@@ -1060,14 +1060,29 @@ expresion ::= NUMERO:num{:
 		 	  	RESULT = aV.getExpresion();
 		 	:}
 			| llamadaFuncion:fun{:				
-			    // Verificar que la llamada a la funcion devuelve un tipo	
+			    
+			   
+			    /*----- Análisis semántico -----*/
+			    
 				SymbolIF symbolFun = scopeManager.searchSymbol(fun.getName());
 				if(!(symbolFun.getType() instanceof TypeSimpleEntero)){
 					semanticErrorManager.semanticFatalError("Error: La funcion '" + fun.getName() + "' no devuelve un valor");
 				}
-				
 				Expresion exp = new Expresion(symbolFun.getType());
-				exp.setFunction(true);								
+				
+				/*----- Código intermedio -----*/
+				
+				// Las expresiones que son funciones devuelven 1
+				
+				ScopeIF scope = scopeManager.getCurrentScope();
+				TemporalFactory tf = new TemporalFactory(scope);
+				IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+				TemporalIF temp = tf.create();
+				
+				cb.addQuadruple ("MV", temp, 1);
+				
+				exp.setTemporal(temp);
+				exp.setIntermediateCode(cb.create());															
 				RESULT = exp;	
 			:};
 
@@ -1124,6 +1139,8 @@ accesoVector ::= IDENTIFICADOR:id OPEN_BRACKET expresion:e CLOSE_BRACKET{:
 
 llamadaFuncion ::= IDENTIFICADOR:id OPEN_KEY parametros:param CLOSE_KEY{:					
 				        
+				        /*----- Análisis semántico -----*/
+				        
 				        //Comprobar si existe la funcion referenciada
 				        if(!scopeManager.containsSymbol(id.getLexema())){
 				            semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": La función '" + id.getLexema() + "' no ha sido declarada");
@@ -1132,7 +1149,7 @@ llamadaFuncion ::= IDENTIFICADOR:id OPEN_KEY parametros:param CLOSE_KEY{:
 					    // Verificar que se corresponden los parametros actuales y formales
 						SymbolFunction sF = (SymbolFunction) scopeManager.searchSymbol(id.getLexema());
 						
-						if(sF.getParametros().size() != param.getListaExpr().size()){
+						if((sF.getParametros() == null) || (sF.getParametros().size() != param.getListaExpr().size())){
 							semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": Incorrecto número de parámetros en '" + id.getLexema() + "'");
 						}	
 																
@@ -1145,7 +1162,9 @@ llamadaFuncion ::= IDENTIFICADOR:id OPEN_KEY parametros:param CLOSE_KEY{:
 					   RESULT = new LlamadaFuncion(id.getLexema(), param.getListaExpr()); 	
                  :}
 	             | IDENTIFICADOR:id OPEN_KEY CLOSE_KEY{:
-	             
+	             	   
+	             	   /*----- Análisis semántico -----*/
+	             	   	
 	             	   if(!scopeManager.containsSymbol(id.getLexema())){
 				          semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": La función '" + id.getLexema() + "' no ha sido declarada");
 					   }
@@ -1153,7 +1172,7 @@ llamadaFuncion ::= IDENTIFICADOR:id OPEN_KEY parametros:param CLOSE_KEY{:
 					   // Verificar que se corresponden los parametros actuales y formales
 					   SymbolFunction sF = (SymbolFunction) scopeManager.searchSymbol(id.getLexema());
 						
-					   if(sF.getParametros().size() > 0){
+					   if(sF.getParametros() != null){
 							semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": Incorrecto número de parámetros en '" + id.getLexema() + "'");
 				       }
 						
@@ -1381,25 +1400,21 @@ sentenciaAsignacion ::= ref:r ASSIGN:a expresion:e SEMI_COLON{:
 							SentenciaAsignacion sentAsign = new SentenciaAsignacion(r,e);
 							
 							/*----- Código intermedio -----*/
-							
-							// solo generamos codigo intermedio si la 
-							// expresion no es una llamada a funcion		
-												
-							if(!e.isFunction()){
-								ScopeIF scope = scopeManager.getCurrentScope();
-								TemporalFactoryIF tf = new TemporalFactory(scope);
-								IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);														
+						
+							ScopeIF scope = scopeManager.getCurrentScope();
+							TemporalFactoryIF tf = new TemporalFactory(scope);
+							IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);														
 							    
-								TemporalIF tempExp = e.getTemporal();
-								TemporalIF tempRef = r.getTemporal();
-								TemporalIF temp = tf.create();										
+							TemporalIF tempExp = e.getTemporal();
+							TemporalIF tempRef = r.getTemporal();
+							TemporalIF temp = tf.create();										
 								
-								cb.addQuadruples(e.getIntermediateCode());
-								cb.addQuadruples(r.getIntermediateCode());																						
-								cb.addQuadruple("STP",tempRef,tempExp);
+							cb.addQuadruples(e.getIntermediateCode());
+							cb.addQuadruples(r.getIntermediateCode());																						
+							cb.addQuadruple("STP",tempRef,tempExp);
 				
-								sentAsign.setIntermediateCode(cb.create());	
-							}						
+							sentAsign.setIntermediateCode(cb.create());	
+													
 							RESULT = sentAsign;						
 													
                       :};
@@ -1414,37 +1429,33 @@ sentenciaAsignacionSuma ::= ref:r ASSIGN_SUMA:as expresion:e SEMI_COLON{:
 								}									
 								SentenciaAsignacionSuma sentAsignSum = new SentenciaAsignacionSuma(r,e);
 								
-								/*----- Código intermedio -----*/
-								
-								// solo generamos codigo intermedio si la 
-								// expresion no es una llamada a funcion		
-													
-								if(!e.isFunction()){
-									ScopeIF scope = scopeManager.getCurrentScope();
-									TemporalFactoryIF tf = new TemporalFactory(scope);
-									IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);									
-									SymbolIF symbol = scopeManager.searchSymbol(r.getId());			
+								/*----- Código intermedio -----*/								
+						
+								ScopeIF scope = scopeManager.getCurrentScope();
+								TemporalFactoryIF tf = new TemporalFactory(scope);
+								IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);									
+								SymbolIF symbol = scopeManager.searchSymbol(r.getId());			
 								    
-									TemporalIF tempExp = e.getTemporal();
-									TemporalIF tempRef = r.getTemporal();					
-									TemporalIF temp = tf.create();		
-									TemporalIF temp2 = tf.create();
+								TemporalIF tempExp = e.getTemporal();
+								TemporalIF tempRef = r.getTemporal();					
+								TemporalIF temp = tf.create();		
+								TemporalIF temp2 = tf.create();
 									
-									cb.addQuadruples(r.getIntermediateCode());
-									cb.addQuadruples(e.getIntermediateCode());								
+								cb.addQuadruples(r.getIntermediateCode());
+								cb.addQuadruples(e.getIntermediateCode());								
 									
-									if(symbol instanceof SymbolConstant){
-										Value value = new Value(((SymbolConstant)symbol).getValue());
-										cb.addQuadruple("MV",temp2,value);									
-									}else if(symbol instanceof SymbolVariable){
-										Variable var = new Variable((SymbolVariable)symbol);
-										cb.addQuadruple("MVP",temp2,var);									
-									}								
-									cb.addQuadruple ("ADD", temp, temp2, tempExp);												
-									cb.addQuadruple("STP",tempRef,temp);                
+								if(symbol instanceof SymbolConstant){
+									Value value = new Value(((SymbolConstant)symbol).getValue());
+									cb.addQuadruple("MV",temp2,value);									
+								}else if(symbol instanceof SymbolVariable){
+									Variable var = new Variable((SymbolVariable)symbol);
+									cb.addQuadruple("MVP",temp2,var);									
+								}								
+								cb.addQuadruple ("ADD", temp, temp2, tempExp);												
+								cb.addQuadruple("STP",tempRef,temp);                
 					
-									sentAsignSum.setIntermediateCode(cb.create());	
-								}						
+								sentAsignSum.setIntermediateCode(cb.create());	
+														
 								RESULT = sentAsignSum;						
 	                      :};
 
@@ -1735,12 +1746,12 @@ sentenciaLlamadaFuncion ::= llamadaFuncion:fun SEMI_COLON:sc{:
 								
 								/*----- Código intermedio -----*/
 								
-								ScopeIF scope = scopeManager.getCurrentScope();
-								IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
+							//	ScopeIF scope = scopeManager.getCurrentScope();
+							//	IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 								
-								cb.addQuadruples(fun.getIntermediateCode());
+							//	cb.addQuadruples(fun.getIntermediateCode());
 									
-								sentLlamFun.setIntermediateCode(cb.create());	
+							//	sentLlamFun.setIntermediateCode(cb.create());	
 								RESULT = sentLlamFun;
                           :};
 
