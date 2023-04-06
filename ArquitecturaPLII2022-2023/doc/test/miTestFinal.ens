@@ -1,6 +1,42 @@
+;Quadruple - [VAR v1, 0, null]
+MOVE #0, /65535
+
+;Quadruple - [MV T_0, 2, null]
+MOVE #2, /65525
+
+;Quadruple - [MVA T_3, v1, null]
+MOVE #65535, /65522
+
+;Quadruple - [SUB T_2, T_3, T_0]
+SUB /65522, /65525
+MOVE .A, /65523
+
+;Quadruple - [MV T_4, 11, null]
+MOVE #11, /65521
+
+;Quadruple - [STP T_2, T_4, null]
+MOVE /65523, .R1
+MOVE /65521, [.R1]
+
+;Quadruple - [MV T_5, 2, null]
+MOVE #2, /65520
+
+;Quadruple - [MVA T_8, v1, null]
+MOVE #65535, /65517
+
+;Quadruple - [SUB T_7, T_8, T_5]
+SUB /65517, /65520
+MOVE .A, /65518
+
+;Quadruple - [MVP T_9, T_7, null]
+MOVE /65518, /65516
+
+;Quadruple - [MV T_10, T_9, null]
+MOVE /65516, /65515
+
+;Quadruple - [WRITEINT T_10, null, null]
+WRINT /65515
+
 ;Quadruple - [HALT null, null, null]
 HALT
-
-;Quadruple - [STR "Hola mundo", L_0, null]
-L_0: DATA "Hola mundo"
 

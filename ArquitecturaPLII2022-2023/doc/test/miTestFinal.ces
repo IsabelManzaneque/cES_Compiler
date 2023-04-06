@@ -1,19 +1,14 @@
 
 
-vacio saluda () {
- 	escribe ("Hola mundo");
-}
-
 vacio principal () {
 
-	
-	
-	
-	saluda();
-	
-	
+tipo entero vector[10];
+
+vector v1;
 
 
+v1[2] = 11;
+escribeEnt(v1[2]);
 
 devuelve;
 

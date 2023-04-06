@@ -157,6 +157,12 @@ public class ExecutionEnvironmentEns2001
 				b.append("MOVE .A" + ", " + res + "\n");
 				return b.toString();
 				
+		    case "SUB":				
+		    	
+				b.append("SUB " + op1 + ", " + op2 + "\n");
+				b.append("MOVE .A" + ", " + res + "\n");
+				return b.toString();
+				
 		    case "AND":				
 		    	
 		    	b.append("AND " + op1 + ", " + op2 + "\n");
@@ -218,9 +224,16 @@ public class ExecutionEnvironmentEns2001
 			
 		    case "MVA":	
 		    	
-		     	b.append("MOVE #" + ((Variable)quadruple.getFirstOperand()).getAddress() + ", " + res + "\n");
-				return b.toString();
-			
+//		     	b.append("MOVE #" + ((Variable)quadruple.getFirstOperand()).getAddress() + ", " + res + "\n");
+//				return b.toString();
+		    	
+		    	if(quadruple.getFirstOperand() instanceof Variable) {
+		    		b.append("MOVE #" + ((Variable)quadruple.getFirstOperand()).getAddress() + ", " + res + "\n");
+		    	}else if(quadruple.getFirstOperand() instanceof Temporal) {
+		    		b.append("MOVE #" + ((Temporal)quadruple.getFirstOperand()).getAddress() + ", " + res + "\n");
+		    	}
+		    	return b.toString();
+		    	
 		    case "MVP":	
 		    	
 		     	b.append("MOVE " + op1 + ", " + res + "\n");
@@ -241,6 +254,22 @@ public class ExecutionEnvironmentEns2001
 		     	b.append("MOVE " + res + ", .R1\n");   //mover al registro R1
 		     	b.append("MOVE " + op1 + ", [.R1]\n"); //mover a la posicion de memoria que contiene R1
 				return b.toString();
+		    	
+//		    	if(quadruple.getFirstOperand() instanceof Variable) {
+//		    		
+//		    		b.append("SUB .IX, #" + ((Variable)quadruple.getFirstOperand()).getAddress()+ "\n");
+//		    		b.append("MOVE .A, .R1\n");
+//		    		b.append("MOVE [.R1], .R2\n");
+//		    		b.append("MOVE " + op1 + ", [.R2]\n");
+//		    		
+//		    	}else if(quadruple.getFirstOperand() instanceof Temporal) {
+//		    		
+//		    		b.append("SUB .IX, #" + ((Temporal)quadruple.getFirstOperand()).getAddress()+ "\n");
+//		    		b.append("MOVE .A, .R1\n");
+//		    		b.append("MOVE [.R1], .R2\n");
+//		    		b.append("MOVE " + op1 + ", [.R2]\n");
+//		    	}		    	
+//				return b.toString();
 				
 		    case "VAR":
 				

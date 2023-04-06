@@ -1,10 +1,12 @@
 package compiler.syntax.nonTerminal;
 
+import compiler.intermediate.Variable;
 
 public class Ref extends NonTerminal {
 	
 	private String id;
 	private AccesoVector accesoVector;
+	Variable var;
 	
 	public Ref(String id) {
 		this.id = id;
@@ -30,6 +32,14 @@ public class Ref extends NonTerminal {
 
 	public void setAccesoVector(AccesoVector accesoVector) {
 		this.accesoVector = accesoVector;
+	}
+
+	public Variable getVar() {
+		return var;
+	}
+
+	public void setVar(Variable var) {
+		this.var = var;
 	}
 
 
