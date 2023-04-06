@@ -1066,11 +1066,13 @@ expresion ::= NUMERO:num{:
             	TemporalFactory tf = new TemporalFactory(scope);
 				IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 				TemporalIF temp = tf.create();
+				TemporalIF tempAux = tf.create();
 				
 				cb.addQuadruples(aV.getIntermediateCode());
 				cb.addQuadruple("MVP",temp,aV.getTemporal());
+				cb.addQuadruple("LOAD",tempAux,temp);
 				
-				exp.setTemporal(temp);
+				exp.setTemporal(tempAux);
 				exp.setIntermediateCode(cb.create());	            	
 		 	  	RESULT = exp;
 		 	:}

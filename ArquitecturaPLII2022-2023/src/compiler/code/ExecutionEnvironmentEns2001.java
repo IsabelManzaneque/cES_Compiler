@@ -162,6 +162,12 @@ public class ExecutionEnvironmentEns2001
 				b.append("SUB " + op1 + ", " + op2 + "\n");
 				b.append("MOVE .A" + ", " + res + "\n");
 				return b.toString();
+		    
+		    case "LOAD":				
+		    	
+				b.append("MOVE " + op1 + ", .R1\n");
+				b.append("MOVE [.R1], " + res + "\n");
+				return b.toString();
 				
 		    case "AND":				
 		    	
