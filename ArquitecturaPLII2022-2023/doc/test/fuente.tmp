@@ -1,118 +1,210 @@
 ;Quadruple - [VAR v1, 0, null]
+MOVE #0, /65534
+
+;Quadruple - [VAR c, 0, null]
 MOVE #0, /65535
 
-;Quadruple - [MV T_0, 0, null]
-MOVE #0, /65525
+;Quadruple - [MV T_0, 1, null]
+MOVE #1, /65524
 
 ;Quadruple - [MVA T_3, v1, null]
-MOVE #65535, /65522
+MOVE #65534, /65521
 
 ;Quadruple - [SUB T_2, T_3, T_0]
-SUB /65522, /65525
-MOVE .A, /65523
+SUB /65521, /65524
+MOVE .A, /65522
 
 ;Quadruple - [MV T_4, 10, null]
-MOVE #10, /65521
+MOVE #10, /65520
 
 ;Quadruple - [STP T_2, T_4, null]
-MOVE /65523, .R1
-MOVE /65521, [.R1]
+MOVE /65522, .R1
+MOVE /65520, [.R1]
 
-;Quadruple - [MV T_5, 1, null]
-MOVE #1, /65520
+;Quadruple - [MV T_5, 2, null]
+MOVE #2, /65519
 
 ;Quadruple - [MVA T_8, v1, null]
-MOVE #65535, /65517
+MOVE #65534, /65516
 
 ;Quadruple - [SUB T_7, T_8, T_5]
-SUB /65517, /65520
-MOVE .A, /65518
+SUB /65516, /65519
+MOVE .A, /65517
 
-;Quadruple - [MV T_9, 20, null]
-MOVE #20, /65516
+;Quadruple - [MV T_9, 4, null]
+MOVE #4, /65515
 
 ;Quadruple - [STP T_7, T_9, null]
-MOVE /65518, .R1
-MOVE /65516, [.R1]
+MOVE /65517, .R1
+MOVE /65515, [.R1]
 
-;Quadruple - [MV T_10, 2, null]
-MOVE #2, /65515
+;Quadruple - [MV T_10, 4, null]
+MOVE #4, /65514
 
 ;Quadruple - [MVA T_13, v1, null]
-MOVE #65535, /65512
+MOVE #65534, /65511
 
 ;Quadruple - [SUB T_12, T_13, T_10]
-SUB /65512, /65515
-MOVE .A, /65513
+SUB /65511, /65514
+MOVE .A, /65512
 
 ;Quadruple - [MV T_14, 30, null]
-MOVE #30, /65511
+MOVE #30, /65510
 
 ;Quadruple - [STP T_12, T_14, null]
-MOVE /65513, .R1
-MOVE /65511, [.R1]
+MOVE /65512, .R1
+MOVE /65510, [.R1]
 
-;Quadruple - [MV T_15, 0, null]
-MOVE #0, /65510
+;Quadruple - [WRITESTR T_15, L_0, null]
+WRSTR /L_0
 
-;Quadruple - [MVA T_18, v1, null]
-MOVE #65535, /65507
+;Quadruple - [MV T_16, 1, null]
+MOVE #1, /65508
 
-;Quadruple - [SUB T_17, T_18, T_15]
-SUB /65507, /65510
-MOVE .A, /65508
+;Quadruple - [MVA T_19, v1, null]
+MOVE #65534, /65505
 
-;Quadruple - [MVP T_19, T_17, null]
-MOVE /65508, /65506
+;Quadruple - [SUB T_18, T_19, T_16]
+SUB /65505, /65508
+MOVE .A, /65506
 
-;Quadruple - [LOAD T_20, T_19, null]
-MOVE /65506, .R1
-MOVE [.R1], /65505
+;Quadruple - [MVP T_20, T_18, null]
+MOVE /65506, /65504
 
-;Quadruple - [WRITEINT T_20, null, null]
-WRINT /65505
+;Quadruple - [LOAD T_21, T_20, null]
+MOVE /65504, .R1
+MOVE [.R1], /65503
 
-;Quadruple - [MV T_21, 1, null]
-MOVE #1, /65504
+;Quadruple - [WRITEINT T_21, null, null]
+WRINT /65503
 
-;Quadruple - [MVA T_24, v1, null]
-MOVE #65535, /65501
+;Quadruple - [WRITESTR T_22, L_1, null]
+WRSTR /L_1
 
-;Quadruple - [SUB T_23, T_24, T_21]
-SUB /65501, /65504
-MOVE .A, /65502
+;Quadruple - [MV T_23, 2, null]
+MOVE #2, /65501
 
-;Quadruple - [MVP T_25, T_23, null]
-MOVE /65502, /65500
+;Quadruple - [MVA T_26, v1, null]
+MOVE #65534, /65498
 
-;Quadruple - [LOAD T_26, T_25, null]
-MOVE /65500, .R1
-MOVE [.R1], /65499
+;Quadruple - [SUB T_25, T_26, T_23]
+SUB /65498, /65501
+MOVE .A, /65499
 
-;Quadruple - [WRITEINT T_26, null, null]
-WRINT /65499
+;Quadruple - [MVP T_27, T_25, null]
+MOVE /65499, /65497
 
-;Quadruple - [MV T_27, 2, null]
-MOVE #2, /65498
+;Quadruple - [LOAD T_28, T_27, null]
+MOVE /65497, .R1
+MOVE [.R1], /65496
 
-;Quadruple - [MVA T_30, v1, null]
-MOVE #65535, /65495
+;Quadruple - [WRITEINT T_28, null, null]
+WRINT /65496
 
-;Quadruple - [SUB T_29, T_30, T_27]
-SUB /65495, /65498
-MOVE .A, /65496
+;Quadruple - [WRITESTR T_29, L_2, null]
+WRSTR /L_2
 
-;Quadruple - [MVP T_31, T_29, null]
-MOVE /65496, /65494
+;Quadruple - [MV T_30, 4, null]
+MOVE #4, /65494
 
-;Quadruple - [LOAD T_32, T_31, null]
-MOVE /65494, .R1
-MOVE [.R1], /65493
+;Quadruple - [MVA T_33, v1, null]
+MOVE #65534, /65491
 
-;Quadruple - [WRITEINT T_32, null, null]
-WRINT /65493
+;Quadruple - [SUB T_32, T_33, T_30]
+SUB /65491, /65494
+MOVE .A, /65492
+
+;Quadruple - [MVP T_34, T_32, null]
+MOVE /65492, /65490
+
+;Quadruple - [LOAD T_35, T_34, null]
+MOVE /65490, .R1
+MOVE [.R1], /65489
+
+;Quadruple - [WRITEINT T_35, null, null]
+WRINT /65489
+
+;Quadruple - [MVA T_36, c, null]
+MOVE #65535, /65488
+
+;Quadruple - [MV T_37, 1, null]
+MOVE #1, /65487
+
+;Quadruple - [MVA T_40, v1, null]
+MOVE #65534, /65484
+
+;Quadruple - [SUB T_39, T_40, T_37]
+SUB /65484, /65487
+MOVE .A, /65485
+
+;Quadruple - [MVP T_41, T_39, null]
+MOVE /65485, /65483
+
+;Quadruple - [LOAD T_42, T_41, null]
+MOVE /65483, .R1
+MOVE [.R1], /65482
+
+;Quadruple - [MV T_43, 2, null]
+MOVE #2, /65481
+
+;Quadruple - [MVA T_46, v1, null]
+MOVE #65534, /65478
+
+;Quadruple - [SUB T_45, T_46, T_43]
+SUB /65478, /65481
+MOVE .A, /65479
+
+;Quadruple - [MVP T_47, T_45, null]
+MOVE /65479, /65477
+
+;Quadruple - [LOAD T_48, T_47, null]
+MOVE /65477, .R1
+MOVE [.R1], /65476
+
+;Quadruple - [MVA T_51, v1, null]
+MOVE #65534, /65473
+
+;Quadruple - [SUB T_50, T_51, T_48]
+SUB /65473, /65476
+MOVE .A, /65474
+
+;Quadruple - [MVP T_52, T_50, null]
+MOVE /65474, /65472
+
+;Quadruple - [LOAD T_53, T_52, null]
+MOVE /65472, .R1
+MOVE [.R1], /65471
+
+;Quadruple - [ADD T_54, T_42, T_53]
+ADD /65482, /65471
+MOVE .A, /65470
+
+;Quadruple - [STP T_36, T_54, null]
+MOVE /65488, .R1
+MOVE /65470, [.R1]
+
+;Quadruple - [WRITESTR T_55, L_3, null]
+WRSTR /L_3
+
+;Quadruple - [MVP T_56, c, null]
+MOVE /65535, /65468
+
+;Quadruple - [WRITEINT T_56, null, null]
+WRINT /65468
 
 ;Quadruple - [HALT null, null, null]
 HALT
+
+;Quadruple - [STR "v1[1]:", L_0, null]
+L_0: DATA "v1[1]:"
+
+;Quadruple - [STR "v1[2]:", L_1, null]
+L_1: DATA "v1[2]:"
+
+;Quadruple - [STR "v1[4]:", L_2, null]
+L_2: DATA "v1[4]:"
+
+;Quadruple - [STR "----c:", L_3, null]
+L_3: DATA "----c:"
 
 

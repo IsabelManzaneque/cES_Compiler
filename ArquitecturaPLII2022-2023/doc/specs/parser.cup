@@ -1143,8 +1143,7 @@ accesoVector ::= IDENTIFICADOR:id OPEN_BRACKET expresion:e CLOSE_BRACKET{:
                  	
                  	cb.addQuadruple("MVA", tempBase, var);                       // obtiene la base del array             	              	
                  	cb.addQuadruple("SUB", tempSub, tempBase, e.getTemporal());  // calcula la direccion restando a la base el offset y poniendo el resultado en temp
-                   // cb.addQuadruple("MVA",temp,tempSub);                       // pone un puntero a tempSub en temp  
-                	
+                 	
                  	aV.setIntermediateCode(cb.create());
                  	aV.setTemporal(tempSub);                                   // propaga temp
                  	RESULT = aV;
@@ -1505,13 +1504,12 @@ ref ::= IDENTIFICADOR:id {:
 			if(symbol instanceof SymbolVariable){	  
 				Variable var = new Variable((SymbolVariable)symbol);
 				cb.addQuadruple ("MVA", temp, var);
-//				ref.setVar(var);
 			}else if(symbol instanceof SymbolParameter){
 				Variable var = new Variable((SymbolParameter)symbol);
 				cb.addQuadruple ("MVA", temp, var);
 			}
 			
-			ref.setTemporal(temp);                // el temp es MVA
+			ref.setTemporal(temp);                
 			ref.setIntermediateCode(cb.create());			
 			RESULT = ref;
 	  :}
@@ -1526,7 +1524,7 @@ ref ::= IDENTIFICADOR:id {:
 			
 			cb.addQuadruples(aV.getIntermediateCode());
 			
-			ref.setTemporal(aV.getTemporal());      // el temp de aV es MVP 
+			ref.setTemporal(aV.getTemporal());      
 			ref.setIntermediateCode(cb.create());					
       		RESULT = ref;
       :}; 
