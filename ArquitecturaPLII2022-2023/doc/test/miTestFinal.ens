@@ -26,26 +26,23 @@ MOVE #0, /65532
 MOVE #0, /65516
 
 ;Quadruple - [VAR i, 0, null]
-MOVE #0, /65438
+MOVE #0, /65439
 
 ;Quadruple - [VAR b, 0, null]
-MOVE #0, /65459
-
-;Quadruple - [VAR a, 0, null]
 MOVE #0, /65460
 
+;Quadruple - [VAR a, 0, null]
+MOVE #0, /65461
+
 ;Quadruple - [VAR dia, 1, null]
-MOVE #1, /65437
+MOVE #1, /65438
 
 ;Quadruple - [VAR vecPrinp20, 0, null]
-MOVE #0, /65458
+MOVE #0, /65459
 
 ;Quadruple - [HALT null, null, null]
 HALT
 
 ;Quadruple - [STR "Hola mundo", L_1, null]
 L_1: DATA "Hola mundo"
-
-;Quadruple - [STR "Hola mundo", L_2, null]
-L_2: DATA "Hola mundo"
 

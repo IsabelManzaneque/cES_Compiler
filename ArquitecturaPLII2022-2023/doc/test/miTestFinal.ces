@@ -66,14 +66,15 @@ entero funResta (entero a, entero b){   // debe devolver
 vacio miFun (entero w) {                // no debe devolver
  	escribe ("Hola mundo");
  	devuelve w;
-
+}
 vacio saluda() {                        // ya ha sido declarada  
+ 	escribe ("Hola mundo");
+}
+vacio saludaDos (vectorGlobal15 v) {    // no se puede pasar un vector entero de param       
  	escribe ("Hola mundo");
 }*/
 
-vacio saludaDos (vectorGlobal15 v) {             
- 	escribe ("Hola mundo");
-}
+
 
 
 vacio principal () {

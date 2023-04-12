@@ -800,7 +800,12 @@ parametro ::= ENTERO IDENTIFICADOR:id{:
             	  if(!scopeManager.containsType(iden.getLexema())){
 					  semanticErrorManager.semanticFatalError("Error en linea " + iden.getLine() + ": Tipo de parametro sin declarar");
 				  }
-            	  TypeIF tipo = scopeManager.searchType(iden.getLexema());					
+				  
+            	  TypeIF tipo = scopeManager.searchType(iden.getLexema());	
+            	  
+            	  if(!(tipo instanceof TypeSimpleEntero)){
+					semanticErrorManager.semanticFatalError("Error en linea " + iden.getLine() + ": Los parametros deben ser de tipo entero");
+				  }					
 				  RESULT = new Parametro(tipo, id.getLexema());            
             :};
 
