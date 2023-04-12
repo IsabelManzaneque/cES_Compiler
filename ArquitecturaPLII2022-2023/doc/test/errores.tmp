@@ -1,11 +1,2 @@
-Linea 26: ERROR[4] Operando 1 Incorrecto - null
-Linea 29: ERROR[4] Operando 1 Incorrecto - null
-Linea 32: ERROR[4] Operando 1 Incorrecto - null
-Linea 35: ERROR[4] Operando 1 Incorrecto - null
-Linea 68: ERROR[8] Entrada Incorrecta - -
-Linea 85: ERROR[8] Entrada Incorrecta - -
-Linea 108: ERROR[8] Entrada Incorrecta - -
-Linea 372: ERROR[3] Instrucción no reconocida - L_21
-Linea 417: ERROR[7] Etiqueta No Definida - L_22
-Linea 423: ERROR[3] Instrucción no reconocida - L_23
-Linea 462: ERROR[7] Etiqueta No Definida - L_24
+Linea 56: ERROR[3] Instrucción no reconocida - L_1
+Linea 101: ERROR[7] Etiqueta No Definida - L_2

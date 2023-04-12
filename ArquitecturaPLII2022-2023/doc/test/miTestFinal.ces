@@ -1,32 +1,112 @@
+/* CONSTANTES */
+#constante VERDADERO 1;
+#constante FALSO 0;
+#constante MAX 10;
 
-/* 
 
- Creaci—n y acceso datos complejos, vectores
+/* TIPOS COMPUESTOS */ 
+tipo entero vectorGlobal15[15];
+tipo entero vectorGlobal10[MAX];
 
-*/
+
+/* VARIABLES */
+entero a, b, x;
+entero suma;
+entero uno = 1, tres = 3, cinco = 5;
+vectorGlobal15 vecGlob15;
+vectorGlobal10 vecGlob10;
+
+
+/* FUNCIONES */
+
+entero funSuma (entero y, entero x) {
+	
+	/*tipos*/
+	tipo entero vectorFunSuma[15];
+	
+	/*variables locales*/
+	entero i;
+	vectorFunSuma vecFunSum;
+	entero suma;
+	
+	/*sentencias*/
+	suma = x + y;
+	suma = funSuma(i,vecFunSum[2]);
+	
+	devuelve suma;	
+}
+
+vacio escribeEntero (entero x) {
+	
+	/*tipos*/
+	tipo entero vectorFunSuma[15];
+	
+	/*variables*/
+	entero nueve = 9;
+	entero fS;
+		
+	/*sentencias*/
+	fS = funSuma(x,nueve);
+	escribeEnt (x);
+	escribeEntero(9);
+	
+	devuelve;
+}
+
+vacio saluda () {
+	suma = 3;
+ 	escribe ("Hola mundo");
+}
+
+/* Error: 
+entero funResta (entero a, entero b){   // debe devolver 
+	a = a++;
+	devuelve;
+}
+vacio miFun (entero w) {                // no debe devolver
+ 	escribe ("Hola mundo");
+ 	devuelve w;
+
+vacio saluda() {                        // ya ha sido declarada  
+ 	escribe ("Hola mundo");
+}*/
+
+vacio saludaDos (vectorGlobal15 v) {             
+ 	escribe ("Hola mundo");
+}
+
 
 vacio principal () {
-
-tipo entero vector[10];
-
-vector v1;
-entero c;
-
-v1[1] = 10;
-v1[2] = 4;
-v1[4] = 30;
-
-escribe("v1[1]:");
-escribeEnt(v1[1]);
-escribe("v1[2]:");
-escribeEnt(v1[2]);
-escribe("v1[4]:");
-escribeEnt(v1[4]);
-
-c = v1[1] + v1[v1[2]];
-
-escribe("----c:");
-escribeEnt(c);
+	
+	/*TIPOS*/
+	tipo entero vectorPrincipal20[20];
+	tipo entero vectorFunSuma[15];
+	
+	/*error: 
+	tipo entero vectorGlobal15[15];  // ya declarado
+	tipo entero vectorError[a];      // no es constante
+	tipo entero vectorError[0];      // tamano es cero
+	*/
+		
+	
+	/* DECLARACIONES */
+	entero a, b, i;
+	entero dia = 1;
+	vectorPrincipal20 vecPrinp20;
+	
+	/*error: 
+	entero a;          // ya declarado
+	vector miVector;   // no existe el tipo
+	*/
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 devuelve;
 

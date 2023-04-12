@@ -92,7 +92,7 @@ public class ExecutionEnvironmentEns2001
         return memoryDescriptor;
     }
     
-    private String operacion(OperandIF o) {
+    private String getOp(OperandIF o) {
     	
     	if(o instanceof Variable) {
     		return "/" + ((Variable)o).getAddress();
@@ -140,9 +140,9 @@ public class ExecutionEnvironmentEns2001
     	StringBuffer b = new StringBuffer();
     	LabelFactory lF = new LabelFactory(); 
     	
-    	String op1 = operacion(quadruple.getFirstOperand());
-    	String op2 = operacion(quadruple.getSecondOperand());
-    	String res = operacion(quadruple.getResult());
+    	String op1 = getOp(quadruple.getFirstOperand());
+    	String op2 = getOp(quadruple.getSecondOperand());
+    	String res = getOp(quadruple.getResult());
     	
     	LabelIF l1 = lF.create();
 		LabelIF l2 = lF.create();
@@ -194,15 +194,9 @@ public class ExecutionEnvironmentEns2001
 				return b.toString();
 			
 		    case "EQ":	    	
-		    	        	
-	        	// CMP realiza comparaciones. Realiza la resta entre 2 valores y 
-	        	// en base al resultado modifical los biestables. Tenemos Z para zero y
-	        	// S para signo. Si hacemos 5-5 se activa Z, si no se activa S.
-	        	// En base al resultado hace un salto si el resultado es distinto de 0 (BNZ)
-	        	// o cero (BZ)
-									        	
+		    	        										        	
 				b.append("CMP " + op1 + ", " + op2 + "\n");	 	        	
-				b.append("BNZ /" + l2 + "\n");       // si resultado no es 0 (op1 != 0) salta a l2        	
+				b.append("BNZ /" + l2 + "\n");       // si resultado no es 0 (op1 != op2) salta a l2        	
 	        	b.append("MOVE #1, " + res + "\n");         	
 	        	b.append("BZ /" + l1 + "\n");        // si resultado es 0 (op1 == op2) salta a l1     	
 	        	b.append(l2 + ": \n");               // l2        	
@@ -252,7 +246,7 @@ public class ExecutionEnvironmentEns2001
 				
 		    case "INL":	
 		    	
-		     	b.append(res + ": \n");
+		     	b.append(res + ":NOP\n");
 				return b.toString();
 				
 		    case "STP":	 
@@ -260,23 +254,7 @@ public class ExecutionEnvironmentEns2001
 		     	b.append("MOVE " + res + ", .R1\n");   //mover al registro R1
 		     	b.append("MOVE " + op1 + ", [.R1]\n"); //mover a la posicion de memoria que contiene R1
 				return b.toString();
-		    	
-//		    	if(quadruple.getFirstOperand() instanceof Variable) {
-//		    		
-//		    		b.append("SUB .IX, #" + ((Variable)quadruple.getFirstOperand()).getAddress()+ "\n");
-//		    		b.append("MOVE .A, .R1\n");
-//		    		b.append("MOVE [.R1], .R2\n");
-//		    		b.append("MOVE " + op1 + ", [.R2]\n");
-//		    		
-//		    	}else if(quadruple.getFirstOperand() instanceof Temporal) {
-//		    		
-//		    		b.append("SUB .IX, #" + ((Temporal)quadruple.getFirstOperand()).getAddress()+ "\n");
-//		    		b.append("MOVE .A, .R1\n");
-//		    		b.append("MOVE [.R1], .R2\n");
-//		    		b.append("MOVE " + op1 + ", [.R2]\n");
-//		    	}		    	
-//				return b.toString();
-				
+		    					
 		    case "VAR":
 				
 		    	b.append("MOVE " + op1 + ", " + res +"\n");		    	
@@ -301,6 +279,11 @@ public class ExecutionEnvironmentEns2001
 		    	   	
 		    	b.append("CMP #1, " + res + "\n");
 		    	b.append("BNZ /" + op1 + "\n");
+				return b.toString();
+		    
+		    case "NOP":	 
+	    	   	
+		    	b.append("NOP\n");		    	
 				return b.toString();
 		    
 		    case "BRF0":	 

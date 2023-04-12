@@ -84,6 +84,24 @@ vacio principal () {
 	mayorDiez = !(suma < 10);
 	a +=2;
 	
+	/* Vectores */
+	
+	v1[1] = 10;
+	v1[2] = 4;
+	v1[4] = 30;
+	
+	escribe("v1[1]:");
+	escribeEnt(v1[1]);
+	escribe("v1[2]:");
+	escribeEnt(v1[2]);
+	escribe("v1[4]:");
+	escribeEnt(v1[4]);
+	
+	a = v1[1] + v1[v1[2]];
+	
+	escribe("----a:");
+	escribeEnt(a);
+	
 	
 	/* Sentencias */	
 	

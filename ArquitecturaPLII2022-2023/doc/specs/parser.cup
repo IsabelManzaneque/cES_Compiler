@@ -248,7 +248,6 @@ axiom ::= {:
 						
 		      :};
 
-//sT.getListaTipos().forEach((n) -> System.out.println(n));
 
 axiom2 ::= seccionConstantes:sC seccionTipos:sT seccionVariables:sV seccionFunciones:sF{:
 		     
@@ -259,10 +258,8 @@ axiom2 ::= seccionConstantes:sC seccionTipos:sT seccionVariables:sV seccionFunci
 		   	 ScopeIF scope = scopeManager.getCurrentScope();
 			 IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 			 
-		//	 if(sC != null){cb.addQuadruples(sC.getIntermediateCode());}
 			 cb.addQuadruples(sV.getIntermediateCode());
-			 cb.addQuadruples(sF.getIntermediateCode());
-		     
+			 cb.addQuadruples(sF.getIntermediateCode());		     
 		     axiom2.setIntermediateCode(cb.create());
 		     RESULT = axiom2;
 		 :}
@@ -275,9 +272,7 @@ axiom2 ::= seccionConstantes:sC seccionTipos:sT seccionVariables:sV seccionFunci
 		   	 ScopeIF scope = scopeManager.getCurrentScope();
 			 IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 			 
-			// if(sC != null){cb.addQuadruples(sC.getIntermediateCode());}
-			 cb.addQuadruples(sF.getIntermediateCode());
-	       	 
+			 cb.addQuadruples(sF.getIntermediateCode());	       	 
 	       	 axiom2.setIntermediateCode(cb.create());
 		     RESULT = axiom2;
 		 :};
@@ -298,8 +293,8 @@ seccionConstantes ::= declaracionConstante:dec seccionConstantes:sC{:
 					//	  ScopeIF scope = scopeManager.getCurrentScope();
 				   	//	  IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);			 
 				   		  
-				   	//	  cb.addQuadruples(sC.getIntermediateCode());  //anadir el codigo de las constantes ya generadas
-				   	//	  cb.addQuadruples(dec.getIntermediateCode());       //anadir el codigo de la nueva constante
+				   	//	  cb.addQuadruples(sC.getIntermediateCode());  
+				   	//	  cb.addQuadruples(dec.getIntermediateCode());       
 				   		  
 				   	//	  sC.setIntermediateCode(cb.create()); 
 						  RESULT = sC;
@@ -352,10 +347,9 @@ seccionTipos ::= declaracionTipo:decTip seccionTipos:secTip{:
 
 declaracionTipo ::= TIPO ENTERO IDENTIFICADOR:id OPEN_BRACKET tamTipo:tt CLOSE_BRACKET SEMI_COLON {:		      		 		
 							
-						// Obtener ambito actual y tablas de simbolos y tipos  
+						
 						ScopeIF scope = scopeManager.getCurrentScope();
 						TypeTableIF tablaTipos = scope.getTypeTable();	
-
 												
 						// Comprobar que el tipo no este ya declarado y el tamano sea mayor que 0
 						int size = (int)tt;
@@ -376,15 +370,21 @@ declaracionTipo ::= TIPO ENTERO IDENTIFICADOR:id OPEN_BRACKET tamTipo:tt CLOSE_B
 tamTipo ::= NUMERO:num {: 
 				RESULT = Integer.parseInt(num.getLexema()); 
 		  :}
-          | IDENTIFICADOR:id {:          
-                // Buscar la constante en el ambito                 
+          | IDENTIFICADOR:id {:     
+               
+                // El id debe existir y debe ser una constante           
+                
 				SymbolTableIF tablaSimbolos = scopeManager.getCurrentScope().getSymbolTable();
 				if(!scopeManager.containsSymbol(id.getLexema())){
 					semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": No existe la constante '" + id.getLexema() + "'");
 				}
+				SymbolIF symbol = scopeManager.searchSymbol(id.getLexema());
 				
-				SymbolConstant c = (SymbolConstant)scopeManager.searchSymbol(id.getLexema());
-				RESULT = c.getValue();					
+				if( !(symbol instanceof SymbolConstant) ){
+					semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": El simbolo '" + id.getLexema() + "' no es una constante");
+				}
+				
+				RESULT = ((SymbolConstant)symbol).getValue();					
           :};
 
 
@@ -528,8 +528,8 @@ seccionFunciones ::= funcion:fun seccionFunciones:sF{:
 	                    //ScopeIF scope = scopeManager.getCurrentScope();
 				   		//IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);	
 				   		
-				   		//cb.addQuadruples(sF.getIntermediateCode());  //anadir el codigo de las funciones ya generadas
-				   		//cb.addQuadruples(fun.getIntermediateCode());       //anadir el codigo de la nueva funcion
+				   		//cb.addQuadruples(sF.getIntermediateCode());  
+				   		//cb.addQuadruples(fun.getIntermediateCode());      
 				   		
 				   		//sF.setIntermediateCode(cb.create());
                         RESULT = sF;	
@@ -597,11 +597,17 @@ funcionPrincipal ::= VACIO principal OPEN_KEY CLOSE_KEY OPEN_PARENTHESIS{:
 
 funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN_PARENTHESIS
             {:
-            	//Declarar funcion en tabla de tipos y tabla de simbolos global             	                  	
-                ScopeIF globalScope = scopeManager.getCurrentScope();
+            	
+            	ScopeIF globalScope = scopeManager.getCurrentScope();
                 SymbolTableIF globalTablaSimbolos = globalScope.getSymbolTable();
-				TypeTableIF globalTablaTipos = globalScope.getTypeTable();	
-                     	
+				TypeTableIF globalTablaTipos = globalScope.getTypeTable();
+				
+            	// Comprobar que la funcion no ha sido ya declarada
+            	if(globalTablaSimbolos.containsSymbol(id.getLexema())){
+					semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": la funcion '" + id.getLexema() + "' ya ha sido declarada");								
+				}
+				
+            	// Declarar funcion en tabla de tipos y tabla de simbolos global                   	
                 TypeIF type = scopeManager.searchType("ENTERO");  
 				SymbolFunction symbolFunction = new SymbolFunction(globalScope, id.getLexema(), type);
 				globalTablaSimbolos.addSymbol(symbolFunction);	
@@ -650,12 +656,17 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 			:}
 			 
 	      | VACIO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN_PARENTHESIS {:
-	      
-	        	//Declarar funcion en tabla de tipos y tabla de simbolos global  	        	               	
-                ScopeIF globalScope = scopeManager.getCurrentScope();
+	      		
+	      		ScopeIF globalScope = scopeManager.getCurrentScope();
                 SymbolTableIF globalTablaSimbolos = globalScope.getSymbolTable();
-				TypeTableIF globalTablaTipos = globalScope.getTypeTable();	
-                     	
+				TypeTableIF globalTablaTipos = globalScope.getTypeTable();
+				
+            	// Comprobar que la funcion no ha sido ya declarada
+            	if(globalTablaSimbolos.containsSymbol(id.getLexema())){
+					semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": la funcion '" + id.getLexema() + "' ya ha sido declarada");								
+				}
+				
+	        	//Declarar funcion en tabla de tipos y tabla de simbolos global  	        	               	
                 TypeIF type = scopeManager.searchType("VACIO");  
 				SymbolFunction symbolFunction = new SymbolFunction(globalScope, id.getLexema(), type);
 				globalTablaSimbolos.addSymbol(symbolFunction);	
@@ -1141,11 +1152,13 @@ accesoVector ::= IDENTIFICADOR:id OPEN_BRACKET expresion:e CLOSE_BRACKET{:
                  	TemporalIF tempSub = tf.create();
                  	TemporalIF tempBase = tf.create();
                  	
-                 	cb.addQuadruple("MVA", tempBase, var);                       // obtiene la base del array             	              	
-                 	cb.addQuadruple("SUB", tempSub, tempBase, e.getTemporal());  // calcula la direccion restando a la base el offset y poniendo el resultado en temp
+                 	// obtiene la direccion base del array  
+                 	cb.addQuadruple("MVA", tempBase, var);     
+                 	// calcula la direccion objetivo restando a la direccion base el offset                             	              	
+                 	cb.addQuadruple("SUB", tempSub, tempBase, e.getTemporal());  
                  	
                  	aV.setIntermediateCode(cb.create());
-                 	aV.setTemporal(tempSub);                                   // propaga temp
+                 	aV.setTemporal(tempSub);                                   
                  	RESULT = aV;
                :};
 
@@ -1730,15 +1743,14 @@ sentenciaMientras ::= MIENTRAS:m OPEN_KEY expresion:e CLOSE_KEY sentencia:sent{:
 									
 							LabelIF labelIniWhile = lf.create();       	   //etiqueta para inicio del mientras
 							LabelIF labelFinWhile = lf.create();           //etiqueta para final del mientras
-							TemporalIF tempExp = e.getTemporal();
-							
-							cb.addQuadruple("INL", labelIniWhile);     	 	//etiqueta comienzo mientras
-							cb.addQuadruples(e.getIntermediateCode());  	//anadir codigo de la expresion
-							cb.addQuadruple("BRF",tempExp,labelFinWhile);   //si no se cumple la expresion, ir a final del while
-							cb.addQuadruples(sent.getIntermediateCode());   //anadir codigo de la sentencia
-							cb.addQuadruple("BR",labelIniWhile);            //volver al inicio del while
-							cb.addQuadruple("INL",labelFinWhile);           //etiqueta fin while
-							
+														
+							cb.addQuadruple("INL", labelIniWhile);     	 			//etiqueta comienzo mientras
+							cb.addQuadruples(e.getIntermediateCode());  			//anadir codigo de la expresion
+							cb.addQuadruple("BRF",e.getTemporal(),labelFinWhile);   //si no se cumple la expresion, ir a final del while
+							cb.addQuadruples(sent.getIntermediateCode());  			//anadir codigo de la sentencia
+							cb.addQuadruple("BR",labelIniWhile);            		//volver al inicio del while
+							cb.addQuadruple("INL",labelFinWhile);           		//etiqueta fin while				
+													
 							sentM.setIntermediateCode(cb.create());	
 							RESULT = sentM;
                     :};
