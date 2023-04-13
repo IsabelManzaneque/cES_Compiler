@@ -93,7 +93,8 @@ vacio principal () {
 	/* DECLARACIONES */
 	entero a, b, i;
 	entero dia = 1;
-	vectorPrincipal20 vecPrinp20;
+	vectorPrincipal20 vec20;
+	vectorPrincipal20 vec202;
 	
 	/*error: 
 	entero a;          // ya declarado
@@ -101,6 +102,90 @@ vacio principal () {
 	*/
 	
 	
+	/* EXPRESIONES Y SENTENCIAS*/
+	
+	/* precedencias */
+	
+	escribe("-diez:");
+	escribeEnt(2 + 2 + 3 * 2);
+	escribe("-doce:");
+	escribeEnt(2 + (2 + 3) * 2); 
+	escribe("-cero(falso):");
+	escribeEnt(1 && 0 && 1 );
+	escribe("-uno(cierto):");
+	escribeEnt(2 < 3 < 4 );
+	escribe("-cero(falso):");
+	escribeEnt(2 < (3 < 4) );
+	
+	/* vectores */
+	
+	vec20[0] = 1; 
+	vec20[1] = 2; 
+	vec20[2] = 3;
+	vec20[4] = 5;
+	vec20[15] = vec20[2];
+	escribe("uno:");
+	escribeEnt (vec20[0]); 
+	escribe("-tres:");
+	escribeEnt (vec20[1+1]);
+	escribe("-tres:"); 
+	escribeEnt (vec20[vec20[1]]); 
+	escribe("-cinco:");
+	escribeEnt (vec20[1]+vec20[2]); 
+	escribe("-dos:");
+	escribeEnt (vec20[0++]); 
+	escribe("-tres:");
+	escribeEnt (vec20[3*5]); 
+	
+	/* error	
+	vec20[20]=2728;  // fuera de limites
+	vec20 = vec202;  // asignacion directa no permitida	
+	*/
+	
+	
+	/* incrementos */
+	
+	a = 2*vec20[2];
+	a++;
+	escribe("-siete:");
+	escribeEnt(a); 
+	a+=5;
+	escribe("-doce:");
+	escribeEnt(a); 
+	b = a++;
+	escribe("-trece:");
+	escribeEnt(b); 
+	
+	/* error	
+	MAX ++;
+	vec20 ++;
+	*/
+	
+	/* llamadas a funciones */
+	
+	saluda();
+	i =  funSuma(a, i) + 2;
+	i += funSuma(4, vec20[0]);
+	escribe("-cuatro:");
+	escribeEnt(i);	
+	
+	/* error	
+	funSuma(4, vec20[0]);  // devuelve un valor, contexto equivocado
+	i = saluda();		   // no devuelve un valor, contexto equivocado
+	saluda(3);   		   // parametros incorrectos	
+	i = funSuma(vec20, 4); // parametros incorrectos
+	i = funSuma();		   // parametros incorrectos	
+	*/
+	
+	
+	/* sentencia si */
+	
+	/* en contexto logico (como sentencia mientras o sentcia si), el 0 es falso y distinto de 0 es verdadero */
+	si (3){
+		escribe ("rama1");
+	} sino {
+	    escribe ("rama2");
+	}
 	
 	
 	
