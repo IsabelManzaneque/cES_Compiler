@@ -1751,7 +1751,7 @@ sentenciaMientras ::= MIENTRAS:m OPEN_KEY expresion:e CLOSE_KEY sentencia:sent{:
 														
 							cb.addQuadruple("INL", labelIniWhile);     	 			//etiqueta comienzo mientras
 							cb.addQuadruples(e.getIntermediateCode());  			//anadir codigo de la expresion
-							cb.addQuadruple("BRF",e.getTemporal(),labelFinWhile);   //si no se cumple la expresion, ir a final del while
+							cb.addQuadruple("BRF1",e.getTemporal(),labelFinWhile);  //si temp es 0, saltar a etiqueta finWhile (cambiar por BRF para while clasico)
 							cb.addQuadruples(sent.getIntermediateCode());  			//anadir codigo de la sentencia
 							cb.addQuadruple("BR",labelIniWhile);            		//volver al inicio del while
 							cb.addQuadruple("INL",labelFinWhile);           		//etiqueta fin while				

@@ -181,7 +181,7 @@ vacio principal () {
 	/* sentencia si */
 	
 	/* en contexto logico (como sentencia mientras o sentcia si), el 0 es falso y distinto de 0 es verdadero */
-	
+	escribe ("----SENTENCIA SI----");
 	a = 5;
 	b = 5;
 	i = 0;
@@ -197,6 +197,14 @@ vacio principal () {
 	    escribe ("rama2");
 	    si(a == b){
 	    	escribe("rama2.1");
+	    	si (i==5)
+			 escribe ("i es cinco");
+			si (i==0){
+			 escribe ("i es");
+			 escribe ("falso");
+			} sino {
+			 escribe (" i es verdadero");
+			}
 	    }sino{
 	    	entero ramaVar = 98;
 	    	escribe("rama2.2");
@@ -208,12 +216,59 @@ vacio principal () {
 	    }	    	
 	}
 	
+	/* sentencia alternativas */
+	escribe ("----SENTENCIA ALTERNATIVAS----");
+	a = 2;
+	b = 8;
 	
+	alternativas (a){
+	 caso 1: {escribe("caso uno");} corte;
+	 caso 2: {
+	 	entero altVar = 2;
+		escribe("caso dos");
+		escribe("altVar es ");
+		escribeEnt(altVar);
+	 } corte;
+	 caso 4: {
+	 	escribe("caso cuatro cuatro");
+	 	si(b) escribe("b es distinto a 0");
+	 } corte;
+	 	pordefecto: {escribe ("porDefecto!");} corte;
+	}
 	
+	alternativas (b){
+	 caso 1: {escribe("alternativas 2 caso 1");} corte;
+	 caso 4: {
+	 	escribe("caso cuatro cuatro");
+	 	si(b) escribe("b es distinto a 0");
+	 } corte;	 	
+	}
 	
+	/* sentencia mientras */
+	escribe ("----SENTENCIA MIENTRAS----");	
 	
+	a = 2;
+	b = 1;
+	i = a + b;
 	
+	mientras (a<7){		
+	    a=a+1;
+	    escribeEnt(a);
+	}
 	
+	escribe("i es 3:");
+	escribeEnt(i);
+	mientras (i<10) i++;
+	escribe("i es 10:");
+	escribeEnt(i);
+	
+	mientras (a){
+		escribe("a es:");
+	    escribeEnt(a);
+	    a = 0;
+	}
+	escribe("a es 0:");
+	escribeEnt(a);
 
 devuelve;
 
