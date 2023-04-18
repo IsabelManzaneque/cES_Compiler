@@ -617,16 +617,7 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 				TypeIF tipo = scopeManager.searchType("ENTERO");
 				Funcion fun = new Funcion(tipo,id.getLexema(),sP,cFun);
 				
-				/*----- Código intermedio -----*/
-				
-				ScopeIF scope = scopeManager.getCurrentScope();
-				IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
-				
-				cb.addQuadruples(cFun.getIntermediateCode());
-				
-				fun.setIntermediateCode(cb.create());
-				RESULT = fun;
-								
+				RESULT = fun;								
 				scopeManager.closeScope();	
 		
 			:}
@@ -675,16 +666,7 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 				TypeIF tipo = scopeManager.searchType("VACIO");
 				Funcion fun = new Funcion(tipo,id.getLexema(),sP,cFun);
 				
-				/*----- Código intermedio -----*/
-				
-				ScopeIF scope = scopeManager.getCurrentScope();
-				IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
-				
-				cb.addQuadruples(cFun.getIntermediateCode());
-				
-				fun.setIntermediateCode(cb.create());
-				RESULT = fun;
-			
+				RESULT = fun;			
 				scopeManager.closeScope();		
 		
 			:};
@@ -721,49 +703,17 @@ cuerpoFuncion ::= seccionTipos:sT listadoSentencias:lS{:
                 :};
                 
 seccionParametros ::= declaracionParametros:dP{:		
-				
-						SeccionParametros sP = new SeccionParametros(dP);	
-						
-						/*----- Código intermedio -----*/
-						   		
-						ScopeIF scope = scopeManager.getCurrentScope();
-						IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
-						
-						cb.addQuadruples(dP.getIntermediateCode());
-						
-						sP.setIntermediateCode(cb.create());
-						RESULT = sP;					
+						RESULT = new SeccionParametros(dP);;					
 			        :} 
 			        | epsilon;
 
-declaracionParametros  ::= parametro:param COLON declaracionParametros:dP{:		
-								
+declaracionParametros  ::= parametro:param COLON declaracionParametros:dP{:										
 								dP.add(param);
-						   		
-						   		/*----- Código intermedio -----*/
-						   		
-						   		ScopeIF scope = scopeManager.getCurrentScope();
-						   		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
-						   		
-						   		cb.addQuadruples(dP.getIntermediateCode());    
-						   		cb.addQuadruples(param.getIntermediateCode()); 
-						   		
-						   		dP.setIntermediateCode(cb.create());
-						   		RESULT = dP;	 	
+								RESULT = dP;	 	
 						 :}
-                         | parametro:param {:
-                         
+                         | parametro:param {:                         
                          		DeclaracionParametros dP = new DeclaracionParametros();
                          		dP.add(param);
-                         		
-                         		/*----- Código intermedio -----*/
-						   		
-						   		ScopeIF scope = scopeManager.getCurrentScope();
-						   		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
-						   		
-						   		cb.addQuadruples(param.getIntermediateCode()); // anadir el codigo del nuevo parametro
-						   		
-						   		dP.setIntermediateCode(cb.create());
                          		RESULT = dP;                         
                          :};
 
@@ -866,12 +816,11 @@ expresion ::= NUMERO:num{:
 				TemporalFactory tf = new TemporalFactory(scope);
 				IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 				TemporalIF temp1 = e1.getTemporal();
-				TemporalIF temp2 = e2.getTemporal();
 				TemporalIF temp = tf.create();
 				
 				cb.addQuadruples (e1.getIntermediateCode());
 				cb.addQuadruples (e2.getIntermediateCode());
-				cb.addQuadruple ("ADD", temp, temp1, temp2);
+				cb.addQuadruple ("ADD", temp, e1.getTemporal(), e2.getTemporal());
 				
 				exp.setTemporal(temp);
 				exp.setIntermediateCode(cb.create());						
@@ -894,13 +843,11 @@ expresion ::= NUMERO:num{:
 				
 				TemporalFactory tf = new TemporalFactory(scope);
 				IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
-				TemporalIF temp1 = e1.getTemporal();
-				TemporalIF temp2 = e2.getTemporal();
 				TemporalIF temp = tf.create();
 				
 				cb.addQuadruples (e1.getIntermediateCode());
 				cb.addQuadruples (e2.getIntermediateCode());
-				cb.addQuadruple ("MUL", temp, temp1, temp2);
+				cb.addQuadruple ("MUL", temp, e1.getTemporal(), e2.getTemporal());
 				
 				exp.setTemporal(temp);
 				exp.setIntermediateCode(cb.create());						
@@ -922,12 +869,11 @@ expresion ::= NUMERO:num{:
 		 		/*----- Código intermedio -----*/
 				
 				IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
-				TemporalIF temp = e1.getTemporal();
 								
 				cb.addQuadruples (e1.getIntermediateCode());
-				cb.addQuadruple ("INC", temp);
+				cb.addQuadruple ("INC", e1.getTemporal());
 				
-				exp.setTemporal(temp);
+				exp.setTemporal(e1.getTemporal());
 				exp.setIntermediateCode(cb.create());						
 				RESULT = exp;				
 		 		
@@ -948,11 +894,10 @@ expresion ::= NUMERO:num{:
 		 		
 		 		TemporalFactory tf = new TemporalFactory(scope);
 				IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
-				TemporalIF temp1 = e1.getTemporal();
 				TemporalIF temp = tf.create();
 				
 				cb.addQuadruples (e1.getIntermediateCode ());
-				cb.addQuadruple ("NOT", temp, temp1);
+				cb.addQuadruple ("NOT", temp, e1.getTemporal());
 				
 				exp.setTemporal(temp);
 				exp.setIntermediateCode(cb.create());						
@@ -975,13 +920,11 @@ expresion ::= NUMERO:num{:
 				
 				TemporalFactory tf = new TemporalFactory(scope);
 				IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
-				TemporalIF temp1 = e1.getTemporal();
-				TemporalIF temp2 = e2.getTemporal();
 				TemporalIF temp = tf.create();
 				
 				cb.addQuadruples (e1.getIntermediateCode());
 				cb.addQuadruples (e2.getIntermediateCode());
-				cb.addQuadruple ("LS", temp, temp1, temp2);
+				cb.addQuadruple ("LS", temp, e1.getTemporal(), e2.getTemporal());
 				
 				exp.setTemporal(temp);
 				exp.setIntermediateCode(cb.create());						
@@ -1005,13 +948,11 @@ expresion ::= NUMERO:num{:
 				
 				TemporalFactory tf = new TemporalFactory(scope);
 				IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
-				TemporalIF temp1 = e1.getTemporal();
-				TemporalIF temp2 = e2.getTemporal();
 				TemporalIF temp = tf.create();
 				
 				cb.addQuadruples (e1.getIntermediateCode());
 				cb.addQuadruples (e2.getIntermediateCode());
-				cb.addQuadruple ("EQ", temp, temp1, temp2);
+				cb.addQuadruple ("EQ", temp, e1.getTemporal(), e2.getTemporal());
 				
 				exp.setTemporal(temp);
 				exp.setIntermediateCode(cb.create());						
@@ -1034,13 +975,11 @@ expresion ::= NUMERO:num{:
 				
 				TemporalFactory tf = new TemporalFactory(scope);
 				IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
-				TemporalIF temp1 = e1.getTemporal();
-				TemporalIF temp2 = e2.getTemporal();
 				TemporalIF temp = tf.create();
 				
 				cb.addQuadruples (e1.getIntermediateCode());
 				cb.addQuadruples (e2.getIntermediateCode());
-				cb.addQuadruple ("AND", temp, temp1, temp2);
+				cb.addQuadruple ("AND", temp, e1.getTemporal(), e2.getTemporal());
 				
 				exp.setTemporal(temp);
 				exp.setIntermediateCode(cb.create());						
@@ -1186,32 +1125,12 @@ llamadaFuncion ::= IDENTIFICADOR:id OPEN_KEY parametros:param CLOSE_KEY{:
 	
 	
 parametros ::= expresion:e{:
-
                     Parametros params = new Parametros();
-                    params.add(e);
-                    
-                    /*----- Código intermedio -----*/
-                    ScopeIF scope = scopeManager.getCurrentScope();
-			   		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
-			   		
-			   		cb.addQuadruples(e.getIntermediateCode());       
-                    
-                    params.setIntermediateCode(cb.create());
+                    params.add(e);                    
                     RESULT = params;                         
              :}
-             | expresion:e COLON parametros:params{:		
-             				   		
+             | expresion:e COLON parametros:params{:             				   		
 			   		params.add(e);
-			   		
-			   		/*----- Código intermedio -----*/
-						   		
-			   		ScopeIF scope = scopeManager.getCurrentScope();
-			   		IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
-			   		
-			   		cb.addQuadruples(params.getIntermediateCode());  
-			   		cb.addQuadruples(e.getIntermediateCode());       
-			   		
-			   		params.setIntermediateCode(cb.create());			   		
 				    RESULT = params;	 	
 			 :};
 
@@ -1240,7 +1159,6 @@ bloque ::= OPEN_PARENTHESIS {:
 				blq.setIntermediateCode(cb.create());
 				RESULT = blq;	
 				
-				//cerrar ambito 
 				scopeManager.closeScope();							
 			:};    	 
 
@@ -1357,10 +1275,9 @@ sentenciaDevuelve ::= DEVUELVE SEMI_COLON{:
 						 LabelFactory lf = new LabelFactory();
 						 IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
 						 
-						 TemporalIF temp = e.getTemporal();
 	                	 LabelIF l1 = lf.create(scope.getName());
 	                	 cb.addQuadruples(e.getIntermediateCode());
-	                	 cb.addQuadruple("RETURN",l1,temp);
+	                	 cb.addQuadruple("RETURN",l1,e.getTemporal());
 	                	 
 	                	 sentDvl.setIntermediateCode(cb.create());
 						 RESULT = sentDvl;					  
@@ -1409,16 +1326,13 @@ sentenciaAsignacion ::= ref:r ASSIGN:a expresion:e SEMI_COLON{:
 						
 							ScopeIF scope = scopeManager.getCurrentScope();
 							TemporalFactoryIF tf = new TemporalFactory(scope);
-							IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);					    
-								
+							IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);									
 								
 							cb.addQuadruples(r.getIntermediateCode());
-							cb.addQuadruples(e.getIntermediateCode());
-						    
+							cb.addQuadruples(e.getIntermediateCode());						    
 						    cb.addQuadruple("STP",r.getTemporal(),e.getTemporal());
 						    				
-							sentAsign.setIntermediateCode(cb.create());	
-													
+							sentAsign.setIntermediateCode(cb.create());														
 							RESULT = sentAsign;						
 													
                       :};
@@ -1439,9 +1353,7 @@ sentenciaAsignacionSuma ::= ref:r ASSIGN_SUMA:as expresion:e SEMI_COLON{:
 								TemporalFactoryIF tf = new TemporalFactory(scope);
 								IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);									
 								SymbolIF symbol = scopeManager.searchSymbol(r.getId());			
-								    
-								TemporalIF tempExp = e.getTemporal();
-								TemporalIF tempRef = r.getTemporal();					
+									
 								TemporalIF temp = tf.create();		
 								TemporalIF temp2 = tf.create();
 									
@@ -1455,11 +1367,10 @@ sentenciaAsignacionSuma ::= ref:r ASSIGN_SUMA:as expresion:e SEMI_COLON{:
 									Variable var = new Variable((SymbolVariable)symbol);
 									cb.addQuadruple("MVP",temp2,var);									
 								}								
-								cb.addQuadruple ("ADD", temp, temp2, tempExp);												
-								cb.addQuadruple("STP",tempRef,temp);                
+								cb.addQuadruple ("ADD", temp, temp2, e.getTemporal());												
+								cb.addQuadruple("STP",r.getTemporal(),temp);                
 					
-								sentAsignSum.setIntermediateCode(cb.create());	
-														
+								sentAsignSum.setIntermediateCode(cb.create());															
 								RESULT = sentAsignSum;						
 	                      :};
 
@@ -1541,17 +1452,16 @@ sentenciaSi ::= SI:si OPEN_KEY expresion:e CLOSE_KEY sentencia:sSi SINO sentenci
 					IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);					
 					LabelFactory lf = new LabelFactory();
 					
-					LabelIF labelFinSi = lf.create();       	   //etiqueta para fin de las sentencias si
-					LabelIF labelSino = lf.create();        	   //etiqueta para el sino
-					TemporalIF tempExp = e.getTemporal();
-					
+					LabelIF labelFinSi = lf.create();       	  
+					LabelIF labelSino = lf.create();        	   
+							
 					cb.addQuadruples(e.getIntermediateCode());     
-					cb.addQuadruple("BRF1",tempExp,labelSino);     //si tempExp es 0, saltar a etiqueta sino (cambiar por BRF para si clasico)
-					cb.addQuadruples(sSi.getIntermediateCode());   //anadir codigo sentencias parte si					
-					cb.addQuadruple("BR",labelFinSi);              //salto a etiqueta finSi
-					cb.addQuadruple("INL",labelSino);              //etiqueta sino
-					cb.addQuadruples(sSino.getIntermediateCode()); //anadir codigo sentencias parte sino
-					cb.addQuadruple("INL",labelFinSi);			   //etiqueta fin si
+					cb.addQuadruple("BRF1",e.getTemporal(),labelSino);  //si temporal es 0, saltar a etiqueta sino 
+					cb.addQuadruples(sSi.getIntermediateCode());        //anadir codigo sentencias parte si					
+					cb.addQuadruple("BR",labelFinSi);                   //salto a etiqueta finSi
+					cb.addQuadruple("INL",labelSino);                   //etiqueta sino
+					cb.addQuadruples(sSino.getIntermediateCode());      //anadir codigo sentencias parte sino
+					cb.addQuadruple("INL",labelFinSi);			        //etiqueta fin si
 					
 					sentSi.setIntermediateCode(cb.create());					
 					RESULT = sentSi;			
@@ -1571,15 +1481,14 @@ sentenciaSi ::= SI:si OPEN_KEY expresion:e CLOSE_KEY sentencia:sSi SINO sentenci
 					ScopeIF scope = scopeManager.getCurrentScope();
 					IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);					
 					LabelFactory lf = new LabelFactory();
+										
+					LabelIF labelFinSi = lf.create();       	  
 					
-					LabelIF labelFinSi = lf.create();       	   //etiqueta para fin de las sentencias si
-					TemporalIF tempExp = e.getTemporal();
-					
-					cb.addQuadruples(e.getIntermediateCode());     //anadir codigo de la expresion
-					cb.addQuadruple("BRF1",tempExp,labelFinSi);    //si tempExp es 0, saltar a etiqueta sino (cambiar por BRF para si clasico)
-					cb.addQuadruples(sSi.getIntermediateCode());   //anadir codigo sentencias parte si	
-					cb.addQuadruple("BR",labelFinSi);              //salto a etiqueta finSi
-					cb.addQuadruple("INL",labelFinSi);			   //etiqueta fin si
+					cb.addQuadruples(e.getIntermediateCode());           //anadir codigo de la expresion
+					cb.addQuadruple("BRF1",e.getTemporal(),labelFinSi);  //si temporal es 0, saltar a etiqueta sino 
+					cb.addQuadruples(sSi.getIntermediateCode());         //anadir codigo sentencias parte si	
+					cb.addQuadruple("BR",labelFinSi);                    //salto a etiqueta finSi
+					cb.addQuadruple("INL",labelFinSi);			         //etiqueta fin si
 					
 					sentSi.setIntermediateCode(cb.create());					
 					RESULT = sentSi;
@@ -1601,27 +1510,24 @@ sentenciaAlternativas ::= ALTENATIVAS:alt OPEN_KEY expresion:e CLOSE_KEY OPEN_PA
 								ScopeIF scope = scopeManager.getCurrentScope();
 								IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);	
 								TemporalFactory tf = new TemporalFactory(scope);				
-								LabelFactory lf = new LabelFactory();								
-								
-								//LabelIF labelFinSwitch = lf.create();								
+								LabelFactory lf = new LabelFactory();										
+															
 								cb.addQuadruples(e.getIntermediateCode()); 										
-								TemporalIF tempExp = e.getTemporal();
 								TemporalIF tempEQ = tf.create();
 								TemporalIF tempAUX = tf.create();
 								
 								// Compara el numero de cada caso con la expresion. Si hay 
 								// coincidencia, genera el codigo intermedio del caso
 								for (CasoAlt caso : cA.getCasos()) {				
-									
-									TemporalIF tempCaso = caso.getTemporal();							        
+															        
 							        cb.addQuadruples(caso.getIntermediateCode());
-							        cb.addQuadruple ("EQ", tempEQ, tempExp, tempCaso);	      // compara temporales de expresion y caso		        
+							        cb.addQuadruple ("EQ", tempEQ, e.getTemporal(),caso.getTemporal());	  // compara temporales de expresion y caso		        
        
 							        LabelIF labelFinCaso = lf.create();
-							        cb.addQuadruple("BRF",tempEQ,labelFinCaso);               // si no se cumple la condicion, saltar a etiqueta de fin de caso
+							        cb.addQuadruple("BRF",tempEQ,labelFinCaso);               // si no se cumple la condicion, saltar a fin de caso
 							        cb.addQuadruples(caso.getBloque().getIntermediateCode()); // generar codigo intermedio para el bloque del caso							        
 							        cb.addQuadruple("MV",tempAUX,1);                          						        
-							       	cb.addQuadruple("INL",labelFinCaso);			          // etiqueta fin si									        
+							       	cb.addQuadruple("INL",labelFinCaso);			          // etiqueta fin caso									        
 							    }
 							    
 							    // Si no hay coincidencia y existe porDefecto, se ejecuta 
@@ -1722,12 +1628,12 @@ sentenciaMientras ::= MIENTRAS:m OPEN_KEY expresion:e CLOSE_KEY sentencia:sent{:
 							IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);					
 							LabelFactory lf = new LabelFactory();
 									
-							LabelIF labelIniWhile = lf.create();       	   //etiqueta para inicio del mientras
-							LabelIF labelFinWhile = lf.create();           //etiqueta para final del mientras
+							LabelIF labelIniWhile = lf.create();       	           
+							LabelIF labelFinWhile = lf.create();                   
 														
 							cb.addQuadruple("INL", labelIniWhile);     	 			//etiqueta comienzo mientras
 							cb.addQuadruples(e.getIntermediateCode());  			//anadir codigo de la expresion
-							cb.addQuadruple("BRF1",e.getTemporal(),labelFinWhile);  //si temp es 0, saltar a etiqueta finWhile (cambiar por BRF para while clasico)
+							cb.addQuadruple("BRF1",e.getTemporal(),labelFinWhile);  //si temppral es 0, saltar a finWhile 
 							cb.addQuadruples(sent.getIntermediateCode());  			//anadir codigo de la sentencia
 							cb.addQuadruple("BR",labelIniWhile);            		//volver al inicio del while
 							cb.addQuadruple("INL",labelFinWhile);           		//etiqueta fin while				
@@ -1765,16 +1671,15 @@ sentenciaSalida ::= ESCRIBE OPEN_KEY opcionesEscribe:opEsc CLOSE_KEY SEMI_COLON{
 							
 							TemporalFactory tf = new TemporalFactory(scope);
 							IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
-							LabelFactory lf = new LabelFactory();							
-							
-							String str = opEsc.getOpciones();
+							LabelFactory lf = new LabelFactory();								
+			
 							LabelIF lb = lf.create();
 							TemporalIF temp = tf.create();
 							
 							cb.addQuadruple("WRITESTR",temp,lb);
 														
 							// Guardamos la cadena en la lista para recuperarla al final del programa
-							listaCadenas.add(new Quadruple("STR",new Label(str),lb));							
+							listaCadenas.add(new Quadruple("STR",new Label(opEsc.getOpciones()),lb));							
 														
 							sentSld.setIntermediateCode(cb.create());	
 							RESULT = sentSld;
@@ -1805,14 +1710,11 @@ sentenciaSalida ::= ESCRIBE OPEN_KEY opcionesEscribe:opEsc CLOSE_KEY SEMI_COLON{
 	
 opcionesEscribe ::= epsilon 
                   | STRING:str {:                   
-                  		OpcionesEscribe opEsc = new OpcionesEscribe(str.getLexema());
-                    	RESULT = opEsc; 
+                    	RESULT = new OpcionesEscribe(str.getLexema()); 
                   :};
                   
 opcionesEscribeEnt ::= epsilon 
-                     | expresion:e {:                            
-                           OpcionesEscribeEnt opEscEnt = new OpcionesEscribeEnt(e); 						   
-						   RESULT = opEscEnt;
-						   
+                     | expresion:e {:                            						   
+						   RESULT = new OpcionesEscribeEnt(e);						   
                      :};
                      
