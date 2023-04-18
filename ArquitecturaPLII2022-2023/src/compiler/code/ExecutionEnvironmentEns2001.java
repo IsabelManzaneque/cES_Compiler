@@ -291,6 +291,12 @@ public class ExecutionEnvironmentEns2001
 		    	b.append("CMP #0, " + res + "\n");
 		    	b.append("BNZ /" + op1 + "\n");
 				return b.toString();
+			
+		    case "BRF1":	 
+	    	   	
+		    	b.append("CMP #0, " + res + "\n");
+		    	b.append("BZ /" + op1 + "\n");
+				return b.toString();
 				
 		    case "BR":	
 	    	   			   

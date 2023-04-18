@@ -181,10 +181,31 @@ vacio principal () {
 	/* sentencia si */
 	
 	/* en contexto logico (como sentencia mientras o sentcia si), el 0 es falso y distinto de 0 es verdadero */
-	si (3){
+	
+	a = 5;
+	b = 5;
+	i = 0;
+	
+	si (i){
 		escribe ("rama1");
+		si(a<b){
+			escribe("rama1.1");
+		}sino{
+			escribe("rama1.2");
+		}
 	} sino {
 	    escribe ("rama2");
+	    si(a == b){
+	    	escribe("rama2.1");
+	    }sino{
+	    	entero ramaVar = 98;
+	    	escribe("rama2.2");
+	    	si(ramaVar+a){
+	    		escribe("rama2.2.1");
+	    	}sino{
+	    		escribe("rama2.2.2");
+	    	}
+	    }	    	
 	}
 	
 	

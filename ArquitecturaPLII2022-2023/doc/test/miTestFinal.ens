@@ -137,24 +137,24 @@ MOVE #3, /65393
 
 ;Quadruple - [LS T_25, T_23, T_24]
 CMP /65394, /65393
-BN /L_108
+BN /L_120
 MOVE #0, /65392
-BR /L_107
-L_108: 
+BR /L_119
+L_120: 
 MOVE #1, /65392
-L_107: 
+L_119: 
 
 ;Quadruple - [MV T_26, 4, null]
 MOVE #4, /65391
 
 ;Quadruple - [LS T_27, T_25, T_26]
 CMP /65392, /65391
-BN /L_112
+BN /L_124
 MOVE #0, /65390
-BR /L_111
-L_112: 
+BR /L_123
+L_124: 
 MOVE #1, /65390
-L_111: 
+L_123: 
 
 ;Quadruple - [WRITEINT T_27, null, null]
 WRINT /65390
@@ -173,21 +173,21 @@ MOVE #4, /65386
 
 ;Quadruple - [LS T_32, T_30, T_31]
 CMP /65387, /65386
-BN /L_124
+BN /L_136
 MOVE #0, /65385
-BR /L_123
-L_124: 
+BR /L_135
+L_136: 
 MOVE #1, /65385
-L_123: 
+L_135: 
 
 ;Quadruple - [LS T_33, T_29, T_32]
 CMP /65388, /65385
-BN /L_126
+BN /L_138
 MOVE #0, /65384
-BR /L_125
-L_126: 
+BR /L_137
+L_138: 
 MOVE #1, /65384
-L_125: 
+L_137: 
 
 ;Quadruple - [WRITEINT T_33, null, null]
 WRINT /65384
@@ -615,27 +615,157 @@ MOVE /65439, /65256
 ;Quadruple - [WRITEINT T_161, null, null]
 WRINT /65256
 
-;Quadruple - [MV T_162, 3, null]
-MOVE #3, /65255
+;Quadruple - [MVA T_162, a, null]
+MOVE #65461, /65255
 
-;Quadruple - [BRF T_162, L_20, null]
-CMP #1, /65255
-BNZ /L_20
+;Quadruple - [MV T_163, 5, null]
+MOVE #5, /65254
+
+;Quadruple - [STP T_162, T_163, null]
+MOVE /65255, .R1
+MOVE /65254, [.R1]
+
+;Quadruple - [MVA T_164, b, null]
+MOVE #65460, /65253
+
+;Quadruple - [MV T_165, 5, null]
+MOVE #5, /65252
+
+;Quadruple - [STP T_164, T_165, null]
+MOVE /65253, .R1
+MOVE /65252, [.R1]
+
+;Quadruple - [MVA T_166, i, null]
+MOVE #65439, /65251
+
+;Quadruple - [MV T_167, 0, null]
+MOVE #0, /65250
+
+;Quadruple - [STP T_166, T_167, null]
+MOVE /65251, .R1
+MOVE /65250, [.R1]
+
+;Quadruple - [MVP T_168, i, null]
+MOVE /65439, /65249
+
+;Quadruple - [BRF1 T_168, L_32, null]
+CMP #0, /65249
+BZ /L_32
 
 ;Quadruple - [WRITESTR T_0, L_17, null]
 WRSTR /L_17
 
-;Quadruple - [BR L_19, null, null]
-BR /L_19
+;Quadruple - [MVP T_1, a, null]
+MOVE /65461, /65247
 
-;Quadruple - [INL L_20, null, null]
-L_20:NOP
+;Quadruple - [MVP T_2, b, null]
+MOVE /65460, /65246
+
+;Quadruple - [LS T_3, T_1, T_2]
+CMP /65247, /65246
+BN /L_424
+MOVE #0, /65245
+BR /L_423
+L_424: 
+MOVE #1, /65245
+L_423: 
+
+;Quadruple - [BRF1 T_3, L_21, null]
+CMP #0, /65245
+BZ /L_21
 
 ;Quadruple - [WRITESTR T_0, L_18, null]
 WRSTR /L_18
 
-;Quadruple - [INL L_19, null, null]
-L_19:NOP
+;Quadruple - [BR L_20, null, null]
+BR /L_20
+
+;Quadruple - [INL L_21, null, null]
+L_21:NOP
+
+;Quadruple - [WRITESTR T_0, L_19, null]
+WRSTR /L_19
+
+;Quadruple - [INL L_20, null, null]
+L_20:NOP
+
+;Quadruple - [BR L_31, null, null]
+BR /L_31
+
+;Quadruple - [INL L_32, null, null]
+L_32:NOP
+
+;Quadruple - [WRITESTR T_0, L_22, null]
+WRSTR /L_22
+
+;Quadruple - [MVP T_1, a, null]
+MOVE /65461, /65241
+
+;Quadruple - [MVP T_2, b, null]
+MOVE /65460, /65240
+
+;Quadruple - [EQ T_3, T_1, T_2]
+CMP /65241, /65240
+BNZ /L_448
+MOVE #1, /65239
+BZ /L_447
+L_448: 
+MOVE #0, /65239
+L_447: 
+
+;Quadruple - [BRF1 T_3, L_30, null]
+CMP #0, /65239
+BZ /L_30
+
+;Quadruple - [WRITESTR T_0, L_23, null]
+WRSTR /L_23
+
+;Quadruple - [BR L_29, null, null]
+BR /L_29
+
+;Quadruple - [INL L_30, null, null]
+L_30:NOP
+
+;Quadruple - [VAR ramaVar, 98, null]
+MOVE #98, /65237
+
+;Quadruple - [WRITESTR T_0, L_24, null]
+WRSTR /L_24
+
+;Quadruple - [MVP T_1, ramaVar, null]
+MOVE /65237, /65235
+
+;Quadruple - [MVP T_2, a, null]
+MOVE /65461, /65234
+
+;Quadruple - [ADD T_3, T_1, T_2]
+ADD /65235, /65234
+MOVE .A, /65233
+
+;Quadruple - [BRF1 T_3, L_28, null]
+CMP #0, /65233
+BZ /L_28
+
+;Quadruple - [WRITESTR T_0, L_25, null]
+WRSTR /L_25
+
+;Quadruple - [BR L_27, null, null]
+BR /L_27
+
+;Quadruple - [INL L_28, null, null]
+L_28:NOP
+
+;Quadruple - [WRITESTR T_0, L_26, null]
+WRSTR /L_26
+
+;Quadruple - [INL L_27, null, null]
+L_27:NOP
+
+;Quadruple - [INL L_29, null, null]
+L_29:NOP
+
+;Quadruple - [INL L_31, null, null]
+L_31:NOP
 
 ;Quadruple - [HALT null, null, null]
 HALT
@@ -691,6 +821,24 @@ L_16: DATA "-cuatro:"
 ;Quadruple - [STR "rama1", L_17, null]
 L_17: DATA "rama1"
 
-;Quadruple - [STR "rama2", L_18, null]
-L_18: DATA "rama2"
+;Quadruple - [STR "rama1.1", L_18, null]
+L_18: DATA "rama1.1"
+
+;Quadruple - [STR "rama1.2", L_19, null]
+L_19: DATA "rama1.2"
+
+;Quadruple - [STR "rama2", L_22, null]
+L_22: DATA "rama2"
+
+;Quadruple - [STR "rama2.1", L_23, null]
+L_23: DATA "rama2.1"
+
+;Quadruple - [STR "rama2.2", L_24, null]
+L_24: DATA "rama2.2"
+
+;Quadruple - [STR "rama2.2.1", L_25, null]
+L_25: DATA "rama2.2.1"
+
+;Quadruple - [STR "rama2.2.2", L_26, null]
+L_26: DATA "rama2.2.2"
 

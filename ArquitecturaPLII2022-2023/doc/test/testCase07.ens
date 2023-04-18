@@ -7,44 +7,44 @@ MOVE #0, /65534
 ;Quadruple - [VAR dia, 0, null]
 MOVE #0, /65533
 
-;Quadruple - [MV T_1, 2, null]
-MOVE #2, /65531
-
 ;Quadruple - [MVA T_0, a, null]
 MOVE #65535, /65532
+
+;Quadruple - [MV T_1, 2, null]
+MOVE #2, /65531
 
 ;Quadruple - [STP T_0, T_1, null]
 MOVE /65532, .R1
 MOVE /65531, [.R1]
 
-;Quadruple - [MV T_4, 2, null]
-MOVE #2, /65528
+;Quadruple - [MVA T_2, b, null]
+MOVE #65534, /65530
 
-;Quadruple - [MVA T_3, b, null]
-MOVE #65534, /65529
+;Quadruple - [MV T_3, 2, null]
+MOVE #2, /65529
 
-;Quadruple - [STP T_3, T_4, null]
-MOVE /65529, .R1
-MOVE /65528, [.R1]
+;Quadruple - [STP T_2, T_3, null]
+MOVE /65530, .R1
+MOVE /65529, [.R1]
 
-;Quadruple - [MVP T_6, a, null]
-MOVE /65535, /65526
+;Quadruple - [MVP T_4, a, null]
+MOVE /65535, /65528
 
-;Quadruple - [MVP T_7, b, null]
-MOVE /65534, /65525
+;Quadruple - [MVP T_5, b, null]
+MOVE /65534, /65527
 
-;Quadruple - [EQ T_8, T_6, T_7]
-CMP /65526, /65525
+;Quadruple - [EQ T_6, T_4, T_5]
+CMP /65528, /65527
 BNZ /L_35
-MOVE #1, /65524
+MOVE #1, /65526
 BZ /L_34
 L_35: 
-MOVE #0, /65524
+MOVE #0, /65526
 L_34: 
 
-;Quadruple - [BRF T_8, L_3, null]
-CMP #1, /65524
-BNZ /L_3
+;Quadruple - [BRF1 T_6, L_3, null]
+CMP #0, /65526
+BZ /L_3
 
 ;Quadruple - [WRITESTR T_0, L_0, null]
 WRSTR /L_0
@@ -53,127 +53,127 @@ WRSTR /L_0
 BR /L_2
 
 ;Quadruple - [INL L_3, null, null]
-L_3: 
+L_3:NOP
 
 ;Quadruple - [WRITESTR T_0, L_1, null]
 WRSTR /L_1
 
 ;Quadruple - [INL L_2, null, null]
-L_2: 
+L_2:NOP
 
-;Quadruple - [WRITESTR T_9, L_4, null]
+;Quadruple - [WRITESTR T_7, L_4, null]
 WRSTR /L_4
 
 ;Quadruple - [INL L_5, null, null]
-L_5: 
+L_5:NOP
 
-;Quadruple - [MVP T_10, a, null]
-MOVE /65535, /65522
+;Quadruple - [MVP T_8, a, null]
+MOVE /65535, /65524
 
-;Quadruple - [MV T_11, 5, null]
-MOVE #5, /65521
+;Quadruple - [MV T_9, 5, null]
+MOVE #5, /65523
 
-;Quadruple - [LS T_12, T_10, T_11]
-CMP /65522, /65521
+;Quadruple - [LS T_10, T_8, T_9]
+CMP /65524, /65523
 BN /L_57
-MOVE #0, /65520
+MOVE #0, /65522
 BR /L_56
 L_57: 
-MOVE #1, /65520
+MOVE #1, /65522
 L_56: 
 
-;Quadruple - [BRF T_12, L_6, null]
-CMP #1, /65520
+;Quadruple - [BRF T_10, L_6, null]
+CMP #1, /65522
 BNZ /L_6
 
-;Quadruple - [MVP T_14, a, null]
-MOVE /65535, /65518
+;Quadruple - [MVA T_11, a, null]
+MOVE #65535, /65521
 
-;Quadruple - [MV T_15, 1, null]
-MOVE #1, /65517
+;Quadruple - [MVP T_12, a, null]
+MOVE /65535, /65520
 
-;Quadruple - [ADD T_16, T_14, T_15]
-ADD /65518, /65517
-MOVE .A, /65516
+;Quadruple - [MV T_13, 1, null]
+MOVE #1, /65519
 
-;Quadruple - [MVA T_13, a, null]
-MOVE #65535, /65519
+;Quadruple - [ADD T_14, T_12, T_13]
+ADD /65520, /65519
+MOVE .A, /65518
 
-;Quadruple - [STP T_13, T_16, null]
-MOVE /65519, .R1
-MOVE /65516, [.R1]
+;Quadruple - [STP T_11, T_14, null]
+MOVE /65521, .R1
+MOVE /65518, [.R1]
 
 ;Quadruple - [BR L_5, null, null]
 BR /L_5
 
 ;Quadruple - [INL L_6, null, null]
-L_6: 
+L_6:NOP
 
-;Quadruple - [WRITESTR T_18, L_7, null]
+;Quadruple - [WRITESTR T_15, L_7, null]
 WRSTR /L_7
 
-;Quadruple - [MV T_20, 2, null]
-MOVE #2, /65512
+;Quadruple - [MVA T_16, dia, null]
+MOVE #65533, /65516
 
-;Quadruple - [MVA T_19, dia, null]
-MOVE #65533, /65513
+;Quadruple - [MV T_17, 2, null]
+MOVE #2, /65515
 
-;Quadruple - [STP T_19, T_20, null]
-MOVE /65513, .R1
-MOVE /65512, [.R1]
+;Quadruple - [STP T_16, T_17, null]
+MOVE /65516, .R1
+MOVE /65515, [.R1]
 
-;Quadruple - [MVP T_22, dia, null]
-MOVE /65533, /65510
+;Quadruple - [MVP T_18, dia, null]
+MOVE /65533, /65514
 
-;Quadruple - [MV T_23, 1, null]
-MOVE #1, /65509
+;Quadruple - [MV T_19, 1, null]
+MOVE #1, /65513
 
-;Quadruple - [EQ T_25, T_22, T_23]
-CMP /65510, /65509
+;Quadruple - [EQ T_21, T_18, T_19]
+CMP /65514, /65513
 BNZ /L_87
-MOVE #1, /65507
+MOVE #1, /65511
 BZ /L_86
 L_87: 
-MOVE #0, /65507
+MOVE #0, /65511
 L_86: 
 
-;Quadruple - [BRF T_25, L_10, null]
-CMP #1, /65507
+;Quadruple - [BRF T_21, L_10, null]
+CMP #1, /65511
 BNZ /L_10
 
 ;Quadruple - [WRITESTR T_0, L_8, null]
 WRSTR /L_8
 
-;Quadruple - [MV T_26, 1, null]
-MOVE #1, /65506
+;Quadruple - [MV T_22, 1, null]
+MOVE #1, /65510
 
 ;Quadruple - [INL L_10, null, null]
-L_10: 
+L_10:NOP
 
-;Quadruple - [MV T_24, 2, null]
-MOVE #2, /65508
+;Quadruple - [MV T_20, 2, null]
+MOVE #2, /65512
 
-;Quadruple - [EQ T_25, T_22, T_24]
-CMP /65510, /65508
+;Quadruple - [EQ T_21, T_18, T_20]
+CMP /65514, /65512
 BNZ /L_99
-MOVE #1, /65507
+MOVE #1, /65511
 BZ /L_98
 L_99: 
-MOVE #0, /65507
+MOVE #0, /65511
 L_98: 
 
-;Quadruple - [BRF T_25, L_11, null]
-CMP #1, /65507
+;Quadruple - [BRF T_21, L_11, null]
+CMP #1, /65511
 BNZ /L_11
 
 ;Quadruple - [WRITESTR T_0, L_9, null]
 WRSTR /L_9
 
-;Quadruple - [MV T_26, 1, null]
-MOVE #1, /65506
+;Quadruple - [MV T_22, 1, null]
+MOVE #1, /65510
 
 ;Quadruple - [INL L_11, null, null]
-L_11: 
+L_11:NOP
 
 ;Quadruple - [HALT null, null, null]
 HALT
