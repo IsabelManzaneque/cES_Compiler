@@ -165,13 +165,14 @@ program ::=
    :}
   axiom:ax
   {:   	
-  		// Muestra las cuadruplas que llegan al axioma
+  		
   		String cuadruplas = "";
 		List<QuadrupleIF> ic = ax.getIntermediateCode();
 
 		for(QuadrupleIF q : ic){
 			cuadruplas += q.toString() + "\n";
 		}
+		//descomentar para mostrar las cuadruplas que llegan al axioma
 		//semanticErrorManager.semanticDebug ("***** CUADRUPLAS *****: \n" + cuadruplas);
 		
   		// No modificar esta estructura, aunque se pueden a√±adir m√°s acciones sem√°nticas
@@ -189,6 +190,10 @@ program ::=
   		
    :};
 
+// Hay 2 producciones axioma para solventar las ambiguedades:
+// axiom crea el ambito global, llama a axiom2 y asigna las direcciones estaticas
+// axiom2 genera las secciones principales del programa
+
 axiom ::= {:
 				// Creamos ambito global 							
 				ScopeIF scope = scopeManager.openScope("global");
@@ -205,22 +210,21 @@ axiom ::= {:
 			  	 
 			  	Axiom axiom = new Axiom();			  	
 			  	
-			  	// Asignacion de posiciones de memoria para variables globales y temporales
+			  	// Asignacion de posiciones de memoria para variables y temporales
 			  	
 			  	int dirEstatica = 65535;
 			  	
-			  	for(ScopeIF s : scopeManager.getAllScopes()){  		
-			  					  							  		
+			  	for(ScopeIF s : scopeManager.getAllScopes()){  				  					  							  		
 			  		for(SymbolIF sim : s.getSymbolTable().getSymbols()){			  			
 			  			if(sim instanceof SymbolVariable){
-			  				// guardamos la direccion en SymbolVariable.java y actualizamos dir
+			  				// guarda la direccion en SymbolVariable.java y actualiza dir
 			  				((SymbolVariable)sim).setAddress(dirEstatica);
 			  				dirEstatica -= sim.getType().getSize();			  				
 			  			}
 			  		}			  		
 			  		for(TemporalIF temp : s.getTemporalTable().getTemporals()){
 			  			if(temp instanceof Temporal){
-			  				// guardamos la direccion en Temporal.java y actualizamos dir
+			  				// guarda la direccion en Temporal.java y actualiza dir
 			  				((Temporal)temp).setAddress(dirEstatica);
 			  				dirEstatica -= ((Temporal)temp).getSize();
 			  			}
@@ -243,10 +247,10 @@ axiom ::= {:
 			  	axiom.setIntermediateCode(cb.create());
 			  	RESULT = axiom;	
 			  				
-				// Cerrar ambito global
 				scopeManager.closeScope();	
 						
-		      :};
+		   :};
+
 
 
 axiom2 ::= seccionConstantes:sC seccionTipos:sT seccionVariables:sV seccionFunciones:sF{:
@@ -276,27 +280,18 @@ axiom2 ::= seccionConstantes:sC seccionTipos:sT seccionVariables:sV seccionFunci
 	       	 axiom2.setIntermediateCode(cb.create());
 		     RESULT = axiom2;
 		 :};
- 
-                 
-//  CONSTANTES
-    
+		 
+		 
+		 
+/* CONSTANTES  *******************************************************************************************/
 
 seccionConstantes ::= declaracionConstante:dec seccionConstantes:sC{:
 
 						  if(sC == null){							    			     
 						  	sC = new SeccionConstantes();		
 						  }
-						  sC.add(dec);	
-						  
-						  /*----- CÛdigo intermedio -----*/
-						  			  
-					//	  ScopeIF scope = scopeManager.getCurrentScope();
-				   	//	  IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);			 
-				   		  
-				   	//	  cb.addQuadruples(sC.getIntermediateCode());  
-				   	//	  cb.addQuadruples(dec.getIntermediateCode());       
-				   		  
-				   	//	  sC.setIntermediateCode(cb.create()); 
+						  sC.add(dec);		  
+
 						  RESULT = sC;
                     :}
                     | epsilon;
@@ -321,20 +316,14 @@ declaracionConstante ::= CONSTANTE IDENTIFICADOR:id NUMERO:value SEMI_COLON{:
 							SymbolConstant symbolConstant = new SymbolConstant(scope, id.getLexema(), tipo);
 							symbolConstant.setValue(Integer.parseInt(value.getLexema())); 
 							tablaSimbolos.addSymbol(symbolConstant);	
-							dC.setSymbolConstant(symbolConstant);
-														
-							/*----- CÛdigo intermedio -----*/							
-							
-							//IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);							
-							
-							//Value val = new Value(symbolConstant.getValue());
-							//cb.addQuadruple("CONST",val);
-							
-							//dC.setIntermediateCode(cb.create());														
+							dC.setSymbolConstant(symbolConstant);													
+									
 							RESULT = dC;							
 					   :};
 
-//  TIPOS 
+
+
+/* TIPOS  *******************************************************************************************/
 
 seccionTipos ::= declaracionTipo:decTip seccionTipos:secTip{:	
 					if(secTip == null){			
@@ -386,10 +375,10 @@ tamTipo ::= NUMERO:num {:
 				
 				RESULT = ((SymbolConstant)symbol).getValue();					
           :};
-
-
-
-//  VARIABLES
+          
+          
+          
+/* VARIABLES  *******************************************************************************************/
 
 seccionVariables ::= seccionVariables:sV declaracionVariable:dec{:
 
@@ -513,25 +502,14 @@ id ::= IDENTIFICADOR:id{:
 
 
 
-// FUNCIONES
+/* FUNCIONES  *******************************************************************************************/
 
 // Se han modificado las producciones de la funcion principal y las funciones para que
 // ambas uilicen el no terminal "cuerpoFuncion" y asi evitar conflictos
-
       
 seccionFunciones ::= funcion:fun seccionFunciones:sF{:
 
                         sF.addFuncion(fun);
-                        
-                        /*----- CÛdigo intermedio -----*/
-						
-	                    //ScopeIF scope = scopeManager.getCurrentScope();
-				   		//IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);	
-				   		
-				   		//cb.addQuadruples(sF.getIntermediateCode());  
-				   		//cb.addQuadruples(fun.getIntermediateCode());      
-				   		
-				   		//sF.setIntermediateCode(cb.create());
                         RESULT = sF;	
                         					
                    :}
@@ -589,8 +567,7 @@ funcionPrincipal ::= VACIO principal OPEN_KEY CLOSE_KEY OPEN_PARENTHESIS{:
 						
 						funP.setIntermediateCode(cb.create());
 						RESULT = funP;
-										
-						//cerrar ambito 						
+																
 						scopeManager.closeScope();	
 		
 					 :};
@@ -649,8 +626,7 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 				
 				fun.setIntermediateCode(cb.create());
 				RESULT = fun;
-				
-				//cerrar ambito 				
+								
 				scopeManager.closeScope();	
 		
 			:}
@@ -708,8 +684,7 @@ funcion ::= ENTERO IDENTIFICADOR:id OPEN_KEY seccionParametros:sP CLOSE_KEY OPEN
 				
 				fun.setIntermediateCode(cb.create());
 				RESULT = fun;
-				
-				//cerrar ambito 				
+			
 				scopeManager.closeScope();		
 		
 			:};
@@ -811,7 +786,7 @@ parametro ::= ENTERO IDENTIFICADOR:id{:
 
 
 
-// EXPRESIONES
+/* EXPRESIONES  *******************************************************************************************/
 
 expresion ::= NUMERO:num{:
 				
@@ -1241,7 +1216,8 @@ parametros ::= expresion:e{:
 			 :};
 
 
-//  SENTENCIAS
+
+/* SENTENCIAS  *******************************************************************************************/
 
 bloque ::= OPEN_PARENTHESIS {:
 
@@ -1769,16 +1745,8 @@ sentenciaLlamadaFuncion ::= llamadaFuncion:fun SEMI_COLON:sc{:
 								if(!(symbolFun.getType() instanceof TypeSimpleVacio)){
 									semanticErrorManager.semanticFatalError("Error en linea " + sc.getLine() + ": La funcion debe ser de tipo vacio");
 								}									
-								SentenciaLlamadaFuncion sentLlamFun = new SentenciaLlamadaFuncion(fun);
-								
-								/*----- CÛdigo intermedio -----*/
-								
-							//	ScopeIF scope = scopeManager.getCurrentScope();
-							//	IntermediateCodeBuilder cb = new IntermediateCodeBuilder(scope);
-								
-							//	cb.addQuadruples(fun.getIntermediateCode());
-									
-							//	sentLlamFun.setIntermediateCode(cb.create());	
+								SentenciaLlamadaFuncion sentLlamFun = new SentenciaLlamadaFuncion(fun);								
+
 								RESULT = sentLlamFun;
                           :};
 
