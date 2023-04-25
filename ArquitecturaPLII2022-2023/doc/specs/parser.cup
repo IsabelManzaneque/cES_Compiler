@@ -783,11 +783,11 @@ expresion ::= NUMERO:num{:
 				if(symbol instanceof SymbolConstant){
 					Value value = new Value(((SymbolConstant)symbol).getValue());
 					cb.addQuadruple("MV",temp,value);
-					exp.setValue(((SymbolConstant)symbol).getValue()); //para el acceso a vector
+					exp.setValue(((SymbolConstant)symbol).getValue()); 
 				}else if(symbol instanceof SymbolVariable){
 					Variable var = new Variable((SymbolVariable)symbol);
 					cb.addQuadruple("MVP",temp,var);
-					exp.setValue(((SymbolVariable)symbol).getValue()); //para el acceso a vector
+					exp.setValue(((SymbolVariable)symbol).getValue());
 				}
 				
 				exp.setTemporal(temp);
@@ -810,6 +810,7 @@ expresion ::= NUMERO:num{:
 					semanticErrorManager.semanticFatalError("Error en linea " + op.getLine() + ": Incompatibilidad de tipos");
 				}				
 				exp.setType(e1.getType());
+				exp.setValue(e1.getValue() + e2.getValue());
 				
 				/*----- Código intermedio -----*/
 				
@@ -838,6 +839,7 @@ expresion ::= NUMERO:num{:
 					semanticErrorManager.semanticFatalError("Error en linea " + op.getLine() + ": Incompatibilidad de tipos");
 				}				
 				exp.setType(e1.getType());
+				exp.setValue(e1.getValue() * e2.getValue());
 				
 				/*----- Código intermedio -----*/
 				
@@ -865,6 +867,7 @@ expresion ::= NUMERO:num{:
 					semanticErrorManager.semanticFatalError("Error en linea " + op.getLine() + ": Incompatibilidad de tipos");
 				}				
 				exp.setType(e1.getType());
+				exp.setValue(e1.getValue() + 1);
 				
 		 		/*----- Código intermedio -----*/
 				
@@ -889,6 +892,7 @@ expresion ::= NUMERO:num{:
 					semanticErrorManager.semanticFatalError("Error en linea " + op.getLine() + ": Incompatibilidad de tipos");
 				}
 		 		exp.setType(e1.getType());
+		 		exp.setValue(0 - e1.getValue());
 		 		
 		 		/*----- Código intermedio -----*/
 		 		
@@ -914,7 +918,9 @@ expresion ::= NUMERO:num{:
 			 	if(!(e1.getType() instanceof TypeSimpleEntero) || !(e2.getType() instanceof TypeSimpleEntero)){
 					semanticErrorManager.semanticFatalError("Error en linea " + op.getLine() + ": Incompatibilidad de tipos");
 				}
+				int result = e1.getValue() < e2.getValue() ? 1 : 0;
 				exp.setType(e1.getType());
+				exp.setValue(result);
 				
 				/*----- Código intermedio -----*/
 				
@@ -941,8 +947,9 @@ expresion ::= NUMERO:num{:
 		 		if(!(e1.getType() instanceof TypeSimpleEntero) || !(e2.getType() instanceof TypeSimpleEntero)){
 					semanticErrorManager.semanticFatalError("Error en linea " + op.getLine() + ": Incompatibilidad de tipos");
 				}
+				int result = e1.getValue() == e2.getValue() ? 1 : 0;
 				exp.setType(e1.getType());
-				
+				exp.setValue(result);
 				
 				/*----- Código intermedio -----*/
 				
@@ -969,7 +976,10 @@ expresion ::= NUMERO:num{:
 			 	if(!(e1.getType() instanceof TypeSimpleEntero) || !(e2.getType() instanceof TypeSimpleEntero)){
 					semanticErrorManager.semanticFatalError("Error en linea " + op.getLine() + ": Incompatibilidad de tipos");
 				}	
+				int result = 0;
+				if(e1.getValue() == 1 && e2.getValue() == 1){result = 1;}				
 				exp.setType(e1.getType());
+				exp.setValue(result);
 				
 				/*----- Código intermedio -----*/
 				
@@ -1016,6 +1026,7 @@ expresion ::= NUMERO:num{:
 					semanticErrorManager.semanticFatalError("Error: La funcion '" + fun.getName() + "' no devuelve un valor");
 				}
 				Expresion exp = new Expresion(symbolFun.getType());
+				exp.setValue(1);
 				
 				/*----- Código intermedio -----*/
 				
@@ -1051,6 +1062,7 @@ accesoVector ::= IDENTIFICADOR:id OPEN_BRACKET expresion:e CLOSE_BRACKET{:
                  		semanticErrorManager.semanticFatalError("Error en linea " + id.getLine() + ": '" + id.getLexema() + "' no es un array");
                  	}
                  	TypeArray typeArray = (TypeArray)symbol.getType(); 
+                 	
                  	
                  	//comprobar que expresion respeta el rango del vector                   	
                  	if(e.getValue() < 0 || e.getValue() > typeArray.getSize() -1){
